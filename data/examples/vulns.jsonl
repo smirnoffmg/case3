@@ -1,0 +1,6 @@
+{"id":"select_star","sql":"SELECT * FROM users;","expect":["select_star","missing_limit"]}
+{"id":"delete_no_where","sql":"DELETE FROM orders;","expect":["update_delete_without_where"]}
+{"id":"union","sql":"SELECT id FROM users UNION SELECT id FROM admins;","expect":["union_based_injection","missing_limit"]}
+{"id":"pg_sleep","sql":"SELECT pg_sleep(5);","expect":["time_based_blind_injection","missing_limit"]}
+{"id":"sensitive_column","sql":"SELECT email, password_hash FROM users LIMIT 10;","expect":["direct_access_sensitive_fields"]}
+

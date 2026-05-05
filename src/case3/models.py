@@ -8,6 +8,38 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class OrchestratorState(StrEnum):
+    generating = "generating"
+    judging = "judging"
+    refining = "refining"
+    approved = "approved"
+    exhausted = "exhausted"
+
+
+class ColumnInfo(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1)
+    data_type: str = Field(min_length=1)
+    is_sensitive: bool = False
+
+
+class ForeignKeyInfo(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    column: str = Field(min_length=1)
+    ref_table: str = Field(min_length=1)
+    ref_column: str = Field(min_length=1)
+
+
+class TableInfo(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1)
+    columns: list[ColumnInfo]
+    foreign_keys: list[ForeignKeyInfo] = Field(default_factory=list)
+
+
 class VulnerabilityClass(StrEnum):
     sql_injection = "sql_injection"
     union_based_injection = "union_based_injection"
@@ -55,3 +87,13 @@ class AuditEvent(BaseModel):
     ts: datetime
     type: Literal["generated", "judged", "lesson_added", "approved", "exhausted"]
     payload: dict[str, object]
+
+
+class RunResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    final_state: OrchestratorState
+    iterations: int
+    final_sql: str | None
+    findings_per_iter: list[list[Finding]]
+    lessons_per_iter: list[list[CritiqueLesson]]
