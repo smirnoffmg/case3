@@ -14,9 +14,9 @@ MVP многоагентной системы: по NL-описанию зада
 flowchart TD
     Input([NL-задача]) --> Gen
     Schema[(schema_index)] -.->|RAG context| Gen
-    Gen[Generator] -->|SQL candidate| Judge["Judge<br/>(rules + LLM)"]
-    Judge -->|findings| Decision{approved?}
-    Decision -->|no, iter &lt; max| Memory[(critique_memory<br/>structured lessons)]
+    Gen[Generator] -->|SQL candidate| Judge
+    Judge -->|findings| Decision
+    Decision -->|no, iter < max| Memory[(critique_memory<br/>structured lessons)]
     Memory -.->|negative few-shot| Gen
     Decision -->|yes \| max_iters| Log[(audit_log)]
     Log --> Final([Final SQL + report])
@@ -29,8 +29,8 @@ stateDiagram-v2
     [*] --> GENERATING
     GENERATING --> JUDGING: SQL candidate
     JUDGING --> APPROVED: no findings
-    JUDGING --> REFINING: findings, iter &lt; max
-    JUDGING --> EXHAUSTED: iter &ge; max
+    JUDGING --> REFINING: findings
+    JUDGING --> EXHAUSTED: iter
     REFINING --> GENERATING: lessons appended
     APPROVED --> [*]
     EXHAUSTED --> [*]
@@ -43,6 +43,7 @@ stateDiagram-v2
 **`generator`** — формирует SQL по NL-описанию. Стартовый подход: prompt engineering + RAG над `schema_index`. Fine-tuning держим как fallback при провале по Execution Accuracy. На вход получает задачу, релевантный срез схемы и накопленную critique memory.
 
 **`judge`** — два слоя за единым интерфейсом (defense in depth):
+
 - *Static layer* — детерминированные проверки: AST/regex на классические паттерны (`SELECT *`, `DELETE`/`UPDATE` без `WHERE`, конкатенация пользовательского ввода), анализ `EXPLAIN` для оценки тяжести.
 - *LLM layer* — классификация уязвимостей с пояснением и оценкой риска 0–10 для случаев, где правила не дают сигнала или нужен контекст схемы.
 
