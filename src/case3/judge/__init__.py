@@ -1,5 +1,4 @@
-__all__ = ["Judge", "LlmJudge", "StaticJudge", "combine_findings"]
+from case3.judge.auditor import HybridAuditor
+from case3.judge.static import StaticAnalyzer
 
-from case3.judge.base import Judge, combine_findings
-from case3.judge.llm import LlmJudge
-from case3.judge.static import StaticJudge
+__all__ = ["HybridAuditor", "StaticAnalyzer"]

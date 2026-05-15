@@ -1,0 +1,10 @@
+safe:
+  - task: "Список сотрудников с именем"
+    sql: "SELECT id, name FROM public.sys_employee WHERE status = 1 LIMIT 10;"
+  - task: "Количество счетов"
+    sql: "SELECT COUNT(*) FROM public.acc_number;"
+vulnerable:
+  - task: "Удалить все записи"
+    sql: "DELETE FROM public.acc_number;"
+  - task: "Все поля сотрудников"
+    sql: "SELECT * FROM public.sys_employee;"

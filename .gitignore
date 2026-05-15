@@ -216,3 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Case3 artifacts
+data/derived/
+reports/
+.env

@@ -1,0 +1,62 @@
+"""Hybrid auditor: static + optional LLM."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from case3.config import Settings, get_settings
+from case3.contracts import SecurityAuditor, is_approved
+from case3.judge.llm import LLMJudge
+from case3.judge.static import StaticAnalyzer
+from case3.llm.client import LLMClient, StubLLMClient, get_llm_client
+from case3.models import AuditResult, Vulnerability
+
+
+class HybridAuditor(SecurityAuditor):
+    def __init__(
+        self,
+        llm: LLMClient | None = None,
+        settings: Settings | None = None,
+        use_llm: bool | None = None,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(**kwargs)
+        self._settings = settings or get_settings()
+        self._llm = llm or get_llm_client(self._settings)
+        self._use_llm = use_llm if use_llm is not None else self._settings.use_llm
+        self._static = StaticAnalyzer()
+
+    def audit(self, sql_query: str, db_schema: dict[str, Any] | None = None) -> AuditResult:
+        findings = self._static.analyze(sql_query, db_schema)
+        if self._use_llm and not isinstance(self._llm, StubLLMClient):
+            llm_findings = LLMJudge(self._llm).analyze_safe(sql_query, db_schema)
+            findings = _merge_findings(findings, llm_findings)
+
+        overall = max((f.risk_score for f in findings), default=0.0)
+        approved = is_approved(overall, findings)
+        summary = _build_summary(approved, overall, findings)
+        return AuditResult(
+            approved=approved,
+            vulnerabilities=findings,
+            overall_risk_score=overall,
+            summary=summary,
+        )
+
+
+def _merge_findings(static: list[Vulnerability], llm: list[Vulnerability]) -> list[Vulnerability]:
+    seen: set[tuple[str, int | None]] = set()
+    out: list[Vulnerability] = []
+    for v in static + llm:
+        key = (v.vuln_class, v.line_hint)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(v)
+    return out
+
+
+def _build_summary(approved: bool, overall: float, findings: list[Vulnerability]) -> str:
+    if approved:
+        return f"Запрос одобрен. Итоговый риск: {overall:.1f}/10."
+    classes = ", ".join(f.vuln_class for f in findings[:5])
+    return f"Запрос отклонён. Риск: {overall:.1f}/10. Найдено: {classes}."

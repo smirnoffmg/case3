@@ -24,6 +24,9 @@ case3 = "case3.cli:app"
 requires = ["setuptools>=69"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.uv]
 package = true
 
@@ -57,6 +60,13 @@ ignore = [
   "B008",       # Typer uses Option/Argument defaults idiomatically
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"doc/**" = ["RUF001", "RUF003", "RUF012"]
+"scripts/**" = ["E402"]
+"src/case3/**" = ["RUF001"]
+"streamlit_app.py" = ["RUF001"]
+"tests/**" = ["RUF001"]
+
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
@@ -70,7 +80,14 @@ show_error_codes = true
 pretty = true
 exclude = [
   "^\\.venv/",
+  "^doc/",
+  "^streamlit_app\\.py$",
+  "^tests/",
 ]
+
+[[tool.mypy.overrides]]
+module = "rank_bm25.*"
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 addopts = "-q"

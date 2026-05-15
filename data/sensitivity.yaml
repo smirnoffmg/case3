@@ -1,5 +1,18 @@
-password_hash: true
-token: true
-ssn: true
-card_number: true
-
+column_patterns:
+  - password
+  - passwd
+  - token
+  - secret
+  - api_key
+  - email
+  - phone
+  - birthday
+  - birth_date
+  - passport
+  - inn
+  - snils
+  - card_number
+columns:
+  - sys_employee.email
+  - sys_employee.phone
+  - sys_employee.birthday

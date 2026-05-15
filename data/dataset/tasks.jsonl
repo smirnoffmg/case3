@@ -1,0 +1,22 @@
+{"task": "Список сотрудников с id и именем, лимит 10", "sql": "SELECT id, name FROM public.sys_employee WHERE status = 1 LIMIT 10;"}
+{"task": "Количество записей в таблице счетов", "sql": "SELECT COUNT(*) AS cnt FROM public.acc_number;"}
+{"task": "Найти организации по id и названию, не более 20", "sql": "SELECT id, name FROM public.org WHERE status = 1 LIMIT 20;"}
+{"task": "Сотрудники созданные после 2020 года, лимит 50", "sql": "SELECT id, name, create_date FROM public.sys_employee WHERE create_date >= '2020-01-01' LIMIT 50;"}
+{"task": "Активные номера счетов с названием", "sql": "SELECT id, account_name FROM public.acc_number WHERE status = 1 LIMIT 100;"}
+{"task": "Список id сотрудников со статусом 1", "sql": "SELECT id FROM public.sys_employee WHERE status = 1 LIMIT 100;"}
+{"task": "Подсчет сотрудников по org_id", "sql": "SELECT org_id, COUNT(*) AS emp_count FROM public.sys_employee GROUP BY org_id LIMIT 50;"}
+{"task": "Последние измененные счета", "sql": "SELECT id, last_modified_date FROM public.acc_number ORDER BY last_modified_date DESC LIMIT 10;"}
+{"task": "Сотрудники с именем на русском", "sql": "SELECT id, name__ru FROM public.sys_employee WHERE name__ru IS NOT NULL LIMIT 25;"}
+{"task": "Организации с типом", "sql": "SELECT id, name, type_id FROM public.org WHERE type_id IS NOT NULL LIMIT 30;"}
+{"task": "Счета с parent_acc", "sql": "SELECT id, parent_acc, account_name FROM public.acc_number WHERE parent_acc IS NOT NULL LIMIT 15;"}
+{"task": "Системные счета", "sql": "SELECT id, name FROM public.acc_number WHERE is_system = 1 LIMIT 10;"}
+{"task": "Сотрудники по user_id", "sql": "SELECT id, user_id FROM public.sys_employee WHERE user_id IS NOT NULL LIMIT 20;"}
+{"task": "Минимальный id организации", "sql": "SELECT MIN(id) AS min_id FROM public.org;"}
+{"task": "Счета с ord больше нуля", "sql": "SELECT id, ord FROM public.acc_number WHERE ord > 0 LIMIT 40;"}
+{"task": "Сотрудники без фильтра по статусу, лимит 5", "sql": "SELECT id, name FROM public.sys_employee LIMIT 5;"}
+{"task": "Уникальные type_id в org", "sql": "SELECT DISTINCT type_id FROM public.org LIMIT 100;"}
+{"task": "Счета созданные сотрудником", "sql": "SELECT id, created_emp_id FROM public.acc_number WHERE created_emp_id IS NOT NULL LIMIT 20;"}
+{"task": "Сотрудники с org_id", "sql": "SELECT id, org_id FROM public.sys_employee WHERE org_id IS NOT NULL LIMIT 30;"}
+{"task": "Названия счетов на английском", "sql": "SELECT id, name__en FROM public.acc_number WHERE name__en IS NOT NULL LIMIT 10;"}
+{"task": "Количество организаций", "sql": "SELECT COUNT(*) FROM public.org;"}
+{"task": "Сотрудники отсортированные по id", "sql": "SELECT id, name FROM public.sys_employee ORDER BY id ASC LIMIT 15;"}

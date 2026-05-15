@@ -1,84 +1,110 @@
+"""Parse GreenData DDL dump into SchemaIndex."""
+
 from __future__ import annotations
 
-from collections.abc import Mapping
+import re
+from pathlib import Path
 
-import sqlglot
-from sqlglot import exp
-
-from case3.models import ColumnInfo, ForeignKeyInfo, TableInfo
+from pydantic import BaseModel, Field
 
 
-def parse_ddl(sql_text: str, *, sensitivity: Mapping[str, bool] | None = None) -> list[TableInfo]:
-    """
-    Minimal DDL parser for PostgreSQL CREATE TABLE statements.
+class ColumnInfo(BaseModel):
+    name: str
+    data_type: str = ""
+    comment: str = ""
+    sensitive: bool = False
 
-    KISS constraints for MVP:
-    - only extracts table name, column names + types
-    - extracts FK constraints of the form: FOREIGN KEY (col) REFERENCES other(col)
-    """
-    sensitivity = sensitivity or {}
 
-    tables: list[TableInfo] = []
-    statements = sqlglot.parse(sql_text, read="postgres")
+class TableInfo(BaseModel):
+    name: str
+    comment: str = ""
+    columns: list[ColumnInfo] = Field(default_factory=list)
 
-    for stmt in statements:
-        if not isinstance(stmt, exp.Create):
-            continue
-        if stmt.args.get("kind") != "TABLE":
-            continue
 
-        table_expr = stmt.this
-        if not isinstance(table_expr, exp.Schema):
-            continue
+class SchemaIndex(BaseModel):
+    tables: dict[str, TableInfo] = Field(default_factory=dict)
+    fk_edges: list[tuple[str, str, str, str]] = Field(
+        default_factory=list,
+        description="(from_table, from_col, to_table, to_col)",
+    )
 
-        table_name = table_expr.this.name
 
-        columns: list[ColumnInfo] = []
-        fks: list[ForeignKeyInfo] = []
+_CREATE_TABLE = re.compile(
+    r"CREATE TABLE\s+(?:public\.)?(\w+)\s*\((.*?)\);",
+    re.DOTALL | re.IGNORECASE,
+)
+_COMMENT_TABLE = re.compile(
+    r"COMMENT ON TABLE\s+public\.(\w+)\s+IS\s+'((?:[^']|'')*)'",
+    re.IGNORECASE,
+)
+_COMMENT_COLUMN = re.compile(
+    r"COMMENT ON COLUMN\s+public\.(\w+)\.(\w+)\s+IS\s+'((?:[^']|'')*)'",
+    re.IGNORECASE,
+)
+_FK_REF = re.compile(
+    r"FOREIGN KEY\s*\((\w+)\)\s+REFERENCES\s+public\.(\w+)\((\w+)\)",
+    re.IGNORECASE,
+)
+_COLUMN_LINE = re.compile(r"^\s*(\w+)\s+([\w\s().,]+?)(?:,|\s*$)", re.IGNORECASE)
 
-        for element in table_expr.expressions:
-            if isinstance(element, exp.ColumnDef):
-                col_name = element.this.name
-                kind = element.args.get("kind")
-                col_type = (
-                    kind.sql(dialect="postgres") if isinstance(kind, exp.DataType) else "UNKNOWN"
-                )
-                columns.append(
-                    ColumnInfo(
-                        name=col_name,
-                        data_type=col_type,
-                        is_sensitive=bool(sensitivity.get(col_name.lower(), False)),
-                    )
-                )
+
+def _unescape_comment(s: str) -> str:
+    return s.replace("''", "'")
+
+
+def parse_ddl(text: str) -> SchemaIndex:
+    tables: dict[str, TableInfo] = {}
+    fk_edges: list[tuple[str, str, str, str]] = []
+
+    for m in _CREATE_TABLE.finditer(text):
+        table_name = m.group(1)
+        body = m.group(2)
+        cols: list[ColumnInfo] = []
+        for line in body.splitlines():
+            line = line.strip()
+            if not line or line.upper().startswith("CONSTRAINT"):
                 continue
+            cm = _COLUMN_LINE.match(line)
+            if cm:
+                cols.append(ColumnInfo(name=cm.group(1), data_type=cm.group(2).strip().rstrip(",")))
+        tables[table_name] = TableInfo(name=table_name, columns=cols)
 
-            # Table-level constraint
-            if isinstance(element, exp.Constraint):
-                # In sqlglot, the FK is nested inside Constraint.expressions.
-                fk_exprs = [e for e in element.expressions if isinstance(e, exp.ForeignKey)]
-                if not fk_exprs:
-                    continue
+    for m in _COMMENT_TABLE.finditer(text):
+        tname = m.group(1)
+        if tname not in tables:
+            tables[tname] = TableInfo(name=tname)
+        tables[tname].comment = _unescape_comment(m.group(2))
 
-                # MVP: first FK only; only 1-column references supported.
-                fk = fk_exprs[0]
-                fk_cols = [c.name for c in fk.expressions if isinstance(c, exp.Identifier)]
-                ref = fk.args.get("reference")
-                if (
-                    len(fk_cols) == 1
-                    and isinstance(ref, exp.Reference)
-                    and isinstance(ref.this, exp.Schema)
-                    and isinstance(ref.this.this, exp.Table)
-                    and len(ref.this.expressions) == 1
-                    and isinstance(ref.this.expressions[0], exp.Identifier)
-                ):
-                    fks.append(
-                        ForeignKeyInfo(
-                            column=fk_cols[0],
-                            ref_table=ref.this.this.name,
-                            ref_column=ref.this.expressions[0].name,
-                        )
-                    )
+    for m in _COMMENT_COLUMN.finditer(text):
+        tname, cname, comment = m.group(1), m.group(2), _unescape_comment(m.group(3))
+        if tname not in tables:
+            tables[tname] = TableInfo(name=tname)
+        table = tables[tname]
+        col = next((c for c in table.columns if c.name == cname), None)
+        if col is None:
+            table.columns.append(ColumnInfo(name=cname, comment=comment))
+        else:
+            col.comment = comment
 
-        tables.append(TableInfo(name=table_name, columns=columns, foreign_keys=fks))
+    for m in _FK_REF.finditer(text):
+        # FK lines appear in commented ALTER blocks too
+        from_col, to_table, to_col = m.group(1), m.group(2), m.group(3)
+        # find table from preceding ADD CONSTRAINT context
+        start = max(0, m.start() - 500)
+        chunk = text[start : m.start()]
+        tm = re.search(r"ALTER TABLE\s+public\.(\w+)", chunk, re.IGNORECASE)
+        if tm:
+            fk_edges.append((tm.group(1), from_col, to_table, to_col))
 
-    return tables
+    return SchemaIndex(tables=tables, fk_edges=fk_edges)
+
+
+def build_schema_index(ddl_path: Path) -> SchemaIndex:
+    text = ddl_path.read_text(encoding="utf-8", errors="replace")
+    index = parse_ddl(text)
+    from case3.schema_index.graph import enrich_fk_edges
+    from case3.schema_index.pii import mark_sensitive_columns
+
+    index.fk_edges = enrich_fk_edges(index)
+    mark_sensitive_columns(index)
+    return index

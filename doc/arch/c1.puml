@@ -1,0 +1,23 @@
+@startuml C1_SystemContext
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title C4 Level 1: System Context
+
+Person(analyst, "Аналитик / Разработчик", "Формулирует задачу на естественном языке; получает безопасный исполняемый SQL и лог аудита")
+
+System(sqlsec, "SQL Security System", "Генерирует SQL для PostgreSQL, аудирует на уязвимости, итеративно исправляет до одобрения судьи или лимита итераций")
+
+System_Ext(llm, "LLM API", "Облачная или локальная модель (~30B, окно до 256k токенов). Предоставляется GreenData")
+System_Ext(schema_src, "Схема тестовой БД GreenData", "data_model.sql — DDL: 60 таблиц, 1872 комментария к колонкам, FK-граф")
+
+Rel(analyst, sqlsec, "Описывает задачу; получает SQL + лог аудита")
+Rel(sqlsec, llm, "Запросы на генерацию и семантический аудит", "HTTPS / JSON")
+Rel(sqlsec, schema_src, "Загружает машиночитаемое представление схемы", "офлайн, при старте")
+
+note right of sqlsec
+  Система НЕ исполняет SQL.
+  Цикл завершается одобрением
+  судьи или лимитом итераций.
+end note
+
+@enduml

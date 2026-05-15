@@ -1,0 +1,58 @@
+@startuml C3_Component_Core
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title C4 Level 3: Component (Пайплайн генерации и аудита)
+
+Container(ui, "Интерфейс", "Streamlit")
+Container(schema_svc, "Сервис схемы", "Python")
+System_Ext(llm, "LLM API")
+ContainerDb(stores, "Хранилище артефактов", "JSON")
+
+Container_Boundary(core, "Пайплайн генерации и аудита") {
+
+    Component(orchestrator, "SQLSecuritySystem", "Оркестратор / Mediator", "Цикл генератор -> судья -> исправление; стоп по одобрению, лимиту итераций или таймауту")
+    Component(feedback, "FeedbackMemory", "Аккумулятор обратной связи", "Копит все найденные уязвимости как стойкие анти-ограничения; детектор регрессий и не-сходимости")
+
+    Component(generator, "SQLGenerator", "Генератор", "generate(task, sql_history, audit_feedback, iteration); промпты initial vs repair")
+    Component(prompts, "PromptBuilder", "Сборка промптов", "Задача + выборка схемы + few-shot + накопленные замечания")
+
+    Component(auditor, "SecurityAuditor", "Судья (гибридный)", "audit(sql, schema); объединяет статику и LLM-вердикт, считает общий риск 0–10")
+    Component(static_chain, "StaticAnalyzer", "Chain of Responsibility", "Детекторы на sqlglot AST: инъекции, DML без WHERE, SELECT *, чувств. поля, отсутствие LIMIT")
+    Component(llm_judge, "LLMJudge", "Семантический судья", "Контекстные уязвимости и человекочитаемые пояснения с оценкой риска")
+    Component(explain_check, "ExplainChecker", "Опц. проверка плана", "EXPLAIN (без EXECUTE) на локальной БД: исполнимость, тяжёлые seq scan")
+
+    Component(llm_client, "LLMClient", "Strategy", "Провайдер-агностичный клиент: OpenAI / YandexGPT / локальная модель")
+    Component(audit_log, "AuditLogBuilder", "Построитель отчёта", "Прозрачный лог: риски, число итераций, обоснование одобрения")
+}
+
+Rel(ui, orchestrator, "run_sql_security_pipeline(task)")
+
+Rel(orchestrator, generator, "generate(...) на каждой итерации")
+Rel(orchestrator, auditor, "audit(sql, schema)")
+Rel(orchestrator, feedback, "Передаёт AuditResult; запрашивает накопленные замечания")
+Rel(orchestrator, audit_log, "Финализирует SystemResult")
+
+Rel(generator, prompts, "Запрашивает промпт под итерацию")
+Rel(prompts, schema_svc, "Релевантные таблицы (RAG)")
+Rel(prompts, feedback, "Накопленные анти-паттерны")
+Rel(prompts, stores, "Few-shot: безопасный + уязвимый")
+Rel(generator, llm_client, "Вызов модели")
+
+Rel(auditor, static_chain, "Детерминированные проверки")
+Rel(auditor, llm_judge, "Семантический аудит")
+Rel(auditor, explain_check, "Опц. проверка исполнимости")
+Rel(static_chain, schema_svc, "Каталог чувствительных полей")
+Rel(llm_judge, llm_client, "Вызов модели")
+
+Rel(llm_client, llm, "HTTPS / JSON")
+Rel(audit_log, stores, "Пишет лог прогона")
+
+note right of feedback
+  Ядро кейса: генератор учится
+  на замечаниях. Каждая найденная
+  уязвимость становится стойким
+  ограничением для всех следующих
+  итераций — повтор ошибки = регрессия.
+end note
+
+@enduml

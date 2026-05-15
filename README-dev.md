@@ -4,6 +4,7 @@
 
 ```bash
 uv sync --dev
+uv run python scripts/build_schema_index.py
 ```
 
 ### Tests
@@ -25,3 +26,8 @@ uv run ruff format .
 uv run mypy .
 ```
 
+### All checks
+
+```bash
+make check
+```
