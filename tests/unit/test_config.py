@@ -28,3 +28,17 @@ def test_cloud_keeps_key():
     key, base = s.resolve_llm_credentials()
     assert key == "sk-test"
     assert base is None
+
+
+def test_risk_defaults():
+    s = Settings()
+    assert s.risk_threshold == 4.0
+    assert s.hard_block_risk == 8.0
+    assert s.llm_temperature == 0.0
+
+
+def test_model_copy_preserves_env_key_when_ui_empty():
+    s = Settings(openai_api_key="sk-env", openai_model="m1")
+    copy = s.model_copy(update={"openai_model": "m2"})
+    assert copy.openai_api_key == "sk-env"
+    assert copy.openai_model == "m2"

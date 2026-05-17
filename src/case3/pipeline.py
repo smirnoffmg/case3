@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from case3.config import get_settings
+from case3.config import Settings, get_settings
 from case3.contracts import SQLSecuritySystem
 from case3.generator.prompt_rag import PromptRAGGenerator
 from case3.judge.auditor import HybridAuditor
@@ -18,10 +18,12 @@ def run_sql_security_pipeline(
     task_description: str,
     db_schema: dict[str, Any] | None = None,
     max_iterations: int | None = None,
+    timeout_sec: float | None = None,
+    settings_override: Settings | None = None,
     generator_kwargs: dict[str, Any] | None = None,
     auditor_kwargs: dict[str, Any] | None = None,
 ) -> SystemResult:
-    settings = get_settings()
+    settings = settings_override or get_settings()
     gen_kw = dict(generator_kwargs or {})
     aud_kw = dict(auditor_kwargs or {})
 
@@ -36,7 +38,7 @@ def run_sql_security_pipeline(
         generator=generator,
         auditor=auditor,
         max_iterations=max_iterations or settings.max_iterations,
-        timeout_sec=settings.timeout_sec,
+        timeout_sec=timeout_sec if timeout_sec is not None else settings.timeout_sec,
     )
     result = system.run(task_description)
     result.metadata["llm_mode"] = settings.llm_endpoint_label()

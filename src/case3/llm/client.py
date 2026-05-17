@@ -29,18 +29,19 @@ class LangChainLLMClient:
         from langchain_openai import ChatOpenAI
         from pydantic import SecretStr
 
+        temp = self._settings.llm_temperature
         if self._base_url:
             llm = ChatOpenAI(
                 api_key=SecretStr(self._api_key),
                 base_url=self._base_url,
                 model=self._settings.openai_model,
-                temperature=0.0,
+                temperature=temp,
             )
         else:
             llm = ChatOpenAI(
                 api_key=SecretStr(self._api_key),
                 model=self._settings.openai_model,
-                temperature=0.0,
+                temperature=temp,
             )
         response = llm.invoke([HumanMessage(content=prompt)])
         content = response.content

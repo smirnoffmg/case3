@@ -79,8 +79,16 @@ class SQLSecuritySystem(ABC):
         """Run the full pipeline."""
 
 
-def is_approved(overall_risk: float, vulnerabilities: list[Any]) -> bool:
+def is_approved(
+    overall_risk: float,
+    vulnerabilities: list[Any],
+    *,
+    risk_threshold: float | None = None,
+    hard_block_risk: float | None = None,
+) -> bool:
     """Shared approval policy: risk <= threshold and no hard-block findings."""
-    if overall_risk > SecurityAuditor.RISK_THRESHOLD:
+    threshold = risk_threshold if risk_threshold is not None else SecurityAuditor.RISK_THRESHOLD
+    block = hard_block_risk if hard_block_risk is not None else SecurityAuditor.HARD_BLOCK_RISK
+    if overall_risk > threshold:
         return False
-    return not any(v.risk_score >= SecurityAuditor.HARD_BLOCK_RISK for v in vulnerabilities)
+    return not any(v.risk_score >= block for v in vulnerabilities)

@@ -18,13 +18,11 @@ class HybridAuditor(SecurityAuditor):
         self,
         llm: LLMClient | None = None,
         settings: Settings | None = None,
-        use_llm: bool | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
         self._settings = settings or get_settings()
         self._llm = llm or get_llm_client(self._settings)
-        self._use_llm = use_llm if use_llm is not None else self._settings.use_llm
         self._static = StaticAnalyzer()
 
     def audit(
@@ -36,12 +34,16 @@ class HybridAuditor(SecurityAuditor):
         findings = self._static.analyze(sql_query, db_schema)
         if task_description:
             findings = _merge_findings(findings, analyze_task_policy(task_description, sql_query))
-        if self._use_llm:
-            llm_findings = LLMJudge(self._llm).analyze_safe(sql_query, db_schema)
-            findings = _merge_findings(findings, llm_findings)
+        llm_findings = LLMJudge(self._llm).analyze_safe(sql_query, db_schema)
+        findings = _merge_findings(findings, llm_findings)
 
         overall = max((f.risk_score for f in findings), default=0.0)
-        approved = is_approved(overall, findings)
+        approved = is_approved(
+            overall,
+            findings,
+            risk_threshold=self._settings.risk_threshold,
+            hard_block_risk=self._settings.hard_block_risk,
+        )
         summary = _build_summary(approved, overall, findings)
         return AuditResult(
             approved=approved,

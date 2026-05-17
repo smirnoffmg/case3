@@ -29,7 +29,7 @@ def test_policy_rejects_mismatch():
 
 
 def test_refusal_comment_not_approved():
-    audit = HybridAuditor(use_llm=False).audit(
+    audit = HybridAuditor().audit(
         "-- Отказ: деструктивные операции не поддерживаются.",
         task_description="Дай список всех транзакций",
     )
@@ -38,7 +38,7 @@ def test_refusal_comment_not_approved():
 
 
 def test_hybrid_auditor_with_task():
-    audit = HybridAuditor(use_llm=False).audit(
+    audit = HybridAuditor().audit(
         "SELECT id FROM public.sys_employee LIMIT 10",
         task_description="Удалить всех сотрудников",
     )

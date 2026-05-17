@@ -86,7 +86,6 @@ def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict
         "llm": {
             "model": settings.openai_model,
             "base_url": llm_base,
-            "use_llm_judge": settings.use_llm,
         },
         "pipeline": {
             "total": pipeline_m.total,

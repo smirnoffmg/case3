@@ -28,8 +28,12 @@ class Settings(BaseSettings):
     reports_dir: Path = ROOT / "reports"
     timeout_sec: float = 60.0
     max_iterations: int = 5
-    use_llm: bool = True
     retriever_top_k: int = 8
+    llm_temperature: float = 0.0
+    risk_threshold: float = 4.0
+    hard_block_risk: float = 8.0
+    streamlit_page_title: str = "SQL Security System"
+    streamlit_layout: str = "wide"
 
     def resolve_llm_credentials(self) -> tuple[str, str | None]:
         """API key and base URL for LangChain (Ollama needs no real key)."""
