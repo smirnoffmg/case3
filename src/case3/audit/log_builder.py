@@ -52,13 +52,19 @@ def build_audit_log(
         )
     else:
         lines.append("## Причина отклонения")
-        destructive = [
+        refusal_classes = (
+            "TASK_DESTRUCTIVE",
+            "DESTRUCTIVE_DML",
+            "TASK_NOT_ACTIONABLE",
+            "TASK_SQL_MISMATCH",
+        )
+        refusal_findings = [
             v
             for v in (iterations_log[-1].audit_result.vulnerabilities if iterations_log else [])
-            if v.vuln_class in ("TASK_DESTRUCTIVE", "DESTRUCTIVE_DML")
+            if v.vuln_class in refusal_classes
         ]
-        if destructive:
-            lines.append(destructive[0].description)
+        if refusal_findings:
+            lines.append(refusal_findings[0].description)
         elif iterations_log:
             lines.append(iterations_log[-1].audit_result.summary)
     return "\n".join(lines)

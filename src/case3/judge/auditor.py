@@ -34,7 +34,9 @@ class HybridAuditor(SecurityAuditor):
         findings = self._static.analyze(sql_query, db_schema)
         if task_description:
             findings = _merge_findings(findings, analyze_task_policy(task_description, sql_query))
-        llm_findings = LLMJudge(self._llm).analyze_safe(sql_query, db_schema)
+            llm_findings = LLMJudge(self._llm).analyze_safe(
+                sql_query, db_schema, task_description=task_description
+            )
         findings = _merge_findings(findings, llm_findings)
 
         overall = max((f.risk_score for f in findings), default=0.0)

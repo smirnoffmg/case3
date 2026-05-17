@@ -12,7 +12,7 @@ from case3.models import Vulnerability
 _AUDIT_PROMPT = """You are a PostgreSQL security auditor. Analyze the SQL and return JSON array only.
 Each item: {{"vuln_class": "<KEY>", "risk_score": 0-10, "description": "...", "recommendation": "..."}}
 Valid vuln_class keys: SQL_INJ_CLASSIC, SQL_INJ_UNION, DML_NO_WHERE, SELECT_STAR, DIRECT_SENSITIVE,
-NO_PAGINATION, SQL_INJ_TIME, PRIV_ESCALATE, PLPGSQL_UNSAFE.
+NO_PAGINATION, SQL_INJ_TIME, PRIV_ESCALATE, PLPGSQL_UNSAFE, TASK_SQL_MISMATCH.
 If no issues, return [].
 
 SQL:
@@ -20,6 +20,17 @@ SQL:
 
 Schema context (truncated):
 {schema}
+{task_section}
+"""
+
+_TASK_SECTION = """
+Natural language task:
+{task}
+
+Ignore greetings and polite filler; judge whether the SQL answers the data request in the task.
+If there is no data request, or the SQL does not answer that data request,
+emit exactly one finding: vuln_class TASK_SQL_MISMATCH, risk_score 9, with a clear description.
+Do not flag mismatch only because the task started with a greeting.
 """
 
 
@@ -28,18 +39,31 @@ class LLMJudge:
         self._llm = llm
 
     def analyze(
-        self, sql_query: str, db_schema: dict[str, Any] | None = None
+        self,
+        sql_query: str,
+        db_schema: dict[str, Any] | None = None,
+        task_description: str | None = None,
     ) -> list[Vulnerability]:
         schema_snip = str(db_schema or {})[:4000]
-        prompt = _AUDIT_PROMPT.format(sql=sql_query, schema=schema_snip)
+        task_section = ""
+        if task_description and task_description.strip():
+            task_section = _TASK_SECTION.format(task=task_description.strip())
+        prompt = _AUDIT_PROMPT.format(
+            sql=sql_query,
+            schema=schema_snip,
+            task_section=task_section,
+        )
         raw = self._llm.complete(prompt)
         return _parse_findings(raw)
 
     def analyze_safe(
-        self, sql_query: str, db_schema: dict[str, Any] | None = None
+        self,
+        sql_query: str,
+        db_schema: dict[str, Any] | None = None,
+        task_description: str | None = None,
     ) -> list[Vulnerability]:
         try:
-            return self.analyze(sql_query, db_schema)
+            return self.analyze(sql_query, db_schema, task_description=task_description)
         except (json.JSONDecodeError, KeyError, TypeError):
             return []
 

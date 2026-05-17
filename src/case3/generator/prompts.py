@@ -33,6 +33,9 @@ def build_initial_prompt(
     return f"""You are a PostgreSQL expert. Generate a single safe read-only PostgreSQL SELECT for the task.
 Rules:
 - Output exactly one SELECT query (read-only). Never use DELETE, TRUNCATE, DROP, INSERT, or UPDATE.
+- If the message has no concrete data retrieval request (only greeting/chit-chat/meta), return only:
+  -- Отказ: уточните задачу на естественном языке (что выбрать из БД).
+- If the message has a greeting plus a data request, ignore the greeting and generate SQL for the data part.
 - Listing or reporting data (including "all" rows) is allowed: use SELECT with an appropriate LIMIT.
 - Explicit column list (no SELECT *), always include LIMIT, avoid sensitive columns unless required.
 Dialect: PostgreSQL.

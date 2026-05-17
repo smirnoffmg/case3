@@ -41,6 +41,8 @@ class SecurityAuditor(ABC):
         "PLPGSQL_UNSAFE": "PL/pgSQL: небезопасный EXECUTE",
         "DESTRUCTIVE_DML": "DELETE / TRUNCATE / DROP в SQL",
         "TASK_DESTRUCTIVE": "Деструктивная формулировка задачи",
+        "TASK_NOT_ACTIONABLE": "Задача не является запросом к данным",
+        "TASK_SQL_MISMATCH": "SQL не соответствует формулировке задачи",
         "NOT_VALID_SELECT": "Нет исполняемого read-only SELECT",
     }
     RISK_THRESHOLD = 4.0

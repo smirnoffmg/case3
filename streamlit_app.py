@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from typing import Literal
 
 import streamlit as st
@@ -11,33 +10,6 @@ from case3.config import DEFAULT_OLLAMA_BASE_URL, Settings, get_settings
 from case3.pipeline import run_sql_security_pipeline
 
 DetailLevel = Literal["minimal", "standard", "full"]
-
-_EXAMPLE_TASKS_FALLBACK = [
-    "Список сотрудников с id и именем, лимит 10",
-    "Количество записей в таблице счетов",
-    "Найти организации по id и названию, не более 20",
-]
-
-
-def _load_example_tasks(settings: Settings, limit: int = 5) -> list[str]:
-    path = settings.dataset_tasks_path
-    if not path.is_file():
-        return _EXAMPLE_TASKS_FALLBACK[:limit]
-    tasks: list[str] = []
-    for line in path.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            row = json.loads(line)
-            task = row.get("task")
-            if isinstance(task, str) and task.strip():
-                tasks.append(task.strip())
-        except json.JSONDecodeError:
-            continue
-        if len(tasks) >= limit:
-            break
-    return tasks or _EXAMPLE_TASKS_FALLBACK[:limit]
 
 
 def _init_session_defaults(settings: Settings) -> None:
@@ -128,6 +100,11 @@ def _render_results(
     st.caption(f"Модель: {result.metadata.get('llm_mode', model_label)}")
 
     meta = result.metadata
+    if meta.get("refusal") == "non_actionable_task":
+        reason = str(meta.get("refusal_reason", ""))
+        if result.iterations_log:
+            reason = reason or result.iterations_log[0].audit_result.summary
+        st.error(reason or "Задача не является запросом к данным. Уточните формулировку.")
     badges: list[str] = []
     if meta.get("timeout_reached"):
         badges.append("Таймаут")
@@ -205,11 +182,6 @@ def main() -> None:
         )
 
     st.caption(f"Модель: **{model_label}**")
-
-    examples = _load_example_tasks(settings)
-    example = st.selectbox("Пример задачи", ["—", *examples], key="example_task")
-    if example != "—":
-        st.session_state.task_input = example
 
     task = st.text_area(
         "Опишите задачу на естественном языке",

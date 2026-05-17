@@ -11,6 +11,12 @@ from case3.audit.log_builder import finalize_result
 from case3.contracts import SecurityAuditor, SQLGenerator, SQLSecuritySystem, is_approved
 from case3.generator.prompt_rag import PromptRAGGenerator
 from case3.judge.policy import destructive_task_finding, task_requests_destruction
+from case3.judge.task_intent import (
+    classify_task_intent_safe,
+    non_actionable_task_finding,
+    refusal_sql_for_non_actionable,
+)
+from case3.llm.client import LLMClient
 from case3.memory.feedback import FeedbackMemory
 from case3.models import AuditResult, IterationLog, SystemResult
 
@@ -29,14 +35,26 @@ class Orchestrator(SQLSecuritySystem):
         auditor: SecurityAuditor,
         max_iterations: int = SQLSecuritySystem.DEFAULT_MAX_ITERATIONS,
         timeout_sec: float = 60.0,
+        llm: LLMClient | None = None,
     ) -> None:
         super().__init__(generator, auditor, max_iterations)
         self._timeout_sec = timeout_sec
+        self._llm = llm
 
     def run(self, task_description: str) -> SystemResult:
         if task_requests_destruction(task_description):
             logger.warning("Task rejected (destructive intent): %s", task_description[:120])
             return self._refuse_destructive_task(task_description)
+
+        if self._llm is not None:
+            intent = classify_task_intent_safe(task_description, self._llm)
+            if not intent.actionable:
+                logger.warning(
+                    "Task rejected (not actionable): %s — %s",
+                    task_description[:80],
+                    intent.reason,
+                )
+                return self._refuse_non_actionable_task(task_description, intent.reason)
 
         logger.info("Task: %s", task_description)
         deadline = time.monotonic() + self._timeout_sec
@@ -132,4 +150,29 @@ class Orchestrator(SQLSecuritySystem):
             _REFUSAL_SQL,
             approved=False,
             metadata={"refusal": "destructive_task"},
+        )
+
+    def _refuse_non_actionable_task(self, task_description: str, reason: str) -> SystemResult:
+        finding = non_actionable_task_finding(reason)
+        refusal_sql = refusal_sql_for_non_actionable(reason)
+        audit = AuditResult(
+            approved=False,
+            vulnerabilities=[finding],
+            overall_risk_score=finding.risk_score,
+            summary="Запрос отклонён: задача не является запросом к данным.",
+        )
+        log = IterationLog(
+            timestamp=datetime.now(UTC),
+            iteration=1,
+            sql_query=refusal_sql,
+            audit_result=audit,
+            revision_notes="Отклонено до генерации SQL (проверка формулировки задачи).",
+        )
+        assert not is_approved(audit.overall_risk_score, audit.vulnerabilities)
+        return finalize_result(
+            task_description,
+            [log],
+            refusal_sql,
+            approved=False,
+            metadata={"refusal": "non_actionable_task", "refusal_reason": reason},
         )

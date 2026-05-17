@@ -39,6 +39,7 @@ def run_sql_security_pipeline(
         auditor=auditor,
         max_iterations=max_iterations or settings.max_iterations,
         timeout_sec=timeout_sec if timeout_sec is not None else settings.timeout_sec,
+        llm=llm,
     )
     result = system.run(task_description)
     result.metadata["llm_mode"] = settings.llm_endpoint_label()
