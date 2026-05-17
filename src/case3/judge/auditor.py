@@ -7,8 +7,9 @@ from typing import Any
 from case3.config import Settings, get_settings
 from case3.contracts import SecurityAuditor, is_approved
 from case3.judge.llm import LLMJudge
+from case3.judge.policy import analyze_task_policy
 from case3.judge.static import StaticAnalyzer
-from case3.llm.client import LLMClient, StubLLMClient, get_llm_client
+from case3.llm.client import LLMClient, get_llm_client
 from case3.models import AuditResult, Vulnerability
 
 
@@ -26,9 +27,16 @@ class HybridAuditor(SecurityAuditor):
         self._use_llm = use_llm if use_llm is not None else self._settings.use_llm
         self._static = StaticAnalyzer()
 
-    def audit(self, sql_query: str, db_schema: dict[str, Any] | None = None) -> AuditResult:
+    def audit(
+        self,
+        sql_query: str,
+        db_schema: dict[str, Any] | None = None,
+        task_description: str | None = None,
+    ) -> AuditResult:
         findings = self._static.analyze(sql_query, db_schema)
-        if self._use_llm and not isinstance(self._llm, StubLLMClient):
+        if task_description:
+            findings = _merge_findings(findings, analyze_task_policy(task_description, sql_query))
+        if self._use_llm:
             llm_findings = LLMJudge(self._llm).analyze_safe(sql_query, db_schema)
             findings = _merge_findings(findings, llm_findings)
 

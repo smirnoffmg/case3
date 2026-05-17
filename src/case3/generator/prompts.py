@@ -30,8 +30,11 @@ def build_initial_prompt(
     schema_context: str,
     few_shot: str = "",
 ) -> str:
-    return f"""You are a PostgreSQL expert. Generate a single safe SELECT query for the task.
-Rules: explicit column list (no SELECT *), always include LIMIT, avoid sensitive columns unless required.
+    return f"""You are a PostgreSQL expert. Generate a single safe read-only PostgreSQL SELECT for the task.
+Rules:
+- Output exactly one SELECT query (read-only). Never use DELETE, TRUNCATE, DROP, INSERT, or UPDATE.
+- Listing or reporting data (including "all" rows) is allowed: use SELECT with an appropriate LIMIT.
+- Explicit column list (no SELECT *), always include LIMIT, avoid sensitive columns unless required.
 Dialect: PostgreSQL.
 
 Schema:

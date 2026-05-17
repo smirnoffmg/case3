@@ -3,25 +3,41 @@
 from __future__ import annotations
 
 import json
+import logging
 import sys
 from pathlib import Path
+from typing import Annotated
 
 import typer
 
 from case3.config import get_settings
 from case3.eval.runner import run_eval
+from case3.logging_config import configure_logging, verbosity
 from case3.pipeline import run_sql_security_pipeline
 from case3.schema_index.loader import save_schema_index
 from case3.schema_index.parser import build_schema_index
 
 app = typer.Typer(help="SQL generation + security audit (Case 3)")
+logger = logging.getLogger(__name__)
+
+VerboseOption = Annotated[
+    int,
+    typer.Option(
+        "--verbose",
+        "-v",
+        count=True,
+        help="Increase log detail (-v iterations, -vv SQL/vulns, -vvv LLM I/O)",
+    ),
+]
 
 
 @app.command("build-schema")
 def build_schema(
     ddl: Path | None = typer.Option(None, help="Path to data_model.sql"),
     out: Path | None = typer.Option(None, help="Output schema.json path"),
+    verbose: VerboseOption = 0,
 ) -> None:
+    configure_logging(verbose)
     settings = get_settings()
     ddl_path = ddl or settings.schema_ddl_path
     out_path = out or settings.schema_json_path
@@ -34,22 +50,39 @@ def build_schema(
 def run_task(
     task: str = typer.Argument(..., help="Natural language task"),
     max_iterations: int | None = typer.Option(None, "--max-iterations", "-n"),
-    stub: bool = typer.Option(False, "--stub", help="Force stub LLM"),
+    verbose: VerboseOption = 0,
+    log_file: Path | None = typer.Option(
+        None, "--log-file", help="Write audit log markdown to this path"
+    ),
 ) -> None:
-    result = run_sql_security_pipeline(
-        task,
-        max_iterations=max_iterations,
-        generator_kwargs={"force_stub": stub},
-        auditor_kwargs={"force_stub": stub, "use_llm": not stub},
-    )
+    configure_logging(verbose)
+    if verbose >= 1:
+        logger.info("LLM: %s", get_settings().llm_endpoint_label())
+
+    result = run_sql_security_pipeline(task, max_iterations=max_iterations)
+
+    # Final SQL always on stdout
     typer.echo(result.final_sql)
     typer.echo(f"\nApproved: {result.approved} | Iterations: {result.iterations_used}")
+
+    if verbosity() >= 2:
+        typer.echo("\n" + result.audit_log, err=True)
+
+    if log_file is not None:
+        log_file.parent.mkdir(parents=True, exist_ok=True)
+        log_file.write_text(result.audit_log, encoding="utf-8")
+        logger.info("Audit log written to %s", log_file)
+
     if not result.approved:
         sys.exit(1)
 
 
 @app.command("eval")
-def eval_cmd(limit: int | None = typer.Option(None, help="Max tasks to run")) -> None:
+def eval_cmd(
+    limit: int | None = typer.Option(None, help="Max tasks to run"),
+    verbose: VerboseOption = 0,
+) -> None:
+    configure_logging(verbose)
     report = run_eval(limit=limit)
     typer.echo(json.dumps(report, indent=2, ensure_ascii=False))
 

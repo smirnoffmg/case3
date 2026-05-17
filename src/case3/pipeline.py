@@ -24,15 +24,12 @@ def run_sql_security_pipeline(
     settings = get_settings()
     gen_kw = dict(generator_kwargs or {})
     aud_kw = dict(auditor_kwargs or {})
-    force_stub = bool(gen_kw.pop("force_stub", False) or aud_kw.pop("force_stub", False))
-    if force_stub:
-        aud_kw.setdefault("use_llm", False)
 
     if db_schema is None:
         index = load_schema_index(settings.schema_json_path)
         db_schema = to_baseline_dict(index)
 
-    llm = get_llm_client(settings, force_stub=force_stub)
+    llm = get_llm_client(settings)
     generator = PromptRAGGenerator(db_schema=db_schema, llm=llm, settings=settings, **gen_kw)
     auditor = HybridAuditor(llm=llm, settings=settings, **aud_kw)
     system: SQLSecuritySystem = Orchestrator(
@@ -41,4 +38,6 @@ def run_sql_security_pipeline(
         max_iterations=max_iterations or settings.max_iterations,
         timeout_sec=settings.timeout_sec,
     )
-    return system.run(task_description)
+    result = system.run(task_description)
+    result.metadata["llm_mode"] = settings.llm_endpoint_label()
+    return result

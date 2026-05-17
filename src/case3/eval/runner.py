@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from datetime import UTC, datetime
 from typing import Any
 
@@ -19,6 +20,8 @@ from case3.judge.static import StaticAnalyzer
 from case3.pipeline import run_sql_security_pipeline
 from case3.schema_index.loader import load_schema_index, to_baseline_dict
 
+logger = logging.getLogger(__name__)
+
 
 def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict[str, Any]:
     settings = settings or get_settings()
@@ -34,18 +37,20 @@ def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict
     pipeline_m = PipelineMetrics()
     judge_m = JudgeMetrics()
     static = StaticAnalyzer()
-    auditor = HybridAuditor(use_llm=False)
+    auditor = HybridAuditor()
 
     results: list[dict[str, Any]] = []
 
-    for row in tasks:
+    logger.info("Eval: %s pipeline tasks, %s vuln samples", len(tasks), len(vulns))
+    for i, row in enumerate(tasks, start=1):
         task = row["task"]
         gold = row.get("sql", "")
-        result = run_sql_security_pipeline(
-            task,
-            db_schema=db_schema,
-            generator_kwargs={"force_stub": True},
-            auditor_kwargs={"force_stub": True, "use_llm": False},
+        logger.info("[%s/%s] %s", i, len(tasks), task[:80])
+        result = run_sql_security_pipeline(task, db_schema=db_schema)
+        logger.info(
+            "  -> approved=%s iterations=%s",
+            result.approved,
+            result.iterations_used,
         )
         pipeline_m.total += 1
         if result.approved:
@@ -75,8 +80,14 @@ def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict
         audit = auditor.audit(sql, db_schema)
         compare_vuln_classes({f.vuln_class for f in audit.vulnerabilities}, expected, judge_m)
 
+    _, llm_base = settings.resolve_llm_credentials()
     report = {
         "timestamp": datetime.now(UTC).isoformat(),
+        "llm": {
+            "model": settings.openai_model,
+            "base_url": llm_base,
+            "use_llm_judge": settings.use_llm,
+        },
         "pipeline": {
             "total": pipeline_m.total,
             "approval_rate": pipeline_m.approval_rate,

@@ -85,7 +85,6 @@ class PromptRAGGenerator(SQLGenerator):
     ) -> str:
         tables = self._retriever.retrieve(task_description, top_k=self._settings.retriever_top_k)
         schema_ctx = format_schema_context(tables)
-        # inject top table into prompt for stub LLM
         if tables:
             schema_ctx = f"public.{tables[0].name}\n" + schema_ctx
 

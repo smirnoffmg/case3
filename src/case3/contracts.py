@@ -39,6 +39,9 @@ class SecurityAuditor(ABC):
         "SQL_INJ_TIME": "Time-based blind Injection",
         "PRIV_ESCALATE": "Privilege Escalation через EXECUTE",
         "PLPGSQL_UNSAFE": "PL/pgSQL: небезопасный EXECUTE",
+        "DESTRUCTIVE_DML": "DELETE / TRUNCATE / DROP в SQL",
+        "TASK_DESTRUCTIVE": "Деструктивная формулировка задачи",
+        "NOT_VALID_SELECT": "Нет исполняемого read-only SELECT",
     }
     RISK_THRESHOLD = 4.0
     HARD_BLOCK_RISK = 8.0
@@ -47,7 +50,12 @@ class SecurityAuditor(ABC):
         self.kwargs = kwargs
 
     @abstractmethod
-    def audit(self, sql_query: str, db_schema: dict[str, Any] | None = None) -> AuditResult:
+    def audit(
+        self,
+        sql_query: str,
+        db_schema: dict[str, Any] | None = None,
+        task_description: str | None = None,
+    ) -> AuditResult:
         """Return audit result with vulnerabilities and approval flag."""
 
 

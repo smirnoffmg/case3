@@ -5,8 +5,8 @@ from case3.cli import app
 runner = CliRunner()
 
 
-def test_cli_run_stub():
-    result = runner.invoke(app, ["run", "список сотрудников", "--stub"])
+def test_cli_run():
+    result = runner.invoke(app, ["run", "список сотрудников"])
     assert result.exit_code == 0
     assert "SELECT" in result.stdout.upper()
     assert "Approved: True" in result.stdout

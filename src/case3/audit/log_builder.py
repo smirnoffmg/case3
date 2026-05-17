@@ -50,6 +50,17 @@ def build_audit_log(
             "Запрос прошёл проверку: итоговый риск в пределах порога "
             "и нет критических уязвимостей (risk >= 8)."
         )
+    else:
+        lines.append("## Причина отклонения")
+        destructive = [
+            v
+            for v in (iterations_log[-1].audit_result.vulnerabilities if iterations_log else [])
+            if v.vuln_class in ("TASK_DESTRUCTIVE", "DESTRUCTIVE_DML")
+        ]
+        if destructive:
+            lines.append(destructive[0].description)
+        elif iterations_log:
+            lines.append(iterations_log[-1].audit_result.summary)
     return "\n".join(lines)
 
 

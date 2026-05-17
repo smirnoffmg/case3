@@ -8,6 +8,7 @@ from typing import Any
 import sqlglot
 from sqlglot import exp
 
+from case3.judge.sql_validity import analyze_sql_validity
 from case3.models import Vulnerability
 from case3.schema_index.loader import sensitive_column_set
 
@@ -42,6 +43,7 @@ class StaticAnalyzer:
         findings.extend(self._check_no_pagination(sql))
         findings.extend(self._check_sensitive(sql, sensitive))
         findings.extend(self._check_execute(sql, upper))
+        findings.extend(analyze_sql_validity(sql))
 
         return findings
 

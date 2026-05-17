@@ -2,7 +2,7 @@
 
 ## Unit tests
 
-Fast, no network, stub LLM by default:
+Fast, no network, no LLM:
 
 ```bash
 uv run pytest tests/unit -q
@@ -10,15 +10,13 @@ uv run pytest tests/unit -q
 
 ## Integration
 
-Full pipeline with stub LLM:
+Pipeline tests mock the LLM (`tests/integration/conftest.py` + `tests/fake_llm.py`):
 
 ```bash
 uv run pytest tests/integration -q
 ```
 
 ## Build schema index first
-
-Parser tests use fixtures; integration expects `data/derived/schema.json`:
 
 ```bash
 uv run python scripts/build_schema_index.py
