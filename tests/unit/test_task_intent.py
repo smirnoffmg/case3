@@ -46,10 +46,16 @@ def test_classify_mixed_greeting_and_query():
     assert result.actionable
 
 
-def test_refusal_sql_contains_reason():
+def test_refusal_sql_contains_standard_message():
     sql = refusal_sql_for_non_actionable("Нет запроса к данным")
     assert "Отказ" in sql
-    assert "Нет запроса к данным" in sql
+    assert "SELECT" in sql or "запрос" in sql.lower()
+
+
+def test_refusal_sql_does_not_embed_raw_reason():
+    # raw LLM reason must not leak into the user-facing SQL comment
+    sql = refusal_sql_for_non_actionable("pure greeting")
+    assert "pure greeting" not in sql
 
 
 def test_non_actionable_finding_risk():

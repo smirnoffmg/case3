@@ -1,6 +1,6 @@
 from case3.config import get_settings
 from case3.pipeline import run_sql_security_pipeline
-from case3.schema_index.loader import load_schema_index, to_baseline_dict
+from case3.schema_index.loader import load_schema_index
 
 
 def test_pipeline_approves_safe_query():
@@ -11,11 +11,10 @@ def test_pipeline_approves_safe_query():
         from case3.schema_index.parser import build_schema_index
 
         index = build_schema_index(settings.schema_ddl_path)
-    db_schema = to_baseline_dict(index)
 
     result = run_sql_security_pipeline(
         "Список сотрудников с id и именем",
-        db_schema=db_schema,
+        schema_index=index,
     )
     assert result.final_sql
     assert result.iterations_used >= 1
@@ -40,7 +39,8 @@ def test_pipeline_refuses_greeting_task():
     assert "Отказ" in result.final_sql
     assert "SELECT" not in result.final_sql.upper() or result.final_sql.strip().startswith("--")
     assert any(
-        v.vuln_class == "TASK_NOT_ACTIONABLE" for v in result.iterations_log[0].audit_result.vulnerabilities
+        v.vuln_class == "TASK_NOT_ACTIONABLE"
+        for v in result.iterations_log[0].audit_result.vulnerabilities
     )
 
 
@@ -52,11 +52,10 @@ def test_pipeline_accepts_greeting_with_query():
         from case3.schema_index.parser import build_schema_index
 
         index = build_schema_index(settings.schema_ddl_path)
-    db_schema = to_baseline_dict(index)
 
     result = run_sql_security_pipeline(
         "Привет! Список сотрудников с id и именем, лимит 10",
-        db_schema=db_schema,
+        schema_index=index,
     )
     assert result.metadata.get("refusal") != "non_actionable_task"
     assert result.final_sql

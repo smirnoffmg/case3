@@ -27,10 +27,9 @@ def test_pg_sleep():
     assert any(f.vuln_class == "SQL_INJ_TIME" for f in findings)
 
 
-def test_sensitive_columns(mini_db_schema):
-    findings = StaticAnalyzer().analyze(
+def test_sensitive_columns(mini_schema_pii):
+    findings = StaticAnalyzer(schema_index=mini_schema_pii).analyze(
         "SELECT id, email FROM public.sys_employee LIMIT 10",
-        mini_db_schema,
     )
     assert any(f.vuln_class == "DIRECT_SENSITIVE" for f in findings)
 
@@ -38,3 +37,19 @@ def test_sensitive_columns(mini_db_schema):
 def test_plpgsql_unsafe():
     findings = StaticAnalyzer().analyze("EXECUTE format('SELECT %I', 'x');")
     assert any(f.vuln_class == "PLPGSQL_UNSAFE" for f in findings)
+
+
+def test_sql_inj_union_plain():
+    # canonical UNION injection — no concatenation required
+    findings = StaticAnalyzer().analyze(
+        "SELECT id FROM users WHERE id = 1 UNION SELECT password FROM users"
+    )
+    assert any(f.vuln_class == "SQL_INJ_UNION" for f in findings)
+
+
+def test_sql_inj_union_all():
+    # UNION ALL variant must also be caught
+    findings = StaticAnalyzer().analyze(
+        "SELECT id FROM orders UNION ALL SELECT credit_card FROM payments"
+    )
+    assert any(f.vuln_class == "SQL_INJ_UNION" for f in findings)

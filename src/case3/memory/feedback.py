@@ -34,6 +34,13 @@ class FeedbackMemory:
         current = {v.vuln_class for v in audit.vulnerabilities}
         return bool(current & self._resolved)
 
+    def is_stuck(self, min_iterations: int = 2) -> bool:
+        """True when the last min_iterations rounds share identical vuln classes."""
+        if len(self._iteration_classes) < min_iterations:
+            return False
+        last = self._iteration_classes[-1]
+        return all(c == last for c in self._iteration_classes[-min_iterations:])
+
     def revision_note(self, audit: AuditResult, iteration: int) -> str:
         if iteration == 1:
             return "Первая генерация."

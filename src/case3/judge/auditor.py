@@ -11,6 +11,7 @@ from case3.judge.policy import analyze_task_policy
 from case3.judge.static import StaticAnalyzer
 from case3.llm.client import LLMClient, get_llm_client
 from case3.models import AuditResult, Vulnerability
+from case3.schema_index.parser import SchemaIndex
 
 
 class HybridAuditor(SecurityAuditor):
@@ -18,24 +19,26 @@ class HybridAuditor(SecurityAuditor):
         self,
         llm: LLMClient | None = None,
         settings: Settings | None = None,
+        schema_index: SchemaIndex | None = None,
         **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)
         self._settings = settings or get_settings()
         self._llm = llm or get_llm_client(self._settings)
-        self._static = StaticAnalyzer()
+        self._schema_index = schema_index
+        self._static = StaticAnalyzer(schema_index=schema_index)
 
     def audit(
         self,
         sql_query: str,
-        db_schema: dict[str, Any] | None = None,
         task_description: str | None = None,
     ) -> AuditResult:
-        findings = self._static.analyze(sql_query, db_schema)
+        findings = self._static.analyze(sql_query)
+        llm_findings: list[Vulnerability] = []
         if task_description:
             findings = _merge_findings(findings, analyze_task_policy(task_description, sql_query))
-            llm_findings = LLMJudge(self._llm).analyze_safe(
-                sql_query, db_schema, task_description=task_description
+            llm_findings = LLMJudge(self._llm, schema_index=self._schema_index).analyze_safe(
+                sql_query, task_description=task_description
             )
         findings = _merge_findings(findings, llm_findings)
 

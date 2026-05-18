@@ -31,8 +31,8 @@ Task:
 Return JSON only, no markdown. Keys: actionable (boolean), reason (string, Russian).
 """
 
-_REFUSAL_SQL_TEMPLATE = (
-    "-- Отказ: {reason} Переформулируйте задачу как запрос к данным (SELECT с LIMIT)."
+_REFUSAL_SQL = (
+    "-- Отказ: задача не является запросом к данным. Переформулируйте как SELECT с LIMIT."
 )
 
 
@@ -54,8 +54,7 @@ def non_actionable_task_finding(reason: str) -> Vulnerability:
 
 
 def refusal_sql_for_non_actionable(reason: str) -> str:
-    text = reason.strip() or "Задача не является запросом к данным."
-    return _REFUSAL_SQL_TEMPLATE.format(reason=text)
+    return _REFUSAL_SQL
 
 
 def classify_task_intent(task: str, llm: LLMClient) -> TaskIntentResult:

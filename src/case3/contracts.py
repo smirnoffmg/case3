@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, ClassVar
+from typing import Any, ClassVar  # Any kept for SQLGenerator/SQLSecuritySystem **kwargs
 
 from case3.models import AuditResult, SystemResult
 
@@ -11,8 +11,7 @@ from case3.models import AuditResult, SystemResult
 class SQLGenerator(ABC):
     """Генерирует SQL по текстовому описанию задачи."""
 
-    def __init__(self, db_schema: dict[str, Any] | None = None, **kwargs: Any) -> None:
-        self.db_schema = db_schema or {}
+    def __init__(self, **kwargs: Any) -> None:
         self.kwargs = kwargs
 
     @abstractmethod
@@ -55,7 +54,6 @@ class SecurityAuditor(ABC):
     def audit(
         self,
         sql_query: str,
-        db_schema: dict[str, Any] | None = None,
         task_description: str | None = None,
     ) -> AuditResult:
         """Return audit result with vulnerabilities and approval flag."""

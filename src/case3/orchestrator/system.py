@@ -36,10 +36,14 @@ class Orchestrator(SQLSecuritySystem):
         max_iterations: int = SQLSecuritySystem.DEFAULT_MAX_ITERATIONS,
         timeout_sec: float = 60.0,
         llm: LLMClient | None = None,
+        risk_threshold: float = 4.0,
+        hard_block_risk: float = 8.0,
     ) -> None:
         super().__init__(generator, auditor, max_iterations)
         self._timeout_sec = timeout_sec
         self._llm = llm
+        self._risk_threshold = risk_threshold
+        self._hard_block_risk = hard_block_risk
 
     def run(self, task_description: str) -> SystemResult:
         if task_requests_destruction(task_description):
@@ -82,11 +86,7 @@ class Orchestrator(SQLSecuritySystem):
             )
             sql_history.append(sql)
             logger.debug("SQL:\n%s", sql)
-            audit = self.auditor.audit(
-                sql,
-                self.generator.db_schema,
-                task_description=task_description,
-            )
+            audit = self.auditor.audit(sql, task_description=task_description)
             memory.update(audit, iteration)
             note = memory.revision_note(audit, iteration)
 
@@ -115,10 +115,15 @@ class Orchestrator(SQLSecuritySystem):
             if approved:
                 logger.info("Stopping: query approved")
                 break
+            if memory.is_stuck():
+                logger.warning("Stopping: same vuln classes for 2 consecutive iterations")
+                break
 
+        stuck = memory.is_stuck() and not approved
         meta: dict[str, Any] = {
             "timeout_reached": time.monotonic() > deadline,
             "regression_detected": memory.detect_regression(last_audit) if last_audit else False,
+            "stuck": stuck,
         }
         return finalize_result(
             task_description,
@@ -126,6 +131,8 @@ class Orchestrator(SQLSecuritySystem):
             final_sql,
             approved,
             metadata=meta,
+            risk_threshold=self._risk_threshold,
+            hard_block_risk=self._hard_block_risk,
         )
 
     def _refuse_destructive_task(self, task_description: str) -> SystemResult:
@@ -150,6 +157,8 @@ class Orchestrator(SQLSecuritySystem):
             _REFUSAL_SQL,
             approved=False,
             metadata={"refusal": "destructive_task"},
+            risk_threshold=self._risk_threshold,
+            hard_block_risk=self._hard_block_risk,
         )
 
     def _refuse_non_actionable_task(self, task_description: str, reason: str) -> SystemResult:
@@ -175,4 +184,6 @@ class Orchestrator(SQLSecuritySystem):
             refusal_sql,
             approved=False,
             metadata={"refusal": "non_actionable_task", "refusal_reason": reason},
+            risk_threshold=self._risk_threshold,
+            hard_block_risk=self._hard_block_risk,
         )

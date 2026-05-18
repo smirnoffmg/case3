@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import re
-from typing import Any
 
 import sqlglot
 from sqlglot import exp
 
 from case3.judge.sql_validity import analyze_sql_validity
 from case3.models import Vulnerability
-from case3.schema_index.loader import sensitive_column_set
+from case3.schema_index.loader import sensitive_column_set_from_index
+from case3.schema_index.parser import SchemaIndex
 
 _DEFAULT_RISKS: dict[str, float] = {
     "SQL_INJ_CLASSIC": 10.0,
@@ -26,15 +26,18 @@ _DEFAULT_RISKS: dict[str, float] = {
 
 
 class StaticAnalyzer:
-    def analyze(
-        self, sql_query: str, db_schema: dict[str, Any] | None = None
-    ) -> list[Vulnerability]:
+    def __init__(self, schema_index: SchemaIndex | None = None) -> None:
+        self._sensitive: set[str] = (
+            sensitive_column_set_from_index(schema_index) if schema_index else set()
+        )
+
+    def analyze(self, sql_query: str) -> list[Vulnerability]:
         findings: list[Vulnerability] = []
         sql = sql_query.strip()
         if not sql:
             return findings
 
-        sensitive = sensitive_column_set(db_schema or {})
+        sensitive = self._sensitive
         upper = sql.upper()
 
         findings.extend(self._check_injection_patterns(sql, upper))
@@ -58,13 +61,13 @@ class StaticAnalyzer:
                     recommendation="Используйте параметризованные запросы ($1, $2) вместо конкатенации.",
                 )
             )
-        if re.search(r"\bUNION\b", upper) and re.search(r"'\s*\+\s*|'\s*\|\|", sql, re.I):
+        if re.search(r"\bUNION\b", upper):
             out.append(
                 Vulnerability(
                     vuln_class="SQL_INJ_UNION",
                     risk_score=_DEFAULT_RISKS["SQL_INJ_UNION"],
-                    description="UNION в сочетании с конкатенацией пользовательского ввода.",
-                    recommendation="Избегайте динамической сборки UNION-запросов.",
+                    description="Обнаружен UNION, возможна атака типа UNION-based SQL injection.",
+                    recommendation="Избегайте UNION в динамически собираемых запросах; используйте параметризованные запросы.",
                 )
             )
         if re.search(r"\bPG_SLEEP\s*\(", upper) or re.search(r"\bWAITFOR\s+DELAY\b", upper):

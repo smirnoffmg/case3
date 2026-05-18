@@ -32,12 +32,11 @@ def mini_schema():
 
 
 @pytest.fixture
-def mini_db_schema(mini_schema):
-    from case3.schema_index.loader import to_baseline_dict
+def mini_schema_pii(mini_schema):
     from case3.schema_index.pii import mark_sensitive_columns
 
     mark_sensitive_columns(mini_schema)
-    return to_baseline_dict(mini_schema)
+    return mini_schema
 
 
 @pytest.fixture

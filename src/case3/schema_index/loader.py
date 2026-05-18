@@ -50,5 +50,10 @@ def to_baseline_dict(index: SchemaIndex) -> dict[str, Any]:
     }
 
 
-def sensitive_column_set(db_schema: dict[str, Any]) -> set[str]:
-    return set(db_schema.get("sensitive_columns", []))
+def sensitive_column_set_from_index(index: SchemaIndex) -> set[str]:
+    return {
+        f"{name}.{col.name}"
+        for name, table in index.tables.items()
+        for col in table.columns
+        if col.sensitive
+    }

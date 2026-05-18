@@ -14,11 +14,12 @@ from case3.eval.metrics import (
     compare_vuln_classes,
     load_jsonl,
     sql_match,
+    update_class_metrics,
 )
 from case3.judge.auditor import HybridAuditor
 from case3.judge.static import StaticAnalyzer
 from case3.pipeline import run_sql_security_pipeline
-from case3.schema_index.loader import load_schema_index, to_baseline_dict
+from case3.schema_index.loader import load_schema_index
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,6 @@ logger = logging.getLogger(__name__)
 def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict[str, Any]:
     settings = settings or get_settings()
     index = load_schema_index(settings.schema_json_path)
-    db_schema = to_baseline_dict(index)
 
     tasks = load_jsonl(settings.dataset_tasks_path)
     vulns = load_jsonl(settings.dataset_vulns_path)
@@ -36,8 +36,9 @@ def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict
 
     pipeline_m = PipelineMetrics()
     judge_m = JudgeMetrics()
-    static = StaticAnalyzer()
-    auditor = HybridAuditor()
+    judge_by_class: dict[str, JudgeMetrics] = {}
+    static = StaticAnalyzer(schema_index=index)
+    auditor = HybridAuditor(schema_index=index)
 
     results: list[dict[str, Any]] = []
 
@@ -46,7 +47,7 @@ def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict
         task = row["task"]
         gold = row.get("sql", "")
         logger.info("[%s/%s] %s", i, len(tasks), task[:80])
-        result = run_sql_security_pipeline(task, db_schema=db_schema)
+        result = run_sql_security_pipeline(task, schema_index=index)
         logger.info(
             "  -> approved=%s iterations=%s",
             result.approved,
@@ -73,12 +74,15 @@ def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict
     for row in vulns:
         sql = row["sql"]
         expected = set(row.get("expected_classes", []))
-        findings = static.analyze(sql, db_schema)
+        findings = static.analyze(sql)
         predicted = {f.vuln_class for f in findings}
         compare_vuln_classes(predicted, expected, judge_m)
+        update_class_metrics(predicted, expected, judge_by_class)
         # also test hybrid without llm
-        audit = auditor.audit(sql, db_schema)
-        compare_vuln_classes({f.vuln_class for f in audit.vulnerabilities}, expected, judge_m)
+        audit = auditor.audit(sql)
+        hybrid_predicted = {f.vuln_class for f in audit.vulnerabilities}
+        compare_vuln_classes(hybrid_predicted, expected, judge_m)
+        update_class_metrics(hybrid_predicted, expected, judge_by_class)
 
     _, llm_base = settings.resolve_llm_credentials()
     report = {
@@ -101,6 +105,10 @@ def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict
         "judge": {
             "precision": judge_m.precision,
             "recall": judge_m.recall,
+            "by_class": {
+                cls: {"precision": m.precision, "recall": m.recall}
+                for cls, m in sorted(judge_by_class.items())
+            },
         },
         "samples": results[:10],
     }

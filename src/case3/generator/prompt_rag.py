@@ -50,14 +50,13 @@ def load_few_shot(path: Path) -> str:
 class PromptRAGGenerator(SQLGenerator):
     def __init__(
         self,
-        db_schema: dict[str, Any] | None = None,
         llm: LLMClient | None = None,
         settings: Settings | None = None,
         schema_index: SchemaIndex | None = None,
         lessons: list[str] | None = None,
         **kwargs: Any,
     ) -> None:
-        super().__init__(db_schema=db_schema, **kwargs)
+        super().__init__(**kwargs)
         self._settings = settings or get_settings()
         self._llm = llm or get_llm_client(self._settings)
         self._lessons = lessons or []

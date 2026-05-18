@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import json
 import re
-from typing import Any
 
 from case3.llm.client import LLMClient
 from case3.models import Vulnerability
+from case3.schema_index.parser import SchemaIndex
 
 _AUDIT_PROMPT = """You are a PostgreSQL security auditor. Analyze the SQL and return JSON array only.
 Each item: {{"vuln_class": "<KEY>", "risk_score": 0-10, "description": "...", "recommendation": "..."}}
@@ -35,22 +35,21 @@ Do not flag mismatch only because the task started with a greeting.
 
 
 class LLMJudge:
-    def __init__(self, llm: LLMClient) -> None:
+    def __init__(self, llm: LLMClient, schema_index: SchemaIndex | None = None) -> None:
         self._llm = llm
+        self._schema_snip = str(schema_index.model_dump() if schema_index else {})[:4000]
 
     def analyze(
         self,
         sql_query: str,
-        db_schema: dict[str, Any] | None = None,
         task_description: str | None = None,
     ) -> list[Vulnerability]:
-        schema_snip = str(db_schema or {})[:4000]
         task_section = ""
         if task_description and task_description.strip():
             task_section = _TASK_SECTION.format(task=task_description.strip())
         prompt = _AUDIT_PROMPT.format(
             sql=sql_query,
-            schema=schema_snip,
+            schema=self._schema_snip,
             task_section=task_section,
         )
         raw = self._llm.complete(prompt)
@@ -59,11 +58,10 @@ class LLMJudge:
     def analyze_safe(
         self,
         sql_query: str,
-        db_schema: dict[str, Any] | None = None,
         task_description: str | None = None,
     ) -> list[Vulnerability]:
         try:
-            return self.analyze(sql_query, db_schema, task_description=task_description)
+            return self.analyze(sql_query, task_description=task_description)
         except (json.JSONDecodeError, KeyError, TypeError):
             return []
 

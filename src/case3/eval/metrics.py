@@ -73,3 +73,18 @@ def compare_vuln_classes(predicted: set[str], expected: set[str], m: JudgeMetric
     m.true_positives += len(predicted & expected)
     m.false_positives += len(predicted - expected)
     m.false_negatives += len(expected - predicted)
+
+
+def update_class_metrics(
+    predicted: set[str], expected: set[str], by_class: dict[str, JudgeMetrics]
+) -> None:
+    for cls in predicted | expected:
+        if cls not in by_class:
+            by_class[cls] = JudgeMetrics()
+        m = by_class[cls]
+        if cls in predicted and cls in expected:
+            m.true_positives += 1
+        elif cls in predicted:
+            m.false_positives += 1
+        else:
+            m.false_negatives += 1
