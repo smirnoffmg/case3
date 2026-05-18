@@ -1,0 +1,1867 @@
+"Таблица","№","Поле","Тип","Описание"
+afhd_ac_trans_link,1,id,bigint,Код
+afhd_ac_trans_link,2,obj_owner_id,bigint,Ссылка на объект владелец
+afhd_ac_trans_link,3,transaction_id,bigint,Ссылка на операцию
+afhd_ac_trans_link,4,source_row_id,bigint,Статья (базовая)
+afhd_ac_trans_link,5,reclass_row_id,bigint,Статья (реклассификация)
+afhd_ac_trans_link,6,dummy_row_id,bigint,Статья (фиктивная)
+afhd_ac_trans_link,7,debit_credit_id,bigint,Дебет/Кредит
+afhd_ac_trans_link,8,comp_sign_id,bigint,Арифметический знак
+afhd_ac_trans_link,9,form_inst_id,bigint,Экземпляр формы отчетности
+afhd_ac_trans_link,10,form_section_id,bigint,Раздел формы отчетности
+afhd_ac_trans_link,11,consolidation_obj_id,bigint,Ссылка на объект консолидации
+afhd_ac_trans_link,12,statem_trans_id,bigint,Ссылка на транзакцию
+afhd_ac_trans_link,13,multiply_val,numeric,Мультипликатор
+afhd_ac_trans_link,14,account_date,timestamp without time zone,Дата для учета
+afhd_ac_trans_link,15,after_amount,numeric,Сумма для учета (консолидация)
+afhd_ac_trans_link,16,before_amount,numeric,Сумма для учета (декомпозиция)
+afhd_ac_trans_link,17,is_excepted,smallint,Исключен
+afhd_ac_trans_link,18,is_intragroup,smallint,ВГО
+afhd_ac_trans_link,19,is_psb_trans,smallint,Операция проведена в ПСБ?
+afhd_ac_trans_link,20,copy_source_ac_tr_l_id,bigint,Ссылка на источник копирования
+afhd_ac_trans_link,21,link_turnover,bigint,Ссылка на проводку по контрагенту
+afhd_ac_trans_link,22,tbs_item_id,bigint,"Ссылка на проводку ""Прочие субконто"""
+afhd_ac_trans_link,23,multiplicator_sign_id,bigint,Арифметический знак мультипликатора
+afhd_ac_trans_link,24,link_calc_turn_log_id,bigint,Ссылка на связь расчета и ОСВ
+afhd_ac_trans_link,25,okved_activity_id,bigint,Вид деятельности (по ОКВЭД)
+afhd_ac_trans_link,26,vat,numeric,НДС
+afhd_ac_trans_link,27,balance_type_id,bigint,Тип сальдо
+afhd_ac_trans_link,28,account_num_id,bigint,Номер счета
+afhd_ac_trans_link,29,link_cnt,bigint,Контрагент из проводки
+afhd_ac_trans_link,30,cnt_count,character varying,Контрагент
+afhd_ac_trans_link,31,contragent_name,character varying,Контрагент унифицированное название
+afhd_ac_trans_link,32,is_clean_apply,smallint,Применяется очистка внутригрупповых операций
+afhd_ac_trans_link,33,cnt_turnover_id,bigint,"Ссылка на проводку ""Субконто счет"""
+afhd_ac_trans_link,34,vat_calc,numeric,"Ставка НДС (для Выручки, расчетная)"
+afhd_ac_trans_link,35,link_turnover_reserv,bigint,"Ссылка на проводку ""Субконто контрагенты"" (для логики резервов)"
+afhd_ac_trans_link,36,report_date,timestamp without time zone,Дата отчетности
+afhd_ac_trans_link,37,discount,numeric,Дисконт
+afhd_ac_trans_link,38,cr_id,bigint,Ссылка на КЗ (полный анализ)
+alembic_version,1,version_num,character varying,
+application_obj,1,id,bigint,ID
+application_obj,2,name__ru,character varying,"Name, languageSchema=ru"
+application_obj,3,name__en,character varying,"Name, languageSchema=en"
+application_obj,4,name,character varying,Name
+application_obj,5,create_date,timestamp without time zone,Create date
+application_obj,6,type_id,bigint,Тип объекта
+application_obj,7,status,smallint,Status
+application_obj,8,org_id,bigint,Подразделение
+application_obj,9,user_id,bigint,Пользователь
+application_obj,10,last_modified_date,timestamp without time zone,Last modified date
+application_obj,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+application_obj,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+application_obj,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+application_obj,14,is_system,smallint,System object
+application_obj,15,afl_doc_num,character varying,Номер документа
+application_obj,16,afl_doc_data,timestamp without time zone,Дата документа
+application_obj,17,afp_state_id,bigint,Состояние
+application_obj,18,initiator_id,bigint,Клиент
+application_obj,19,emp_id,bigint,Ответственный менеджер
+application_obj,20,processing_steps_id,bigint,Текущий этап обработки
+application_obj,21,temp_cont_turn,bigint,Промежуточный контейнер загрузки ОСВ
+application_obj,22,cr_id,bigint,Ссылка на КЗ
+application_obj,23,scp_tech_ctredit,bigint,Технология кредитования
+application_obj,24,scp_business_segment,bigint,Клиентский сегмент
+application_obj,25,client_type_id,bigint,Тип клиента
+application_obj,26,gsl_data_cont_id,bigint,Ссылка на контейнер данных ГСЛ
+application_obj,27,industry_code_id,bigint,Отрасль клиента
+application_obj,28,scp_product_str,character varying,Продукт (строка)
+application_obj,29,is_state_program,smallint,Применение госпрограммы
+application_obj,30,cred_technology_str,character varying,Технология кредитования (строка)
+application_obj,31,is_fin_activ_newsub,smallint,Финансирование деятельности в НС
+application_obj,32,prelim_gsl_calc_id,bigint,Ссылка на предварительный расчет
+business_segment,1,id,bigint,"Код, SysTypeAttrEffective{id=101002, ident='ID'}"
+business_segment,2,name__en,character varying,"Наименование, SysTypeAttrEffective{id=101003, ident='NAME'}, languageSchema=en"
+business_segment,3,name__ru,character varying,"Наименование, SysTypeAttrEffective{id=101003, ident='NAME'}, languageSchema=ru"
+business_segment,4,name,character varying,"Наименование, SysTypeAttrEffective{id=101003, ident='NAME'}"
+business_segment,5,create_date,timestamp without time zone,"Дата создания, SysTypeAttrEffective{id=101004, ident='CREATE_DATE'}"
+business_segment,6,type_id,bigint,"Тип объекта, SysTypeAttrEffective{id=101005, ident='TYPE_ID'}"
+business_segment,7,status,smallint,"Статус, SysTypeAttrEffective{id=101006, ident='STATUS'}"
+business_segment,8,org_id,bigint,"Подразделение, SysTypeAttrEffective{id=101007, ident='ORG_ID'}"
+business_segment,9,user_id,bigint,"Пользователь, SysTypeAttrEffective{id=101008, ident='USER_ID'}"
+business_segment,10,last_modified_date,timestamp without time zone,"Дата последнего изменения, SysTypeAttrEffective{id=101009, ident='LAST_MODIFIED_DATE'}"
+business_segment,11,last_modified_user_id,bigint,"Пользователь, кто последним изменил, SysTypeAttrEffective{id=101010, ident='LAST_MODIFIED_USER_ID'}"
+business_segment,12,created_emp_id,bigint,"Сотрудник, создавший объект, SysTypeAttrEffective{id=101011, ident='CREATED_EMP_ID'}"
+business_segment,13,last_modified_emp_id,bigint,"Сотрудник, кто последним изменил, SysTypeAttrEffective{id=101012, ident='LAST_MODIFIED_EMP_ID'}"
+business_segment,14,is_system,smallint,"Системный объект, SysTypeAttrEffective{id=105077, ident='SYS_OBJ_TYPE_IS_SYSTEM'}"
+business_segment,15,ident,character varying,Идентификатор
+business_segment,16,type_int_code,bigint,Код типа технологии
+cb_interest_rate,1,id,bigint,ID
+cb_interest_rate,2,name__ru,character varying,"Name, languageSchema=ru"
+cb_interest_rate,3,name__en,character varying,"Name, languageSchema=en"
+cb_interest_rate,4,name,character varying,Name
+cb_interest_rate,5,create_date,timestamp without time zone,Create date
+cb_interest_rate,6,type_id,bigint,Тип объекта
+cb_interest_rate,7,status,smallint,Status
+cb_interest_rate,8,org_id,bigint,Подразделение
+cb_interest_rate,9,user_id,bigint,Пользователь
+cb_interest_rate,10,last_modified_date,timestamp without time zone,Last modified date
+cb_interest_rate,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+cb_interest_rate,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+cb_interest_rate,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+cb_interest_rate,14,is_system,smallint,System object
+cb_interest_rate,15,date_start_cb,timestamp without time zone,Дата начала действия
+cb_interest_rate,16,date_end_cb,timestamp without time zone,Дата окончания действия
+cb_interest_rate,17,grade_number_cb,numeric,Значение
+corp_tech_application,1,id,bigint,ID
+corp_tech_application,2,name__ru,character varying,"Name, languageSchema=ru"
+corp_tech_application,3,name__en,character varying,"Name, languageSchema=en"
+corp_tech_application,4,name,character varying,Name
+corp_tech_application,5,create_date,timestamp without time zone,Create date
+corp_tech_application,6,type_id,bigint,Тип объекта
+corp_tech_application,7,status,smallint,Status
+corp_tech_application,8,org_id,bigint,Подразделение
+corp_tech_application,9,user_id,bigint,Пользователь
+corp_tech_application,10,last_modified_date,timestamp without time zone,Last modified date
+corp_tech_application,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+corp_tech_application,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+corp_tech_application,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+corp_tech_application,14,is_system,smallint,System object
+corp_tech_application,15,afl_doc_num,character varying,Номер документа
+corp_tech_application,16,afl_doc_data,timestamp without time zone,Дата документа
+corp_tech_application,17,afp_state_id,bigint,Состояние
+corp_tech_application,18,initiator_id,bigint,Клиент
+corp_tech_application,19,emp_id,bigint,Ответственный менеджер
+corp_tech_application,20,processing_steps_id,bigint,Текущий этап обработки
+corp_tech_application,21,temp_cont_turn,bigint,Промежуточный контейнер загрузки ОСВ
+corp_tech_application,22,cr_id,bigint,Ссылка на КЗ
+corp_tech_application,23,scp_tech_ctredit,bigint,Технология кредитования
+corp_tech_application,24,scp_business_segment,bigint,Клиентский сегмент
+corp_tech_application,25,client_type_id,bigint,Тип клиента
+corp_tech_application,26,is_without_pledge,smallint,Без залога
+corp_tech_application,27,lim_currency_id,bigint,Валюта
+corp_tech_application,28,req_type_id,bigint,Класс заявки
+corp_tech_application,29,credit_logic_id,bigint,Логика кредитования
+corp_tech_application,30,gsl_limit,numeric,Сумма общего лимита
+corp_tech_application,31,is_main_owner,smallint,Основные собственники
+corp_tech_application,32,risk_zone_id,bigint,Результат проверки благонадежности и деловой репутации по заявке
+corp_tech_application,33,scp_arm_manager_id,bigint,Сотрудник АРМ
+corp_tech_application,34,loan_terms,bigint,Срок лимита
+corp_tech_application,35,auto_check_status,bigint,Статус автопроверок
+corp_tech_application,36,lim_sum,numeric,Сумма заявки
+corp_tech_application,37,third_parties,text,Третьи лица
+corp_tech_application,38,scp_proc_steds_id,bigint,Этап обработки
+corp_tech_application,39,is_active_get_gsl_part,smallint,Запущена сборка ГСЛ (тех)
+corp_tech_application,40,is_na_active,smallint,Интеграция с НА по получению кредитных обязательств активна
+corp_tech_application,41,deleg_region_id,bigint,Регион клиента
+corp_tech_application,42,client_list_changed,smallint,Состав клиентов был изменен
+corp_tech_application,43,gsl_data_cont_id,bigint,Ссылка на контейнер данных ГСЛ
+corp_tech_application,44,scp_gsl_name_str,character varying,Наименование ГСЛ
+corp_tech_application,45,ca_rout_office_id,bigint,Офис маршрутизации для КА
+corp_tech_application,46,is_form_bch_active,smallint,Запущен сбор БКИ (тех.)
+corp_tech_application,47,is_active_exp_sec,smallint,Заблокировано изменение участников (тех.)
+corp_tech_application,48,scp_hcm_decision_id,bigint,Вариант решения на задаче руководителя КМ
+corp_tech_application,49,scp_appl_type_id,bigint,Тип заявки
+corp_tech_application,50,comment_txt,text,Комментарий проверки СЭБ
+corp_tech_application,51,sec_conclusion_id,bigint,Вывод
+corp_tech_application,52,is_bch_validator_on,smallint,Запущен валидатор БКИ (тех)
+corp_tech_application,53,industry_code_id,bigint,Отрасль клиента
+corp_tech_application,54,scp_product_str,character varying,Продукт (строка)
+corp_tech_application,55,is_state_program,smallint,Применение госпрограммы
+corp_tech_application,56,cred_technology_str,character varying,Технология кредитования (строка)
+corp_tech_application,57,is_auto_check_errors,smallint,Наличие ошибок (предпроверки)
+corp_tech_application,58,scp_type_restruct_id,bigint,Тип реструктуризации
+corp_tech_application,59,interm_file_storage,bigint,Промежуточное хранение файла для загрузки
+corp_tech_application,60,suz_start_page_str,character varying,Ссылка на стартовую страницу СУЗ
+corp_tech_application,61,is_legal_exp_launched,smallint,Запущена экспертиза правоспособности (тех.)
+corp_tech_application,62,is_legal_exp_restart,smallint,Перезапуск экспертизы правоспособности (тех.)
+corp_tech_application,63,scp_cheif_cm_id,bigint,Руководитель КМ
+corp_tech_application,64,collat_initiator_id,bigint,Ответственный за проведение экспертизы залогов
+corp_tech_application,65,is_return_awp,smallint,Будет направлено АРМ
+corp_tech_application,66,iniciator_emp_id,bigint,Ответственный за проведение экспертизы правоспособности
+corp_tech_application,67,scp_rejection_client_id,bigint,Причина отказа Клиента
+corp_tech_application,68,is_app_to_cred_depart,smallint,Заявка передана в КП (тех.)
+corp_tech_application,69,scp_rejection_comment,text,Комментарий по отказу
+corp_tech_application,70,reason_refusal_id,bigint,Причина отказа Банка
+corp_tech_application,71,cred_depart_opinion_txt,text,Мнение кредитного подразделения
+corp_tech_application,72,is_start_bp_fa,smallint,Запуск БП из ФА (тех.)
+corp_tech_application,73,is_start_bp_request_fa,smallint,Запуск БП из доп. запроса ФА(тех.)
+corp_tech_application,74,is_simplified_fa,smallint,Упрощенный Финансовый анализ
+corp_tech_application,75,is_tech_ham_task_comp,smallint,Задача рук. КМ завершена (тех.)
+corp_tech_application,76,is_auto_sec_errors,smallint,Наличие ошибок (автосэб)
+corp_tech_application,77,pricing_id,bigint,Ценообразование
+corp_tech_application,78,calc_risk_date,timestamp without time zone,Дата предварительной зоны риска
+corp_tech_application,79,collateral_cont_id,bigint,Контейнер с обеспечением
+corp_tech_application,80,resp_cond_coord,bigint,Голосующий (индивидуальные условия)
+corp_tech_application,81,is_fin_activ_newsub,smallint,Финансирование деятельности в НС
+corp_tech_application,82,prelim_gsl_calc_id,bigint,Ссылка на предварительный расчет
+corp_tech_application,83,exp_fa_office_id,bigint,Офис Экспертизы ФА
+corp_tech_application,84,scp_conclusion_comment,character varying,Вывод с комментарием для визуала заявки
+count_turnover,1,id,bigint,Код
+count_turnover,2,link_cnt_owner,bigint,Владелец
+count_turnover,3,double_turn_balance,smallint,Дубликат
+count_turnover,4,finish_period,timestamp without time zone,Конец периода
+count_turnover,5,count_months,bigint,Количество месяцев в периоде
+count_turnover,6,name,character varying,Наименование
+count_turnover,7,name__ru,character varying,"Наименование, languageSchema=ru"
+count_turnover,8,name__en,character varying,"Наименование, languageSchema=en"
+count_turnover,9,st_period,timestamp without time zone,Начало периода
+count_turnover,10,account_num_id,bigint,Номер счета
+count_turnover,11,account_source,character varying,Номер счета_источник
+count_turnover,12,turnover_debit,numeric,Оборот по Дебету
+count_turnover,13,turnover_credit,numeric,Оборот по Кредиту
+count_turnover,14,is_check,smallint,Обработан
+count_turnover,15,period_st_end,character varying,Период
+count_turnover,16,parent_link_count,bigint,Родительский номер счета
+count_turnover,17,output_balance_debit,numeric,Сальдо на конец периода (Дебет)
+count_turnover,18,output_balance_credit,numeric,Сальдо на конец периода (Кредит)
+count_turnover,19,input_balance_debit,numeric,Сальдо на начало периода (Дебет)
+count_turnover,20,input_balace_credit,numeric,Сальдо на начало периода (Кредит)
+count_turnover,21,link_cred_doc_tur,bigint,Ссылка на КЗ
+count_turnover,22,link_load_val_id,bigint,Ссылка на контейнер загрузки
+count_turnover,23,link_partic_gr,bigint,Ссылка на участника КЗ
+count_turnover,24,is_del,smallint,Удален
+count_turnover,25,correct_type,bigint,Тип ОСВ
+count_turnover,26,tech_manual_vat,smallint,Технический признак ручного НДС
+count_turnover,27,vat,numeric,НДС
+count_turnover,28,bb_debet_id,bigint,Статья (дебет)
+count_turnover,29,bb_cred_id,bigint,Статья (кредит)
+count_turnover,30,bb_debet_reclass_id,bigint,Статья (дебет) - рекласс
+count_turnover,31,bb_cred_reclass_id,bigint,Статья (кредит) - рекласс
+count_turnover,32,out_bal_recl_debt,numeric,Сальдо на конец периода с учетом реклассификации (Дебет)
+count_turnover,33,out_bal_recl_cred,numeric,Сальдо на конец периода с учетом реклассификации (Кредит)
+count_turnover,34,bb_debet_input_id,bigint,"Статья (дебет, сальдо на начало)"
+count_turnover,35,bb_cred_input_id,bigint,"Статья (кредит, сальдо на начало)"
+credit_contract,1,id,bigint,ID
+credit_contract,2,name__ru,character varying,"Name, languageSchema=ru"
+credit_contract,3,name__en,character varying,"Name, languageSchema=en"
+credit_contract,4,name,character varying,Name
+credit_contract,5,create_date,timestamp without time zone,Create date
+credit_contract,6,type_id,bigint,Тип объекта
+credit_contract,7,status,smallint,Status
+credit_contract,8,org_id,bigint,Подразделение
+credit_contract,9,user_id,bigint,Пользователь
+credit_contract,10,last_modified_date,timestamp without time zone,Last modified date
+credit_contract,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+credit_contract,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+credit_contract,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+credit_contract,14,is_system,smallint,System object
+credit_contract,15,afl_doc_num,character varying,Номер документа
+credit_contract,16,afl_doc_data,timestamp without time zone,Дата документа
+credit_contract,17,afp_state_id,bigint,Состояние
+credit_contract,18,credit_contract_number,character varying,Номер кредитного договора
+credit_contract,19,loan_term,bigint,Срок кредитования (мес.)
+credit_contract,20,credit_amount,numeric,Сумма кредита/лимита линии по договору (руб.)
+credit_contract,21,special_purpose,character varying,Целевое назначение кредита по договору
+credit_contract,22,quality_categor,character varying,Категория качества по ссуде/ Название ПОС
+credit_contract,23,financial_position,character varying,"Финансовое положение (Хорошее, Среднее, Плохое)"
+credit_contract,24,reserve_size,numeric,Размер резерва (%)
+credit_contract,25,link_customer_id,bigint,Ссылка на клиента
+credit_contract,26,aplication_id,bigint,Ссылка на микро заявку
+credit_contract,27,cred_interest_rate,numeric,Процентная ставка (%)
+credit_contract,28,sel_curr,bigint,Валюта
+credit_contract,29,credit_start_date,timestamp without time zone,Дата начало кредитования
+credit_contract,30,credit_end_date,timestamp without time zone,Дата окончания кредитования
+credit_contract,31,check_account,character varying,Расчетный счет
+credit_contract,32,days_delay_number,character varying,Количество дней прострочки
+credit_contract,33,loan_classified,character varying,Классифайд кредитного договора
+credit_contract,34,contract_group,character varying,Контрактная группа
+credit_contract,35,date_loan_debt,numeric,Остаток ссудной задолженности на дату отчета
+credit_contract,36,prof_judg_id,bigint,Ссылка на индивид. профсуждение
+credit_contract,37,contract_type,character varying,Вид договора
+credit_contract,38,credit_product,character varying,Кредитный продукт
+credit_contract,39,applic_ko_kbkp_id,bigint,Ссылка на микрозаявку КО/КБКП
+credit_contract,40,is_closed,smallint,Договор закрыт
+credit_contract,41,pledge_contract_id,bigint,Ссылка на договор залога
+credit_contract,42,wf_document_id,bigint,Связь с объектами из ДО. Документ
+credit_contract,43,cr_status_id,bigint,Статус договора
+credit_contract,44,is_guarantee,smallint,Наличие поручительства
+credit_contract,45,lname,character varying,Фамилия сотрудника
+credit_contract,46,fname,character varying,Отчество cотрудника
+credit_contract,47,mname,character varying,Имя cотрудника
+credit_contract,48,tabnum,character varying,Табельный номер сотрудника
+credit_contract,49,sys_employee_id,bigint,Сотрудник
+credit_contract,50,subsidy_prog_id,bigint,Программа субсидирования
+credit_contract,51,individ_guarantee,smallint,Поручительство других лиц из онлайн заявки
+credit_contract,52,offer_ident,character varying,Идентификатор предложения в Цифровом профиле
+credit_contract,53,number_kk,character varying,Номер протокола КК
+credit_contract,54,protocol_date,character varying,Дата принятия решения уполномоченным органом
+credit_contract,55,subsidy_prog_str,character varying,Программа субсидирования (Строка)
+credit_contract,56,bank_ident_number,character varying,БИК
+credit_contract,57,tech_link_etl_susp_id,bigint,Приостановление(тех.)Ссылка на etl приостановление/восстановление КД в НА
+credit_contract,58,suspension_na_id,bigint,Состояние приостановления в НА
+credit_contract,59,tech_link_etl_state_id,bigint,Приостановление(тех.)Ссылка на etl по получению состояния статуса приостановления
+credit_contract,60,appl_documentum_num,character varying,Номер заявки в Documentum
+credit_contract,61,supplement_tech,bigint,Дополнительное соглашение(Тех.)
+credit_contract,62,contracttype,bigint,_Вид договора
+credit_contract,63,tech_selected_rz_id,bigint,Приостановление(тех.) выбранная зона
+credit_contract,64,tech_selected_comm,character varying,Приостановление(Тех.) Комментарий
+credit_contract,65,tech_selected_meas_id,bigint,Приостановление(тех.)Выбранная мера
+credit_contract,66,yaig_base_code,bigint,Код базы НА
+credit_contract,67,hand_suspension,smallint,Ручная(мера)
+credit_contract,68,duration_over_on_date,bigint,Общая длительность просрочки на текущую дату
+credit_contract,69,close_contract,character varying,Наличие закрытых договоров
+credit_contract,70,fa_specialist,character varying,ФИО специалиста проводившего ФА
+credit_contract,71,uid_credit,character varying,UID Кредитного договора
+credit_contract,72,max_loan_amount_ever,numeric,Сумма полного лимита
+credit_contract,73,exite_date,timestamp without time zone,Дата выхода из программы субсидирования
+credit_contract,74,penalty_rate,numeric,%% ставка после выхода из программы субсидирования.
+credit_contract,75,is_tranche_exist,smallint,Были транши
+credit_contract,76,pers_emp_number,character varying,Табельный номер сотрудника
+dict_div_presence,1,id,bigint,ID
+dict_div_presence,2,name__ru,character varying,"Name, languageSchema=ru"
+dict_div_presence,3,name,character varying,Name
+dict_div_presence,4,create_date,timestamp without time zone,Create date
+dict_div_presence,5,type_id,bigint,Тип объекта
+dict_div_presence,6,status,smallint,Status
+dict_div_presence,7,org_id,bigint,Подразделение
+dict_div_presence,8,user_id,bigint,Пользователь
+dict_div_presence,9,last_modified_date,timestamp without time zone,Last modified date
+dict_div_presence,10,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+dict_div_presence,11,created_emp_id,bigint,"Сотрудник, создавший объект"
+dict_div_presence,12,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+dict_div_presence,13,is_system,smallint,System object
+dict_div_presence,14,ord,bigint,Порядок
+dict_div_presence,15,nameregion,character varying,Наименование региона
+dict_div_presence,16,coderegion,character varying,Код региона
+dict_div_presence,17,div_presence,smallint,Признак присутствия Банка
+dict_div_presence,18,stop_region,smallint,Стоп-регион для кредитования (ББКП)
+dict_div_presence,19,stop_region_ko,smallint,Стоп-регион для кредитования (КО)
+dict_div_presence,20,stop_region_fact,smallint,Стоп-регион для кредитования (Факторинг)
+dict_div_presence,21,name__en,character varying,"Name, languageSchema=en"
+dict_product,1,id,bigint,ID
+dict_product,2,name__ru,character varying,"Name, languageSchema=ru"
+dict_product,3,name__en,character varying,"Name, languageSchema=en"
+dict_product,4,name,character varying,Name
+dict_product,5,create_date,timestamp without time zone,Create date
+dict_product,6,type_id,bigint,Тип объекта
+dict_product,7,status,smallint,Status
+dict_product,8,org_id,bigint,Подразделение
+dict_product,9,user_id,bigint,Пользователь
+dict_product,10,last_modified_date,timestamp without time zone,Last modified date
+dict_product,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+dict_product,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+dict_product,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+dict_product,14,is_system,smallint,System object
+dict_product,15,collateral_id,bigint,Необходимость обеспечения
+dict_product,16,guarantee_id,bigint,Необходимость поручительства
+dict_product,17,departure_id,bigint,Выезд на место бизнеса заемщика
+dict_product,18,attr_business_segment,bigint,Сегмент бизнеса клиента
+dict_product,19,interest_penalties_id,bigint,"Возможность включения %, пеней и комиссий в погашаемую сумму"
+dict_product,20,lending_type_id,bigint,Гос контракт. Вид кредитования
+dict_product,21,volume_revenue_id,bigint,Минимальный объем эквайринговой выручки
+dict_product,22,number_transactions_id,bigint,Минимальное количество транзакций по картам
+dict_product,23,amount_tender_loan_id,bigint,Максимальная сумма тендерного кредита
+dict_product,24,payment_method_id,bigint,"Наличие расчетного счета в ""Открытие"""
+dict_product,25,overdraft_limit_id,bigint,Требование к лимиту овердрафта
+dict_product,26,max_amount_id,bigint,Ограничение максимального лимита
+dict_product,27,payment_interest_id,bigint,Порядок уплаты процентов
+dict_product,28,possibility_delay,smallint,Возможность отсрочки по кредиту
+dict_product,29,payment_account,smallint,"Необходимость наличия расчетного счета в ПАО Банк ""ФК Открытие"""
+dict_product,30,early_rep_pos,smallint,Возможность досрочного погашения
+dict_product,31,necessity_insurance,smallint,Требуется страхование
+dict_product,32,payment_commission_id,bigint,Срок уплаты комиссии
+dict_product,33,installment_payment,smallint,Допускается рассрочка платежа
+dict_product,34,rate_increase_1,smallint,Предусматривается повышение ставки
+dict_product,35,id_855918,smallint,Требуется обеспечение
+dict_product,36,guarantee_1,smallint,Требуется поручительство
+dict_product,37,min_sum,numeric,Минимальная сумма
+dict_product,38,type_of_guarantee_id,bigint,Вид гарантии
+dict_product,39,product_relevance,smallint,Актуальность продукта
+dict_product,40,comissions_id,bigint,Комиссии
+dict_product,41,ident,character varying,Сист. Идентификатор
+dict_product,42,valid_decision,bigint,Срок действия положительного решения (день)
+dict_product,43,indefinite_period,smallint,Возможна выдача на неопределенный срок
+dict_product,44,form_issue_id,bigint,Форма выдачи
+dict_product,45,part_big_buyer,numeric,Доля крупнейшего покупателя
+dict_product,46,num_months_cashbox,numeric,Количество месяцев ведения онлайн касс
+dict_product,47,num_months_income,numeric,Количество месяцев по поступлениям на счет в ПСБ и (или) другие банки
+dict_product,48,count_income_month,numeric,Количество поступлений на счет Клиента в каждом месяце
+dict_product,49,limit_over,numeric,Лимит овердрафта
+dict_product,50,summ_tranche,numeric,Сумма транша
+dict_product,51,summ_limit,numeric,Сумма лимита
+dict_product,52,term_limit_credit,bigint,Период выборки лимита кредитной линии
+dict_product,53,max_sum_credit,numeric,Максимальная сумма кредитного продукта
+dict_product,54,min_sum_credit,numeric,Минимальная сумма кредитного продукта
+dict_product,55,forfeight_id,bigint,Неустойки
+dict_product,56,transfert_rate,numeric,Ставка трансферта
+dict_product,57,debt_on_tranche,bigint,Срок задолженности по одному траншу
+dict_product,58,type_limit_over_id,bigint,Тип лимита овердрафта
+dict_product,59,tech_decision_id,bigint,Технология принятия решения
+dict_product,60,credit_interest_rate,numeric,Процентная ставка
+dict_product,61,dynam_type_id,bigint,Тип динамики
+dict_product,62,form_limit,character varying,Форма лимита
+dict_product,63,loan_terms,bigint,Срок лимита
+dict_product,64,issue_limit_second,character varying,Срок транша 2
+dict_product,65,issue_limit_first,character varying,Срок транша 1
+dict_product,66,is_early_repay,smallint,Возможно досрочное погашение(ЦКП)
+dict_product,67,max_loan_term,numeric,Максимальный срок кредита (мес)
+dict_product,68,period_grace,character varying,Грейс
+dict_product,69,card_validity,character varying,Срок действия карты
+dict_product,70,lp_product_code,character varying,Код продукта в LP
+dict_product,71,dbo_product_code,character varying,Код продукта в ДБО
+dict_product,72,cp_product_code,character varying,Код продукта в ЦП
+dict_product,73,limit_term,character varying,Срок договора
+dict_product,74,finstar_product_code,character varying,Код продукта в Финстар
+dict_product,75,factoring_product_code,character varying,Код продукта факторинга
+dict_product,76,is_simplified_fa,smallint,Упрощенный Финансовый анализ
+dict_product,77,is_package,smallint,Пакетный продукт
+dict_product,78,name_contr_group,character varying,Наименование контрактной группы
+dict_product,79,is_insurance_available,smallint,Доступно страхование
+dict_product,80,is_amd_fill_mandatory,smallint,Обязательное заполнение размера резерва и категории качества в РУМ
+dict_product,81,is_new_prod_for_ns,smallint,Новый продукт для НС
+dict_product,82,is_fin_activ_newsub,smallint,Финансирование деятельности в НС
+employees,1,id,integer,
+employees,2,name,character varying,
+fs_file,1,id,bigint,"Код, SysTypeAttrEffective{} AbstractAttrEffective{id=101002, ident='ID'}"
+fs_file,2,name,character varying,Name
+fs_file,3,type_id,bigint,Тип объекта
+fs_file,4,org_id,bigint,Подразделение
+fs_file,5,status,smallint,Status
+fs_file,6,create_date,timestamp without time zone,Create date
+fs_file,7,user_id,bigint,Пользователь
+fs_file,8,ff_type_id,bigint,Тип файла
+fs_file,9,ff_storage_id,bigint,Хранилище
+fs_file,10,ff_inner_name,character varying,Внутреннее имя файла
+fs_file,11,ff_body_size,bigint,Размер файла
+fs_file,12,ff_kind_id,bigint,Классификация
+fs_file,13,ff_note,character varying,Описание
+fs_file,14,ff_actual_end_date,timestamp without time zone,Срок актуальности
+fs_file,15,name__en,character varying,"Name, languageSchema=en"
+fs_file,16,name__ru,character varying,"Name, languageSchema=ru"
+fs_file,17,created_emp_id,bigint,"Сотрудник, создавший объект"
+fs_file,18,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+fs_file,19,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+fs_file,20,last_modified_date,timestamp without time zone,Last modified date
+fs_file,21,is_system,smallint,System object
+fs_file,22,ff_parent_object,bigint,Ссылка на родительский объект
+fs_file,23,ff_is_stored,smallint,Файл сохранен в хранилище
+fs_file,24,ff_id_881754,timestamp without time zone,Дата размещения документа
+fs_file,25,ff_id_881762,character varying,Родительская классификация
+fs_file,26,ff_id_881752,timestamp without time zone,Дата документа
+fs_file,27,ff_fs_is_preview_file,smallint,Открыть на предпросмотр Edoc
+fs_file,28,ff_fs_file_name,character varying,Наименование без расширения
+fs_file,29,ff_fv_date_from,timestamp without time zone,Дата начала действия
+fs_file,30,ff_fv_date_to,timestamp without time zone,Дата окончания действия
+fs_file,31,ff_body_uuid,character varying,UUID для индикации о замене тела файла
+ic_application,1,id,bigint,ID
+ic_application,2,name__ru,character varying,"Name, languageSchema=ru"
+ic_application,3,name__en,character varying,"Name, languageSchema=en"
+ic_application,4,name,character varying,Name
+ic_application,5,create_date,timestamp without time zone,Create date
+ic_application,6,type_id,bigint,Тип объекта
+ic_application,7,status,smallint,Status
+ic_application,8,org_id,bigint,Подразделение
+ic_application,9,user_id,bigint,Пользователь
+ic_application,10,last_modified_date,timestamp without time zone,Last modified date
+ic_application,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+ic_application,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+ic_application,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+ic_application,14,is_system,smallint,System object
+ic_application,15,afl_doc_num,character varying,Номер документа
+ic_application,16,afl_doc_data,timestamp without time zone,Дата документа
+ic_application,17,afp_state_id,bigint,Состояние
+ic_application,18,initiator_id,bigint,Клиент
+ic_application,19,emp_id,bigint,Ответственный менеджер
+ic_application,20,processing_steps_id,bigint,Текущий этап обработки
+ic_application,21,temp_cont_turn,bigint,Промежуточный контейнер загрузки ОСВ
+ic_application,22,cr_id,bigint,Ссылка на КЗ
+ic_application,23,scp_tech_ctredit,bigint,Технология кредитования
+ic_application,24,scp_business_segment,bigint,Клиентский сегмент
+ic_application,25,client_type_id,bigint,Тип клиента
+ic_application,26,gsl_data_cont_id,bigint,Ссылка на контейнер данных ГСЛ
+ic_application,27,scp_arm_manager_id,bigint,Сотрудник АРМ
+ic_application,28,req_type_id,bigint,Класс заявки
+ic_application,29,credit_logic_id,bigint,Логика кредитования
+ic_application,30,gsl_limit,numeric,Общий лимит по ГСЛ
+ic_application,31,pricing_id,bigint,Ценообразование
+ic_application,32,scp_gsl_name_str,character varying,Наименование ГСЛ
+ic_application,33,resp_cond_coord,bigint,Голосующий (индивидуальные условия)
+ic_application,34,curator_head_id,bigint,Куратор ГО
+ic_application,35,resp_cond_coord_str,character varying,_Голосующий (строка)
+ic_application,36,is_auto_creation,smallint,Создана автоматически
+ic_application,37,industry_code_id,bigint,Отрасль клиента
+ic_application,38,app_obj_id,bigint,Ссылка на заявку СКП (для автоматически созданных)
+ic_application,39,deleg_region_id,bigint,Регион клиента
+ic_application,40,scp_proc_steds_id,bigint,Этап обработки
+ic_application,41,is_directed_to_process,smallint,Направлена по процессу
+ic_application,42,scp_product_str,character varying,Продукт (строка)
+ic_application,43,is_state_program,smallint,Применение госпрограммы
+ic_application,44,cred_technology_str,character varying,Технология кредитования (строка)
+ic_application,45,is_na_active,smallint,Интеграция с НА по получению кредитных обязательств активна
+ic_application,46,is_fin_activ_newsub,smallint,Финансирование деятельности в НС
+ic_application,47,prelim_gsl_calc_id,bigint,Ссылка на предварительный расчет
+ic_application,48,scp_rejection_client_id,bigint,Причина отказа Клиента
+ic_application,49,reason_refusal_id,bigint,Причина отказа Банка
+ic_application,50,is_ic_withdrawn,smallint,Отзыв Индивидуальных условий
+ic_application,51,scp_rejection_comment,text,Комментарий по отказу
+ic_application,52,is_button_refuse,smallint,Отказ по кнопке
+mler_application,1,id,bigint,ID
+mler_application,2,name__ru,character varying,"Name, languageSchema=ru"
+mler_application,3,name__en,character varying,"Name, languageSchema=en"
+mler_application,4,name,character varying,Name
+mler_application,5,create_date,timestamp without time zone,Create date
+mler_application,6,type_id,bigint,Тип объекта
+mler_application,7,status,smallint,Status
+mler_application,8,org_id,bigint,Подразделение
+mler_application,9,user_id,bigint,Пользователь
+mler_application,10,last_modified_date,timestamp without time zone,Last modified date
+mler_application,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+mler_application,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+mler_application,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+mler_application,14,is_system,smallint,System object
+mler_application,15,afl_doc_num,character varying,Номер документа
+mler_application,16,afl_doc_data,timestamp without time zone,Дата документа
+mler_application,17,afp_state_id,bigint,Состояние
+mler_application,18,initiator_id,bigint,Клиент
+mler_application,19,emp_id,bigint,Ответственный менеджер
+mler_application,20,processing_steps_id,bigint,Текущий этап обработки
+mler_application,21,temp_cont_turn,bigint,Промежуточный контейнер загрузки ОСВ
+mler_application,22,cr_id,bigint,Ссылка на КЗ
+mler_application,23,scp_tech_ctredit,bigint,Технология кредитования
+mler_application,24,scp_business_segment,bigint,Клиентский сегмент
+mler_application,25,client_type_id,bigint,Тип клиента
+mler_application,26,lim_sum,numeric,Сумма заявки
+mler_application,27,gsl_data_cont_id,bigint,Ссылка на контейнер данных ГСЛ
+mler_application,28,scp_cheif_cm_id,bigint,Руководитель КМ
+mler_application,29,mler_decis_id,bigint,Принятое решение
+mler_application,30,mler_client_name,character varying,_Владелец лимита (не исп)
+mler_application,31,is_out_app,smallint,Заявка есть в Гриндате
+mler_application,32,chief_initiator_id,bigint,Руководитель инициатора
+mler_application,33,req_type_id,bigint,Класс заявки
+mler_application,34,execut_admin_id,bigint,Сотрудник СМБ ДРСМБ
+mler_application,35,mler_signer_id,bigint,Подписант (УО)
+mler_application,36,client_section_id,bigint,Сегмент в соответствии с ВКР
+mler_application,37,project_decis_id,bigint,Ссылка на проект решения
+mler_application,38,date_amd_decision,timestamp without time zone,Дата решения
+mler_application,39,num_amd_decision,character varying,Номер решения (строка)
+mler_application,40,credit_logic_id,bigint,Логика кредитования
+mler_application,41,gsl_limit,numeric,Сумма общего лимита
+mler_application,42,loan_terms,bigint,Срок лимита
+mler_application,43,decis_use_limit,smallint,Ограничение по применению Решения
+mler_application,44,signed_risks_date,timestamp without time zone,Дата подписания
+mler_application,45,deleg_region_id,bigint,Регион клиента
+mler_application,46,decis_use_limit_text,text,Ограничение по применению Решения (текст)
+mler_application,47,is_decision_signed,smallint,Решение подписано
+mler_application,48,is_decision_approved,smallint,Решение согласовано КМ
+mler_application,49,scp_gsl_name_str,character varying,Владелец лимита
+mler_application,50,scp_proc_steds_id,bigint,Этап обработки
+mler_application,51,industry_code_id,bigint,Отрасль клиента
+mler_application,52,scp_product_str,character varying,Продукт (строка)
+mler_application,53,is_state_program,smallint,Применение госпрограммы
+mler_application,54,cred_technology_str,character varying,Технология кредитования (строка)
+mler_application,55,app_product_id,bigint,Продукт
+mler_application,56,is_fin_activ_newsub,smallint,Финансирование деятельности в НС
+mler_application,57,prelim_gsl_calc_id,bigint,Ссылка на предварительный расчет
+ms_0golbfqyrdq4im6jf6ajivwy9,1,id,bigint,ID
+ms_0golbfqyrdq4im6jf6ajivwy9,2,obj_id,bigint,"Link to object, sysObjTypeAttr 3712195"
+ms_0n8ohjyx7oszo6a47ca9g0s6f,1,id,bigint,ID
+ms_0n8ohjyx7oszo6a47ca9g0s6f,2,obj_id,bigint,"Link to object, sysObjTypeAttr 8751793"
+ms_0oc5mpme8nklimjy77sai9gf1,1,id,bigint,ID
+ms_0oc5mpme8nklimjy77sai9gf1,2,obj_id,bigint,"Link to object, sysObjTypeAttr 3714869"
+ms_1fd5jp86pabxu9na4knwphvyr,1,id,bigint,ID
+ms_1fd5jp86pabxu9na4knwphvyr,2,obj_id,bigint,"Link to object, sysObjTypeAttr 3714881"
+ms_333s6j5jn97srp008gyi3zueo,1,id,bigint,ID
+ms_333s6j5jn97srp008gyi3zueo,2,obj_id,bigint,"Link to object, sysObjTypeAttr 8751957"
+ms_39qrctc1n8efr9axiukjssgzl,1,id,bigint,ID
+ms_39qrctc1n8efr9axiukjssgzl,2,obj_id,bigint,"Link to object, sysObjTypeAttr 3817898"
+ms_64cm5ded37z58x0fyt5lgvhc7,1,id,bigint,ID
+ms_64cm5ded37z58x0fyt5lgvhc7,2,obj_id,bigint,"Link to object, sysObjTypeAttr 4217072"
+ms_965j58mgwkpomnuooc29dlq9f,1,id,bigint,ID
+ms_965j58mgwkpomnuooc29dlq9f,2,obj_id,bigint,"Link to object, sysObjTypeAttr 9029886"
+ms_9k60rv4p0oaf3c702f2l1gj77,1,id,bigint,ID
+ms_9k60rv4p0oaf3c702f2l1gj77,2,obj_id,bigint,"Link to object, sysObjTypeAttr 9029887"
+ms_d1oakp9uq175ak3dbhpzbu81d,1,id,bigint,ID
+ms_d1oakp9uq175ak3dbhpzbu81d,2,obj_id,bigint,"Link to object, sysObjTypeAttr 8775851"
+ms_dlggiqkhqj46rhq1lrgryim7c,1,id,bigint,ID
+ms_dlggiqkhqj46rhq1lrgryim7c,2,obj_id,bigint,"Link to object, sysObjTypeAttr 9035998"
+ms_dxsh6488ihf77xmsd43dwby6k,1,id,bigint,ID
+ms_dxsh6488ihf77xmsd43dwby6k,2,obj_id,bigint,"Link to object, sysObjTypeAttr 3190710"
+ms_e5lum3lbateqhx8wkgtstxdf9,1,id,bigint,ID
+ms_e5lum3lbateqhx8wkgtstxdf9,2,obj_id,bigint,"Link to object, sysObjTypeAttr 8751779"
+offices_psb,1,id,bigint,ID
+offices_psb,2,name__ru,character varying,"Name, languageSchema=ru"
+offices_psb,3,name__en,character varying,"Name, languageSchema=en"
+offices_psb,4,name,character varying,Name
+offices_psb,5,create_date,timestamp without time zone,Create date
+offices_psb,6,type_id,bigint,Тип объекта
+offices_psb,7,status,smallint,Status
+offices_psb,8,org_id,bigint,Подразделение
+offices_psb,9,user_id,bigint,Пользователь
+offices_psb,10,last_modified_date,timestamp without time zone,Last modified date
+offices_psb,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+offices_psb,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+offices_psb,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+offices_psb,14,is_system,smallint,System object
+offices_psb,15,parent_org_id,bigint,Родительское подразделение
+offices_psb,16,short_name__ru,character varying,"Краткое наименование, languageSchema=ru"
+offices_psb,17,short_name__en,character varying,"Краткое наименование, languageSchema=en"
+offices_psb,18,short_name,character varying,Краткое наименование
+offices_psb,19,view_id,bigint,Вид подразделения
+offices_psb,20,main_org,bigint,Обособленное подразделение
+offices_psb,21,org_company,bigint,Контрагент подразделения
+offices_psb,22,ident,character varying,Сист. Идентификатор
+offices_psb,23,office_id,character varying,ID офиса
+offices_psb,24,office_name,character varying,Наименование офиса
+offices_psb,25,office_address,character varying,Адрес офис
+offices_psb,26,office_code,character varying,Код региона офиса
+offices_psb,27,office_date_from,timestamp without time zone,Дата открытия офиса
+offices_psb,28,office_date_to,timestamp without time zone,Дата закрытия офиса
+offices_psb,29,office_type,character varying,Тип офиса
+offices_psb,30,office_status,character varying,Профиль обслуживания офиса
+offices_psb,31,office_sign_active,smallint,Признак действия офиса
+offices_psb,32,psb_dep_org,bigint,Организация
+offices_psb,33,rout_office_id,bigint,Офис для маршрутизации
+offices_psb,34,lvl_org,bigint,Уровень подразделения
+offices_psb,35,feat_org,smallint,Признак: 1 - ГО
+offices_psb,36,is_region,smallint,Признак МО
+offices_psb,37,work_org,smallint,Признак: 1 - работает; 0 - закрыто
+offices_psb,38,etl_marker_org,smallint,Маркер загрузки из внешней системы
+offices_psb,39,id_parent_org,bigint,Внешний ИД родителя
+offices_psb,40,id_depart_org,bigint,Внешний ИД Департамента
+offices_psb,41,id_parent_corr_org,bigint,"ID ДО или филиала, которому подчинено ДО"
+participant_app,1,id,bigint,ID
+participant_app,2,name__ru,character varying,"Name, languageSchema=ru"
+participant_app,3,name,character varying,Name
+participant_app,4,create_date,timestamp without time zone,Create date
+participant_app,5,type_id,bigint,Тип объекта
+participant_app,6,status,smallint,Status
+participant_app,7,org_id,bigint,Подразделение
+participant_app,8,user_id,bigint,Пользователь
+participant_app,9,last_modified_date,timestamp without time zone,Last modified date
+participant_app,10,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+participant_app,11,created_emp_id,bigint,"Сотрудник, создавший объект"
+participant_app,12,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+participant_app,13,is_system,smallint,System object
+participant_app,14,app_obj_id,bigint,Ссылка на заявку
+participant_app,15,borrower_id,bigint,Ссылка на лицо
+participant_app,16,is_current,smallint,Действующий
+participant_app,17,is_check_need,smallint,Необходимость проверки
+participant_app,18,part_type_id,bigint,Тип участника сделки
+participant_app,19,is_permanent_role,smallint,Неизменяемость роли для КМ (тех.)
+participant_app,20,sec_date_check,timestamp without time zone,Дата проверки СЭБ (итоговая)
+participant_app,21,sec_appeal_date,timestamp without time zone,Дата апелляции
+participant_app,22,is_sec_appeal,smallint,Апелляция
+participant_app,23,is_antifrod_success,smallint,Успешность проверки антифрод
+participant_app,24,is_perm_role_for_head,smallint,Неизменяемость роли для Рук-ля КМ (тех.)
+participant_app,25,emp_appeal_id,bigint,Ответственный за апелляцию
+participant_app,26,is_create_check,smallint,Создать автопроверки (тех.)
+participant_app,27,is_add_manual,smallint,Добавлен вручную
+participant_app,28,check_role_part_str,character varying,Проверяемые роли (строковый)
+participant_app,29,is_borrower,smallint,Заемщик
+participant_app,30,is_related_entity,smallint,"Лицо, связанное с заемщиком"
+participant_app,31,is_affiliate,smallint,Аффилированное лицо
+participant_app,32,is_pledger,smallint,Залогодатель
+participant_app,33,is_guarantor,smallint,Поручитель
+participant_app,34,return_code_txt,text,Текст ошибки
+participant_app,35,id_siam_str,character varying,Идентификатор отчета
+participant_app,36,consentbkidate,timestamp without time zone,Дата согласия БКИ
+participant_app,37,is_bch_form_error,smallint,Ошибки при формировании БКИ (тех.)
+participant_app,38,is_seller,smallint,Продавец
+participant_app,39,scp_link_particip_id,bigint,Ссылка на участника ГСЛ
+participant_app,40,particip_sec_id,bigint,Ссылка на экспертизу СЭБ по участнику
+participant_app,41,is_guar_prov_balhold,smallint,Является балансодержателем или держателем основной выручки
+participant_app,42,is_state_affilation,smallint,Заёмщик является унитарным предприятием или государственная структура имеет контрольный пакет
+participant_app,43,sec_check_auto_date,timestamp without time zone,Дата завершения автопроверок
+participant_app,44,bch_refuse,smallint,Отказ от БКИ
+participant_app,45,bch_record_link,character varying,Ссылка на отчет БКИ
+participant_app,46,app_obj_person_conn_id,bigint,Ссылка на заявку (для связанных ФЛ)
+participant_app,47,name__en,character varying,"Name, languageSchema=en"
+participant_app,48,obj_owner_id,bigint,Ссылка на объект владелец
+participant_app,49,is_director,smallint,ЕИО
+participant_app,50,is_actual_owner,smallint,Фактический собственник
+participant_app,51,is_founder,smallint,Учредитель
+participant_app,52,is_legal_person,smallint,"ЮЛ, которое представляет Заемщик ФЛ"
+participant_app,53,bki_status,character varying,Состояние БКИ
+prod_change_params,1,id,bigint,ID
+prod_change_params,2,name__ru,character varying,"Name, languageSchema=ru"
+prod_change_params,3,name__en,character varying,"Name, languageSchema=en"
+prod_change_params,4,name,character varying,Name
+prod_change_params,5,create_date,timestamp without time zone,Create date
+prod_change_params,6,type_id,bigint,Тип объекта
+prod_change_params,7,status,smallint,Status
+prod_change_params,8,org_id,bigint,Подразделение
+prod_change_params,9,user_id,bigint,Пользователь
+prod_change_params,10,last_modified_date,timestamp without time zone,Last modified date
+prod_change_params,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+prod_change_params,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+prod_change_params,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+prod_change_params,14,is_system,smallint,System object
+prod_change_params,15,product_pricing_id,bigint,Ценообразование по продукту
+prod_change_params,16,change_param_dict_id,bigint,Изменяемый параметр
+prod_change_params,17,scp_new_cond,character varying,"Предлагаемые условия, %"
+prod_change_params,18,scp_old_cond_val,character varying,"Предлагаемые условия, руб."
+prod_change_params,19,scp_old_cond,character varying,"Текущие условия, %"
+prod_change_params,20,scp_new_cond_val,character varying,"Текущие условия, руб."
+prod_change_params,21,value_comment,character varying,Комментарий к значению
+prod_change_params,22,link_card_obj_id,bigint,Ссылка на объект
+prod_change_params,23,com_val_proc,numeric,Размер  (%) текущий
+prod_change_params,24,payment_schedule_id,bigint,Порядок выплаты
+prod_change_params,25,pay_reward_cond_id,bigint,Условие уплаты вознаграждения за предоставление банковской гарантии (текущее)
+prod_change_params,26,sum_pay_type_id,bigint,Вид суммы для уплаты комиссии
+prod_change_params,27,comm_date_pay_id,bigint,Дата уплаты комиссии
+prod_change_params,28,bank_val_sum,numeric,Размер (руб) текущий
+prod_change_params,29,new_bank_val_sum,numeric,Размер (руб) предлагаемый
+prod_change_params,30,new_pay_reward_cond_id,bigint,Условие уплаты вознаграждения за предоставление банковской гарантии (новое)
+prod_change_params,31,new_com_val_proc,numeric,Размер (%) предлагаемый
+prod_change_params,32,scp_comiss_size_str,character varying,_/годовых
+prod_change_params,33,new_comiss_size_str,character varying,_/годовых (предл)
+prod_change_params,34,is_add_manual,smallint,Добавлен вручную
+prod_change_params,35,is_auto_creation,smallint,Создан автоматически
+prod_commissions,1,id,bigint,ID
+prod_commissions,2,name__ru,character varying,"Name, languageSchema=ru"
+prod_commissions,3,name__en,character varying,"Name, languageSchema=en"
+prod_commissions,4,name,character varying,Name
+prod_commissions,5,create_date,timestamp without time zone,Create date
+prod_commissions,6,type_id,bigint,Тип объекта
+prod_commissions,7,status,smallint,Status
+prod_commissions,8,org_id,bigint,Подразделение
+prod_commissions,9,user_id,bigint,Пользователь
+prod_commissions,10,last_modified_date,timestamp without time zone,Last modified date
+prod_commissions,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+prod_commissions,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+prod_commissions,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+prod_commissions,14,is_system,smallint,System object
+prod_commissions,15,prod_comm_dict_id,bigint,Комиссия
+prod_commissions,16,scp_comiss_size_str,character varying,Размер комиссии (строка)
+prod_commissions,17,scp_payment_shedule_str,character varying,Порядок выплаты
+prod_commissions,18,com_val_proc,numeric,Размер комиссии (%)
+prod_commissions,19,value_comment,character varying,Комментарий к значению
+prod_commissions,20,link_card_obj_id,bigint,Ссылка на объект
+prod_commissions,21,is_for_state_program,smallint,Комиссия для госпрограммы
+prod_commissions,22,comm_date_pay_id,bigint,Дата уплаты комиссии
+prod_commissions,23,sum_pay_type_id,bigint,Вид суммы для уплаты комиссии
+prod_commissions,24,payment_schedule_id,bigint,Порядок выплаты
+prod_commissions,25,is_from_pricing,smallint,Добавлен из ЦО
+prod_commissions,26,is_add_manual,smallint,Добавлена вручную
+prod_commissions,27,is_current_conds,smallint,Скопировано с предыдущего ЦО
+prod_commissions,28,commission_out_of_dict,smallint,Комиссии нет в справочнике
+prod_commissions,29,bank_val_sum,numeric,Размер (руб)
+prod_guarantees,1,id,bigint,ID
+prod_guarantees,2,name__ru,character varying,"Name, languageSchema=ru"
+prod_guarantees,3,name__en,character varying,"Name, languageSchema=en"
+prod_guarantees,4,name,character varying,Name
+prod_guarantees,5,create_date,timestamp without time zone,Create date
+prod_guarantees,6,type_id,bigint,Тип объекта
+prod_guarantees,7,status,smallint,Status
+prod_guarantees,8,org_id,bigint,Подразделение
+prod_guarantees,9,user_id,bigint,Пользователь
+prod_guarantees,10,last_modified_date,timestamp without time zone,Last modified date
+prod_guarantees,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+prod_guarantees,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+prod_guarantees,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+prod_guarantees,14,is_system,smallint,System object
+prod_guarantees,15,link_card_obj_id,bigint,Ссылка на объект
+prod_guarantees,16,prod_guarant_dict_id,bigint,Гарантия
+prod_guarantees,17,bank_val_proc,numeric,Размер (% годовых)
+prod_guarantees,18,bank_val_sum,numeric,Размер (руб)
+prod_guarantees,19,guarantee_type_id,bigint,Вид гарантии
+prod_guarantees,20,is_from_pricing,smallint,Добавлен из ЦО
+prod_guarantees,21,is_current_conds,smallint,Скопировано с предыдущего ЦО
+product_pricing,1,id,bigint,ID
+product_pricing,2,name__ru,character varying,"Name, languageSchema=ru"
+product_pricing,3,name__en,character varying,"Name, languageSchema=en"
+product_pricing,4,name,character varying,Name
+product_pricing,5,create_date,timestamp without time zone,Create date
+product_pricing,6,type_id,bigint,Тип объекта
+product_pricing,7,status,smallint,Status
+product_pricing,8,org_id,bigint,Подразделение
+product_pricing,9,user_id,bigint,Пользователь
+product_pricing,10,last_modified_date,timestamp without time zone,Last modified date
+product_pricing,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+product_pricing,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+product_pricing,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+product_pricing,14,is_system,smallint,System object
+product_pricing,15,pricing_card_id,bigint,Карточка ценообразования (цо)
+product_pricing,16,owner_object_id,bigint,Объект ценообразования (ЦО)
+product_pricing,17,scp_is_individual,smallint,Индивидуальные ценовые условия
+product_pricing,18,scp_calc_rate_val,numeric,Справочно: расчетная ставка
+product_pricing,19,scp_min_margin_val,numeric,Минимальная маржа
+product_pricing,20,offer_margin_over,numeric,Предлагаемая маржа
+product_pricing,21,rate_type_id,bigint,Тип ставки
+product_pricing,22,scp_sublimit_srok,numeric,"Срок, мес."
+product_pricing,23,scp_sublimit_sum,numeric,Сумма
+product_pricing,24,draft_decision_id,bigint,Ссылка Проект решения (цо)
+product_pricing,25,is_inactive,smallint,Недействующий (цо)
+product_pricing,26,product_pricing_id,bigint,Входит в продукт (цо)
+product_pricing,27,is_state_program,smallint,Применение госпрограммы
+product_pricing,28,tranche_term,numeric,Срок транша (мес.)
+product_pricing,29,tranche_term_days,numeric,Срок транша (дни)
+product_pricing,30,g_rate_principal,numeric,"Процентная ставка, уплачиваемая Принципалом в случае уплаты Банком Бенефициару по банковской гарантии"
+product_pricing,31,cr_amount,numeric,Сумма банковской гарантии
+product_pricing,32,tender_guarantees,character varying,Тендерные гарантии (цо)
+product_pricing,33,execution_guarantee,character varying,"_Гарантии исполнения контракта, гарантийный период, возврат аванса (цо)"
+product_pricing,34,scp_min_insec_margin,numeric,Минимальная маржа на период необеспеченности
+product_pricing,35,term_days,numeric,"Срок, дни"
+product_pricing,36,pay_reward_cond_id,bigint,Условие уплаты вознаграждения за предоставление банковской гарантии
+product_pricing,37,amdp_parent_product_id,bigint,Ссылка на продукт РУМ (ЦО)
+product_pricing,38,el_individual,numeric,_EL индивидуальный (цо)
+product_pricing,39,is_param_calc,smallint,Параметры рассчитаны
+product_pricing,40,cr_limit_guar,numeric,Сумма лимита ответственности Гаранта
+product_pricing,41,clc_grade_id,bigint,Посчитанный из АСПР грейд
+product_pricing,42,pricing_compare_id,bigint,Ссылка на технический тип
+product_pricing,43,scp_modif_lim_quest_id,bigint,Ссылка на вопрос по пересмотру лимита (цо)
+product_pricing,44,clc_zone_id,bigint,Посчитанная из АСПР зона
+product_pricing,45,scp_sublimit_sum_prev,numeric,_Сумма (текущие условия) (цо)
+product_pricing,46,gsl_limit,numeric,Сумма общего лимита
+product_pricing,47,type_loan_id,bigint,Форма предоставления продукта
+product_pricing,48,app_product_id,bigint,Продукт
+product_pricing,49,product_compound_id,bigint,Состав продукта
+product_pricing,50,scp_min_margin_from,numeric,_Минимальная маржа ОТ
+product_pricing,51,scp_min_margin,numeric,_Минимальная маржа ДО
+product_pricing,52,min_insec_margin_from,numeric,_Минимальная маржа на период необеспеченности ОТ
+product_pricing,53,min_insec_margin_to,numeric,_Минимальная маржа на период необеспеченности ДО
+product_pricing,54,scp_calc_rate_val_from,numeric,_Справочно: расчетная ставка ОТ
+product_pricing,55,scp_calc_rate_val_to,numeric,_Справочно: расчетная ставка ДО
+product_pricing,56,is_marge_range,smallint,Применить диапазон по марже
+product_pricing,57,scp_min_margin_val_from,smallint,_Минимальная маржа ОТ
+product_pricing,58,offer_margin_over_from,numeric,_Предлагаемая маржа для овердрафта ОТ
+product_pricing,59,offer_margin_over_to,numeric,_Предлагаемая маржа для овердрафта ДО
+product_pricing,60,fix_spread_value,numeric,Спред за фиксацию
+product_pricing,61,change_initiator_id,bigint,Инициатор изменений
+product_pricing,62,product_pricing_cast_id,bigint,Ссылка на слепок ЦО
+product_pricing,63,is_out_app,smallint,Заявки нет в Гриндате
+product_pricing,64,sublimit_sum,numeric,Сумма сублимита
+product_pricing,65,is_umb_surety,smallint,"Зонтичное поручительство/Обеспечение 1,2 категории качества не менее 50%"
+product_pricing,66,cl_group_id,bigint,Группа клиента
+scp_amd_product,1,id,bigint,ID
+scp_amd_product,2,name__ru,character varying,"Name, languageSchema=ru"
+scp_amd_product,3,name__en,character varying,"Name, languageSchema=en"
+scp_amd_product,4,name,character varying,Name
+scp_amd_product,5,create_date,timestamp without time zone,Create date
+scp_amd_product,6,type_id,bigint,Тип объекта
+scp_amd_product,7,status,smallint,Status
+scp_amd_product,8,org_id,bigint,Подразделение
+scp_amd_product,9,user_id,bigint,Пользователь
+scp_amd_product,10,last_modified_date,timestamp without time zone,Last modified date
+scp_amd_product,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+scp_amd_product,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+scp_amd_product,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+scp_amd_product,14,is_system,smallint,System object
+scp_amd_product,15,app_product_id,bigint,Продукт
+scp_amd_product,16,loan_type_id,bigint,Форма предоставления
+scp_amd_product,17,scp_sublimit_val,bigint,Валюта
+scp_amd_product,18,scp_general_amount,numeric,Сумма
+scp_amd_product,19,amdp_parent_product_id,bigint,Ссылка на материнский продукт
+scp_amd_product,20,product_term,bigint,Срок продукта (месяцев)
+scp_amd_product,21,product_limitation,bigint,Срок продукта не более (дней)
+scp_amd_product,22,product_compound_id,bigint,Состав продукта
+scp_amd_product,23,type_gov_prog_id,bigint,Программа господдержки
+scp_amd_product,24,is_inactive,smallint,Недействующий
+scp_amd_product,25,blanc_deal_asmt_result,bigint,Результат оценки допустимой бланко-части по сделке
+scp_amd_product,26,is_blanc_credit,smallint,Бланковое кредитование
+scp_amd_product,27,monthly_contribution,numeric,"Ежемесячный взнос, руб."
+scp_amd_product,28,loan_type_afhd_id,bigint,Форма предоставления (для АФХД)
+scp_amd_product,29,repayment_type_id,bigint,Форма погашения
+scp_amd_product,30,rate_increase_blanc,numeric,Увеличение ставки для бланкового кредитования
+scp_amd_product,31,amount_blanc_deal,numeric,Сумма бланкочасти рассчитанная по сделке исходя из указанного обеспечения
+scp_amd_product,32,amount_blanc_deal_clt,numeric,"Сумма БЧ по сделке, исходя из указанного обеспечения"
+scp_amd_product,33,allowed_blanc_amo_prod,numeric,Допустимая сумма БЧ на продукт
+scp_amd_product,34,is_contract_logic_p,smallint,Контрактная логика
+scp_amd_product,35,draft_dec_id,bigint,_Ссылка на вопрос (принятие решения)
+scp_amd_product,36,is_oth_bank_guar_psb,smallint,Существуют ли другие БГ в ПСБ?
+scp_amd_product,37,contr_cont_id,bigint,Ссылка на контейнер контрактов
+scp_amd_product,38,is_add_req_bank_guar,smallint,В контракте есть требования по другим БГ? / Есть ли БГ исполнения обязательств/возврата аванса?
+scp_amd_product,39,security_part_id,bigint,Ссылка на обеспечительную часть продукта
+scp_amd_product,40,is_requirements_meets,smallint,Соответствие требованиям
+scp_amd_product,41,is_sdo,smallint,Относится к ГОЗ
+scp_amd_product,42,comp_type_gov_prog_id,bigint,Программа господдержки (для сравнения)
+scp_amd_product,43,clc_grade_id,bigint,Посчитанный из АСПР грейд
+scp_amd_product,44,exp_limit_credit_rub,numeric,Расчетный лимит кредитования (руб.)
+scp_amd_product,45,el_individual,numeric,EL индивидуальный
+scp_amd_product,46,clc_zone_id,bigint,Посчитанная из АСПР зона
+scp_amd_product,47,ident_viol_req,character varying,Выявленные нарушения требований
+scp_amd_product,48,seq_subproduct_numb,character varying,Порядковый номер продукта в госзаказе
+scp_amd_product,49,scp_loan_sign,bigint,Признак ссуды
+scp_amd_product,50,borr_restr_seq_num,bigint,Порядковый номер реструктуризации Заемщика
+scp_amd_product,51,curr_loan_debt,bigint,Валюта ОСЗ
+scp_amd_product,52,amount_loan_debt,numeric,Остаток ссудной задолженности
+scp_amd_product,53,product_risk_asses_id,bigint,Оценка риска по продукту
+scp_amd_product,54,test_amd_proj_link,bigint,УДАЛИТЬ_Ссылка на проект решения
+scp_amd_product,55,scp_prod_quest_id,bigint,Ссылка на вопрос (структура вопросов)
+scp_amd_product,56,amd_proj_link,bigint,Ссылка на проект решения (ЛС логика)
+scp_amd_product,57,prod_term_date,timestamp without time zone,Срок продукта (дата)
+scp_amd_product,58,scp_loan_sign_id,bigint,Признак ссуды для внесения в ИСУБД Новая Афина
+scp_amd_product,59,amd_prod_link_id,bigint,Ссылка на продукт РУМ (тех.)
+scp_amd_product,60,cl_group_id,bigint,Группа клиента
+scp_amd_product,61,question_structure,text,Комментарий
+scp_amd_product,62,is_over_limit,smallint,Вне лимита
+scp_application,1,id,bigint,ID
+scp_application,2,name__ru,character varying,"Name, languageSchema=ru"
+scp_application,3,name__en,character varying,"Name, languageSchema=en"
+scp_application,4,name,character varying,Name
+scp_application,5,create_date,timestamp without time zone,Create date
+scp_application,6,type_id,bigint,Тип объекта
+scp_application,7,status,smallint,Status
+scp_application,8,org_id,bigint,Подразделение
+scp_application,9,user_id,bigint,Пользователь
+scp_application,10,last_modified_date,timestamp without time zone,Last modified date
+scp_application,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+scp_application,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+scp_application,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+scp_application,14,is_system,smallint,System object
+scp_application,15,afl_doc_num,character varying,Номер документа
+scp_application,16,afl_doc_data,timestamp without time zone,Дата документа
+scp_application,17,afp_state_id,bigint,Состояние
+scp_application,18,initiator_id,bigint,Клиент
+scp_application,19,req_type_id,bigint,Класс заявки
+scp_application,20,lim_sum,numeric,Сумма заявки
+scp_application,21,loan_terms,bigint,Срок лимита
+scp_application,22,lim_currency_id,bigint,Валюта
+scp_application,23,gsl_limit,numeric,Сумма общего лимита
+scp_application,24,credit_logic_id,bigint,Логика кредитования
+scp_application,25,lending_tech_id,bigint,_Технология кредитования
+scp_application,26,emp_id,bigint,Ответственный менеджер
+scp_application,27,processing_steps_id,bigint,Текущий этап обработки
+scp_application,28,scp_curr_emp,character varying,Текущие исполнители
+scp_application,29,temp_cont_turn,bigint,Промежуточный контейнер загрузки ОСВ
+scp_application,30,risk_zone_id,bigint,Результат проверки благонадежности и деловой репутации по заявке
+scp_application,31,calc_risk_date,timestamp without time zone,Дата предварительной зоны риска
+scp_application,32,is_active_exp_sec,smallint,Заблокировано изменение участников (тех.)
+scp_application,33,cr_id,bigint,Ссылка на КЗ
+scp_application,34,scp_appl_type_id,bigint,Тип заявки
+scp_application,35,deleg_region_id,bigint,Регион клиента
+scp_application,36,scp_hcm_decision_id,bigint,Вариант решения на задаче руководителя КМ
+scp_application,37,is_active_get_gsl_part,smallint,Запущена сборка ГСЛ (тех)
+scp_application,38,scp_tech_ctredit,bigint,Технология кредитования
+scp_application,39,scp_business_segment,bigint,Клиентский сегмент
+scp_application,40,is_start_bp_fa,smallint,Запуск БП из ФА (тех.)
+scp_application,41,is_tech_ham_task_comp,smallint,Задача рук. КМ завершена (тех.)
+scp_application,42,is_collat_exp_launched,smallint,Запущена залоговая экспертиза (тех.)
+scp_application,43,is_simplified_fa,smallint,Упрощенный Финансовый анализ
+scp_application,44,is_start_bp_request_fa,smallint,Запуск БП из доп. запроса ФА(тех.)
+scp_application,45,auto_check_status,bigint,Статус автопроверок
+scp_application,46,client_type_id,bigint,Тип клиента
+scp_application,47,gsl_title,character varying,_Наименование ГСЛ
+scp_application,48,other_parts,character varying,Третьи лица
+scp_application,49,is_without_pledge,smallint,Без залога
+scp_application,50,is_main_owner,smallint,Основные собственники
+scp_application,51,third_parties,text,Третьи лица
+scp_application,52,decis_level_id,bigint,Минимальный уровень принятия решения
+scp_application,53,ca_decis_level_id,bigint,Уровень принятия решения - КА
+scp_application,54,is_legal_exp_launched,smallint,Запущена экспертиза правоспособности (тех.)
+scp_application,55,voting_fm_id,bigint,Голосующий ФМ
+scp_application,56,voting_km_id,bigint,Голосующий КМ
+scp_application,57,is_legal_exp_restart,smallint,Перезапуск экспертизы правоспособности (тех.)
+scp_application,58,scp_gsl_name_str,character varying,Наименование ГСЛ
+scp_application,59,pricing_id,bigint,Ценообразование
+scp_application,60,price_calc_completed,smallint,Расчет ценовых параметров завершен
+scp_application,61,resp_cond_coord,bigint,Голосующий (индивидуальные условия)
+scp_application,62,curator_head_id,bigint,Куратор ГО
+scp_application,63,is_lspr_level,smallint,Принятие решения в рамках ЛСПР Руководителей ПС
+scp_application,64,collateral_cont_id,bigint,Контейнер с обеспечением
+scp_application,65,clc_grade_id,bigint,Посчитанный из АСПР грейд
+scp_application,66,scp_arm_manager_id,bigint,Сотрудник АРМ
+scp_application,67,scp_proc_steds_id,bigint,Этап обработки
+scp_application,68,is_auto_sec_errors,smallint,Наличие ошибок (автосэб)
+scp_application,69,is_auto_check_errors,smallint,Наличие ошибок (предпроверки)
+scp_application,70,is_na_active,smallint,Интеграция с НА по получению кредитных обязательств активна
+scp_application,71,reason_refusal_id,bigint,Причина отказа Банка
+scp_application,72,is_form_bch_active,smallint,Запущен сбор БКИ (тех.)
+scp_application,73,is_bch_validator_on,smallint,Запущен валидатор БКИ (тех)
+scp_application,74,suz_start_page_str,character varying,Ссылка на стартовую страницу СУЗ
+scp_application,75,is_active_get_arbitr,smallint,Запущена сборка арбитражей (тех.)
+scp_application,76,scp_cheif_cm_id,bigint,Руководитель КМ
+scp_application,77,scp_rejection_comment,text,Комментарий по отказу
+scp_application,78,scp_rejection_client_id,bigint,Причина отказа Клиента
+scp_application,79,ca_rout_office_id,bigint,Офис маршрутизации для КА
+scp_application,80,is_test,smallint,Тестовая
+scp_application,81,client_list_changed,smallint,Состав клиентов был изменен
+scp_application,82,tranche_term,numeric,Срок транша (мес.)
+scp_application,83,is_app_to_cred_depart,smallint,Заявка передана в КП (тех.)
+scp_application,84,scp_type_restruct_id,bigint,Тип реструктуризации
+scp_application,85,is_need_agr_cd_co,smallint,Требуется согласование ДК ГО
+scp_application,86,is_ca_notif,smallint,КА уведомлен
+scp_application,87,scp_bg_owner_lidm,bigint,Владелец ЛСПР
+scp_application,88,is_check_list_cont_dev,smallint,_Чек-лист содержит отклонения
+scp_application,89,is_active_get_dp,smallint,Запущено обновление из ЦП
+scp_application,90,scp_bg_current_gr_limit,numeric,_Текущий лимит кредитования по ГСЛ
+scp_application,91,scp_bg_total_prod_limit,numeric,_Общий лимит по продукту
+scp_application,92,is_min_level_changed,smallint,Изменение мин. уровня Заявки СКП (тех.)
+scp_application,93,interm_file_storage,bigint,Промежуточное хранение файла для загрузки анкет
+scp_application,94,is_proj_verif_finished,smallint,Сверка проектов решения завершена
+scp_application,95,gsl_data_cont_id,bigint,Ссылка на контейнер данных ГСЛ
+scp_application,96,industry_code_id,bigint,Отрасль клиента
+scp_application,97,is_cov_bank_garant,smallint,Покрытая Банковская гарантия
+scp_application,98,scp_product_str,character varying,Продукт (строка)
+scp_application,99,is_state_program,smallint,Применение госпрограммы
+scp_application,100,cred_technology_str,character varying,Технология кредитования (строка)
+scp_application,101,is_not_red_zona_bool,smallint,Тех. Клиент отсутствует в «красной зоне» согласно данным EWS
+scp_application,102,is_not_red_zone,bigint,Клиент отсутствует в «Красной зоне» согласно данным EWS
+scp_application,103,is_fin_activ_newsub,smallint,Финансирование деятельности в НС
+scp_application,104,prelim_gsl_calc_id,bigint,Ссылка на предварительный расчет
+scp_collateral_app,1,id,bigint,ID
+scp_collateral_app,2,name__ru,character varying,"Name, languageSchema=ru"
+scp_collateral_app,3,name__en,character varying,"Name, languageSchema=en"
+scp_collateral_app,4,name,character varying,Name
+scp_collateral_app,5,create_date,timestamp without time zone,Create date
+scp_collateral_app,6,type_id,bigint,Тип объекта
+scp_collateral_app,7,status,smallint,Status
+scp_collateral_app,8,org_id,bigint,Подразделение
+scp_collateral_app,9,user_id,bigint,Пользователь
+scp_collateral_app,10,last_modified_date,timestamp without time zone,Last modified date
+scp_collateral_app,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+scp_collateral_app,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+scp_collateral_app,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+scp_collateral_app,14,is_system,smallint,System object
+scp_collateral_app,15,app_obj_id,bigint,Ссылка на заявку
+scp_collateral_app,16,exp_obj_id,bigint,Ссылка на экспертизу
+scp_collateral_app,17,out_collateral_id,bigint,ID заявки в СУЗ
+scp_collateral_app,18,collateral_link,character varying,Ссылка на СУЗ
+scp_collateral_app,19,coll_appl_type_id,bigint,Тип заявки
+scp_collateral_app,20,na_pledge_type_id,bigint,Тип залога (Новая Афина)
+scp_collateral_app,21,pledge_addr_str,character varying,Адрес объекта залога
+scp_collateral_app,22,security_quality_id,bigint,Категория качества обеспечения
+scp_collateral_app,23,quality_group_id,bigint,Группа качества
+scp_collateral_app,24,liquidity_level_id,bigint,Уровень ликвидности
+scp_collateral_app,25,attr_market_val,numeric,Рыночная стоимость
+scp_collateral_app,26,attr_fair_val,numeric,Справедливая стоимость
+scp_collateral_app,27,attr_collateral_val,numeric,Залоговая стоимость
+scp_collateral_app,28,collat_obj_name,character varying,Наименование объекта
+scp_collateral_app,29,emp_id,bigint,Ответственный менеджер
+scp_collateral_app,30,ca_exp_emp_id,bigint,Ответственный за проведение экспертизы КА
+scp_collateral_app,31,cur_upd_appl_id,bigint,Ссылка на текущую актуализацию
+scp_collateral_app,32,parent_collat_app_id,bigint,Ссылка на заявку-родителя (для актуализации)
+scp_collateral_app,33,collateral_discount,numeric,Коэффициент учитывающий расходы на реализацию
+scp_collateral_app,34,discount_rate,numeric,коэффициент для определения справедливой стоимости
+scp_collateral_app,35,appl_state_id,bigint,Состояние заявки
+scp_collateral_app,36,is_pres_spouse_cons,smallint,Предоставление согласия супруги(а) для ФЛ/ИП
+scp_collateral_app,37,is_pres_guar_pled,smallint,Наличие поручительства залогодателя
+scp_collateral_app,38,necessity_insurance,smallint,Страхование
+scp_collateral_app,39,subs_pledge_id,character varying,Последующий залог
+scp_collateral_app,40,total_struct_share,numeric,Доля в общей структуре залогового обеспечения
+scp_collateral_app,41,is_current_concl,smallint,Действующее заключение из СУЗ
+scp_collateral_app,42,conclus_txt,text,Итоговый вывод из Залогового Заключения
+scp_collateral_app,43,pledge_concl_state_id,bigint,Состояние Залогового Заключения
+scp_collateral_app,44,is_export_suz,smallint,Экспортированное заключение из СУЗ
+scp_collateral_app,45,pledge_conclus_date,timestamp without time zone,Дата подготовки заключения
+scp_collateral_app,46,concl_validity_date,timestamp without time zone,Срок действия оценки/заключения
+scp_collateral_app,47,perform_hr_face_id,bigint,Исполнитель Залогового Заключения
+scp_collateral_app,48,pledge_subject_id,bigint,Вид объекта залога (ЦБ)
+scp_collateral_app,49,collat_common_obj_id,bigint,Номер объекта залога
+scp_collateral_app,50,collat_subj_count,bigint,Количество предметов залога
+scp_collateral_app,51,scp_arm_chief_id,bigint,Руководитель АРМ
+scp_collateral_app,52,cp_arm_manager_id,bigint,Сотрудник АРМ
+scp_collateral_app,53,scp_info_comment_txt,text,Комментарий (инфо)
+scp_collateral_app,54,scp_info_proj_fin,smallint,Проектное финансирование (инфо)
+scp_collateral_app,55,scp_info_adress_str,character varying,Адрес местонахождения (инфо)
+scp_collateral_app,56,scp_info_sec_cost,numeric,Предполагаемая стоимость обеспечения (рубль)
+scp_collateral_app,57,scp_info_type_na_id,bigint,Вид предмета залога (из НА) (инфо)
+scp_collateral_app,58,scp_info_cred_summ,numeric,Сумма кредита (инфо)
+scp_collateral_app,59,scp_info_type_prod_id,bigint,Вид кредитного продукта (инфо)
+scp_collateral_app,60,scp_info_pledger_id,bigint,Наименование Залогодателя (ИНН для ЮЛ) (инфо)
+scp_collateral_app,61,scp_project_fin_id,bigint,Проектное финансирование (инфо)
+scp_collateral_app,62,scp_fin_proj_id,bigint,Проектное финансирование (инфо)
+scp_collateral_app,63,scp_quest_dec_id,bigint,Вид кредитного продукта (инфо)
+scp_collateral_app,64,add_comm_concl_txt,text,Дополнительные комментарии/выводы
+scp_collateral_app,65,coll_link_str,character varying,Ссылка на СУЗ (без гиперссылки)
+scp_collateral_app,66,scp_file_req_timest,timestamp without time zone,Дата и время запроса файлов
+scp_collateral_app,67,scp_info_vnd_id,bigint,Классификация по ВНД
+scp_collateral_app,68,quest_decis_id,bigint,Вид кредитного продукта (инфо)
+scp_collateral_app,69,testnumber,numeric,Тест_атрибут
+scp_decision_quest,1,id,bigint,ID
+scp_decision_quest,2,name__ru,character varying,"Name, languageSchema=ru"
+scp_decision_quest,3,name__en,character varying,"Name, languageSchema=en"
+scp_decision_quest,4,name,character varying,Name
+scp_decision_quest,5,create_date,timestamp without time zone,Create date
+scp_decision_quest,6,type_id,bigint,Тип объекта
+scp_decision_quest,7,status,smallint,Status
+scp_decision_quest,8,org_id,bigint,Подразделение
+scp_decision_quest,9,user_id,bigint,Пользователь
+scp_decision_quest,10,last_modified_date,timestamp without time zone,Last modified date
+scp_decision_quest,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+scp_decision_quest,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+scp_decision_quest,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+scp_decision_quest,14,is_system,smallint,System object
+scp_decision_quest,15,app_obj_id,bigint,Ссылка на заявку
+scp_decision_quest,16,scp_sublimit_sum,numeric,Сумма
+scp_decision_quest,17,scp_sublimit_purpose,bigint,_Целевое использование
+scp_decision_quest,18,app_product_id,bigint,Продукт
+scp_decision_quest,19,scp_sublimit_srok,numeric,"Срок, мес."
+scp_decision_quest,20,scp_sublimit_val,bigint,Валюта
+scp_decision_quest,21,scp_subl_bor,bigint,Заемщик
+scp_decision_quest,22,annotation,text,Комментарий
+scp_decision_quest,23,question_structure,text,Суть вопроса
+scp_decision_quest,24,scp_dec_quest_id,bigint,Материнский продукт
+scp_decision_quest,25,scp_gov_program_id,bigint,_Госпрограмма
+scp_decision_quest,26,source_financing_id,bigint,Источник финансирования
+scp_decision_quest,27,credit_purpose_id,bigint,_Цель кредитования
+scp_decision_quest,28,est_credit_limit,numeric,Расчетный лимит кредитования (руб.)
+scp_decision_quest,29,is_inactive,smallint,Недействующий
+scp_decision_quest,30,is_state_program,smallint,Применение госпрограммы
+scp_decision_quest,31,type_loan_id,bigint,Форма предоставления продукта
+scp_decision_quest,32,is_afhd,smallint,АФХД готовится в GD
+scp_decision_quest,33,rate_type_id,bigint,Тип ставки
+scp_decision_quest,34,product_compound_id,bigint,Состав продукта
+scp_decision_quest,35,amdp_parent_product_id,bigint,Ссылка на продукт РУМ
+scp_decision_quest,36,scp_state_id,bigint,Состояние
+scp_decision_quest,37,scp_project_ans_link,bigint,Ссылка на проект решения
+scp_decision_quest,38,is_product_recalc,smallint,Требуется пересчет продукта на заявке
+scp_decision_quest,39,ord,bigint,Порядок
+scp_decision_quest,40,sys_file_id,bigint,Прикрепленные файлы
+scp_decision_quest,41,appr_sum,numeric,Утвержденная сумма
+scp_decision_quest,42,product_compound_str,character varying,Продукт+состав
+scp_decision_quest,43,loan_type_id,bigint,_Форма предоставления
+scp_decision_quest,44,part_excl_ship_debitor,bigint,Вид продукта
+scp_decision_quest,45,attr_business_segment,bigint,_Сегмент бизнеса клиента
+scp_decision_quest,46,scp_num_subl,bigint,Номер продукта
+scp_decision_quest,47,sublimit_sum,numeric,Сумма сублимита
+scp_decision_quest,48,subl_num,character varying,Номер продукта (строка)
+scp_decision_quest,49,is_ca_change_class,smallint,КА изменил вид анализа
+scp_decision_quest,50,credit_report_class,bigint,Вид анализа
+scp_decision_quest,51,tech_atr_bool,smallint,Тех атр. отображение подсказки
+scp_decision_quest,52,copy_source_quest_id,bigint,Ссылка на вопрос - источник копирования
+scp_dict_product_na,1,id,bigint,ID
+scp_dict_product_na,2,name__ru,character varying,"Name, languageSchema=ru"
+scp_dict_product_na,3,name__en,character varying,"Name, languageSchema=en"
+scp_dict_product_na,4,name,character varying,Name
+scp_dict_product_na,5,create_date,timestamp without time zone,Create date
+scp_dict_product_na,6,type_id,bigint,Тип объекта
+scp_dict_product_na,7,status,smallint,Status
+scp_dict_product_na,8,org_id,bigint,Подразделение
+scp_dict_product_na,9,user_id,bigint,Пользователь
+scp_dict_product_na,10,last_modified_date,timestamp without time zone,Last modified date
+scp_dict_product_na,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+scp_dict_product_na,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+scp_dict_product_na,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+scp_dict_product_na,14,is_system,smallint,System object
+scp_dict_product_na,15,ord,bigint,Порядок
+scp_dict_product_na,16,ident,character varying,Идентификатор
+scp_dict_product_na,17,contract_group,character varying,Группа договоров в НА
+scp_dict_product_na,18,credit_product,character varying,Программа кредитования в НА
+scp_dict_product_na,19,app_product_id,bigint,Продукт в ГД
+scp_dict_product_na,20,yaig_product_id,bigint,Продукт из УАиГ
+scp_dict_product_na,21,contr_group_id,bigint,Контрактная группа из УАиГ
+scp_dict_rsc_office,1,id,bigint,ID
+scp_dict_rsc_office,2,name__ru,character varying,"Name, languageSchema=ru"
+scp_dict_rsc_office,3,name__en,character varying,"Name, languageSchema=en"
+scp_dict_rsc_office,4,name,character varying,Name
+scp_dict_rsc_office,5,create_date,timestamp without time zone,Create date
+scp_dict_rsc_office,6,type_id,bigint,Тип объекта
+scp_dict_rsc_office,7,status,smallint,Status
+scp_dict_rsc_office,8,org_id,bigint,Подразделение
+scp_dict_rsc_office,9,user_id,bigint,Пользователь
+scp_dict_rsc_office,10,last_modified_date,timestamp without time zone,Last modified date
+scp_dict_rsc_office,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+scp_dict_rsc_office,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+scp_dict_rsc_office,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+scp_dict_rsc_office,14,is_system,smallint,System object
+scp_dict_rsc_office,15,ord,bigint,Порядок
+scp_dict_rsc_office,16,ident,character varying,Идентификатор
+scp_dict_rsc_office,17,rsc_office_id,bigint,Офис РЦБ
+scp_dict_tech_ctredit,1,id,bigint,ID
+scp_dict_tech_ctredit,2,name__ru,character varying,"Name, languageSchema=ru"
+scp_dict_tech_ctredit,3,name,character varying,Name
+scp_dict_tech_ctredit,4,create_date,timestamp without time zone,Create date
+scp_dict_tech_ctredit,5,type_id,bigint,Тип объекта
+scp_dict_tech_ctredit,6,status,smallint,Status
+scp_dict_tech_ctredit,7,org_id,bigint,Подразделение
+scp_dict_tech_ctredit,8,user_id,bigint,Пользователь
+scp_dict_tech_ctredit,9,last_modified_date,timestamp without time zone,Last modified date
+scp_dict_tech_ctredit,10,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+scp_dict_tech_ctredit,11,created_emp_id,bigint,"Сотрудник, создавший объект"
+scp_dict_tech_ctredit,12,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+scp_dict_tech_ctredit,13,is_system,smallint,System object
+scp_dict_tech_ctredit,14,ord,bigint,Порядок
+scp_dict_tech_ctredit,15,ident,character varying,Идентификатор
+scp_dict_tech_ctredit,16,type_int_code,bigint,Код типа технологии
+scp_dict_tech_ctredit,17,name__en,character varying,"Name, languageSchema=en"
+scp_dict_tech_ctredit,18,is_available,smallint,Доступен для выбора
+scp_gov_program_dict,1,id,bigint,ID
+scp_gov_program_dict,2,name__ru,character varying,"Name, languageSchema=ru"
+scp_gov_program_dict,3,name__en,character varying,"Name, languageSchema=en"
+scp_gov_program_dict,4,name,character varying,Name
+scp_gov_program_dict,5,create_date,timestamp without time zone,Create date
+scp_gov_program_dict,6,type_id,bigint,Тип объекта
+scp_gov_program_dict,7,status,smallint,Status
+scp_gov_program_dict,8,org_id,bigint,Подразделение
+scp_gov_program_dict,9,user_id,bigint,Пользователь
+scp_gov_program_dict,10,last_modified_date,timestamp without time zone,Last modified date
+scp_gov_program_dict,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+scp_gov_program_dict,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+scp_gov_program_dict,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+scp_gov_program_dict,14,is_system,smallint,System object
+scp_gov_program_dict,15,ord,bigint,Порядок
+scp_gov_program_dict,16,ident,character varying,Идентификатор
+scp_gov_program_dict,17,scp_max_margin_val,numeric,Маржа
+scp_gov_program_dict,18,scp_max_pref_rate_val,numeric,Ставка клиента
+scp_gov_program_dict,19,scp_subsidy_rate_val,numeric,Субсидия
+scp_gov_program_dict,20,type_gov_prog_id,bigint,Вид госпрограммы
+scp_gov_program_dict,21,upp_gov_prog_dict_id,bigint,Верхнеуровневая программа
+scp_gov_program_dict,22,date_end_cb,timestamp without time zone,Дата окончания действия
+scp_gov_program_dict,23,scp_fund_rate_val,numeric,Ставка фондирования
+scp_part_sec_expertise,1,id,bigint,ID
+scp_part_sec_expertise,2,name__ru,character varying,"Name, languageSchema=ru"
+scp_part_sec_expertise,3,name__en,character varying,"Name, languageSchema=en"
+scp_part_sec_expertise,4,name,character varying,Name
+scp_part_sec_expertise,5,create_date,timestamp without time zone,Create date
+scp_part_sec_expertise,6,type_id,bigint,Тип объекта
+scp_part_sec_expertise,7,status,smallint,Status
+scp_part_sec_expertise,8,org_id,bigint,Подразделение
+scp_part_sec_expertise,9,user_id,bigint,Пользователь
+scp_part_sec_expertise,10,last_modified_date,timestamp without time zone,Last modified date
+scp_part_sec_expertise,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+scp_part_sec_expertise,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+scp_part_sec_expertise,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+scp_part_sec_expertise,14,is_system,smallint,System object
+scp_part_sec_expertise,15,afl_doc_num,character varying,Номер документа
+scp_part_sec_expertise,16,afl_doc_data,timestamp without time zone,Дата документа
+scp_part_sec_expertise,17,afp_state_id,bigint,Состояние
+scp_part_sec_expertise,18,emp_id,bigint,Ответственный менеджер
+scp_part_sec_expertise,19,sec_date_check,timestamp without time zone,Дата проверки (итоговая)
+scp_part_sec_expertise,20,revoke_reason,character varying,Причина отзыва
+scp_part_sec_expertise,21,expertise_obj_id,bigint,Объект экспертизы
+scp_part_sec_expertise,22,deleg_region_id,bigint,Регион назначения
+scp_part_sec_expertise,23,risk_zone_id,bigint,Зона риска
+scp_part_sec_expertise,24,sec_expertise_id,bigint,Экспертиза СЭБ
+scp_part_sec_expertise,25,sec_ch_res_list,bigint,Результаты проверки
+scp_part_sec_expertise,26,ses_resp_user_id,bigint,Пользователь для покраски (технический)
+scp_part_sec_expertise,27,check_completed,smallint,Проверка произведена
+scp_part_sec_expertise,28,ses_conf_user_id,bigint,Пользователь для подтверждения проверки (технический)
+scp_part_sec_expertise,29,check_button_vis,smallint,Видимость кнопки подтверждения проверки
+scp_part_sec_expertise,30,repeat_check,bigint,Повторные проверки
+scp_part_sec_expertise,31,finish_task_date,timestamp without time zone,Дата и время завершения задачи
+scp_part_sec_expertise,32,psb_office_id,bigint,Офис ПСБ
+scp_part_sec_expertise,33,sec_check_auto_date,timestamp without time zone,Дата завершения автопроверок
+scp_part_sec_expertise,34,ident,character varying,Сист. Идентификатор
+scp_part_sec_expertise,35,sf_exp_term_date,timestamp without time zone,Срок действия
+scp_part_sec_expertise,36,end_date,timestamp without time zone,Дата завершения экспертизы
+scp_part_sec_expertise,37,reason_revision_str,character varying,Причина доработки
+scp_part_sec_expertise,38,reason_restart_str,character varying,Причина перезапуска
+scp_part_sec_expertise,39,reason_cancel_str,character varying,Причина отмены
+scp_part_sec_expertise,40,csd_expertise_obj_id,bigint,Объект экспертизы (КОД)
+scp_part_sec_expertise,41,sf_sec_rs_emp_id,bigint,Ответственный РС (ФС)
+scp_prod_comm_dict,1,id,bigint,ID
+scp_prod_comm_dict,2,name__ru,character varying,"Name, languageSchema=ru"
+scp_prod_comm_dict,3,name__en,character varying,"Name, languageSchema=en"
+scp_prod_comm_dict,4,name,character varying,Name
+scp_prod_comm_dict,5,create_date,timestamp without time zone,Create date
+scp_prod_comm_dict,6,type_id,bigint,Тип объекта
+scp_prod_comm_dict,7,status,smallint,Status
+scp_prod_comm_dict,8,org_id,bigint,Подразделение
+scp_prod_comm_dict,9,user_id,bigint,Пользователь
+scp_prod_comm_dict,10,last_modified_date,timestamp without time zone,Last modified date
+scp_prod_comm_dict,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+scp_prod_comm_dict,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+scp_prod_comm_dict,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+scp_prod_comm_dict,14,is_system,smallint,System object
+scp_prod_comm_dict,15,ord,bigint,Порядок
+scp_prod_comm_dict,16,ident,character varying,Идентификатор
+scp_prod_comm_dict,17,scp_payment_shedule_str,character varying,Порядок выплаты
+scp_prod_comm_dict,18,scp_comiss_size_str,character varying,Размер комиссии
+scp_prod_comm_dict,19,value_comment,character varying,Комментарий к значению
+scp_prod_comm_dict,20,fare_description,character varying,Описание тарифа
+scp_prod_comm_dict,21,is_ho_application,smallint,Заявка ГО
+scp_prod_comm_dict,22,com_val_proc,numeric,Значение комиссии (%)
+scp_prod_comm_dict,23,is_for_state_program,smallint,Комиссия для госпрограммы
+scp_prod_comm_dict,24,gov_prog_value,bigint,Тип значения по госпрограмме
+scp_prod_comm_dict,25,payment_schedule_id,bigint,Порядок выплаты
+scp_prod_comm_dict,26,new_com_val_proc,numeric,_Размер (%) предлагаемый
+scp_prod_comm_dict,27,scp_gov_program_id,bigint,Госпрограмма (справочные значения)
+scp_prod_comm_dict,28,is_corp_tech_bool,smallint,Корп. технология
+scp_prod_comm_dict,29,is_product_log_bool,smallint,Продуктовая логика МСБ
+scp_prod_comm_dict,30,is_actual_comission,smallint,Актуальность комиссии
+scp_prod_comm_dict,31,is_apk_tech_bool,smallint,Технология кредитования АПК
+scp_prod_comm_dict,32,change_comiss_dict_id,bigint,Вид диапазона
+scp_prod_comm_dict,33,bank_val_sum,numeric,Размер (руб)
+scp_prod_guar_dict,1,id,bigint,ID
+scp_prod_guar_dict,2,name__ru,character varying,"Name, languageSchema=ru"
+scp_prod_guar_dict,3,name__en,character varying,"Name, languageSchema=en"
+scp_prod_guar_dict,4,name,character varying,Name
+scp_prod_guar_dict,5,create_date,timestamp without time zone,Create date
+scp_prod_guar_dict,6,type_id,bigint,Тип объекта
+scp_prod_guar_dict,7,status,smallint,Status
+scp_prod_guar_dict,8,org_id,bigint,Подразделение
+scp_prod_guar_dict,9,user_id,bigint,Пользователь
+scp_prod_guar_dict,10,last_modified_date,timestamp without time zone,Last modified date
+scp_prod_guar_dict,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+scp_prod_guar_dict,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+scp_prod_guar_dict,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+scp_prod_guar_dict,14,is_system,smallint,System object
+scp_prod_guar_dict,15,ord,bigint,Порядок
+scp_prod_guar_dict,16,ident,character varying,Идентификатор
+scp_prod_guar_dict,17,scp_comiss_size_str,character varying,Размер комиссии (строка)
+scp_prod_guar_dict,18,scp_payment_shedule_str,character varying,Порядок выплаты
+scp_prod_guar_dict,19,value_comment,character varying,Комментарий к значению
+scp_prod_guar_dict,20,com_val_proc,numeric,Размер комиссии (%)
+scp_prod_guar_dict,21,prod_guarant_dict_id,bigint,Гарантия
+scp_prod_guar_dict,22,gov_prog_value,bigint,Тип значения по госпрограмме
+scp_prod_guar_dict,23,payment_schedule_id,bigint,Порядок выплаты
+scp_prod_guar_dict,24,new_com_val_proc,numeric,_Размер (%) предлагаемый
+scp_prod_guar_dict,25,scp_gov_program_id,bigint,Госпрограмма (справочные значения)
+scp_prod_guarant_dict,1,id,bigint,ID
+scp_prod_guarant_dict,2,name__ru,character varying,"Name, languageSchema=ru"
+scp_prod_guarant_dict,3,name__en,character varying,"Name, languageSchema=en"
+scp_prod_guarant_dict,4,name,character varying,Name
+scp_prod_guarant_dict,5,create_date,timestamp without time zone,Create date
+scp_prod_guarant_dict,6,type_id,bigint,Тип объекта
+scp_prod_guarant_dict,7,status,smallint,Status
+scp_prod_guarant_dict,8,org_id,bigint,Подразделение
+scp_prod_guarant_dict,9,user_id,bigint,Пользователь
+scp_prod_guarant_dict,10,last_modified_date,timestamp without time zone,Last modified date
+scp_prod_guarant_dict,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+scp_prod_guarant_dict,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+scp_prod_guarant_dict,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+scp_prod_guarant_dict,14,is_system,smallint,System object
+scp_prod_guarant_dict,15,ord,bigint,Порядок
+scp_prod_guarant_dict,16,ident,character varying,Идентификатор
+scp_prod_guarant_dict,17,guarantee_type_id,bigint,Вид гарантии
+scp_prod_guarant_dict,18,bank_val_proc,numeric,Размер (руб)
+scp_prod_guarant_dict,19,bank_val_sum,numeric,Размер (руб)
+scp_prod_guarant_dict,20,sum_from,numeric,Сумма от (руб)
+scp_prod_guarant_dict,21,sum_to,numeric,Сумма до (руб)
+scp_project_ans,1,id,bigint,ID
+scp_project_ans,2,name__ru,character varying,"Name, languageSchema=ru"
+scp_project_ans,3,name__en,character varying,"Name, languageSchema=en"
+scp_project_ans,4,name,character varying,Name
+scp_project_ans,5,create_date,timestamp without time zone,Create date
+scp_project_ans,6,type_id,bigint,Тип объекта
+scp_project_ans,7,status,smallint,Status
+scp_project_ans,8,org_id,bigint,Подразделение
+scp_project_ans,9,user_id,bigint,Пользователь
+scp_project_ans,10,last_modified_date,timestamp without time zone,Last modified date
+scp_project_ans,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+scp_project_ans,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+scp_project_ans,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+scp_project_ans,14,is_system,smallint,System object
+scp_project_ans,15,req_link_id,bigint,Ссылка на заявку
+scp_project_ans,16,question_link_id,bigint,Ссылка на вопрос
+scp_project_ans,17,voting_km_id,bigint,Голосующий КМ
+scp_project_ans,18,voting_fm_id,bigint,Голосующий ФМ
+scp_project_ans,19,draft_decision_id,bigint,Проект решения
+scp_project_ans,20,urm_undwrt_decision_id,bigint,Решение УРМ
+scp_project_ans,21,decis_level_id,bigint,Уровень принятия решения
+scp_project_ans,22,doc_num,character varying,Номер документа
+scp_project_ans,23,doc_data,timestamp without time zone,Дата документа
+scp_project_ans,24,is_under_3_years_exp,smallint,Срок ведения бизнеса менее 3х лет
+scp_project_ans,25,scp_loan_sign_id,bigint,Признак ссуды для внесения в ИСУБД Новая Афина
+scp_project_ans,26,loan_sign_st_ot_id,bigint,Код сделки
+scp_project_ans,27,okpd2,character varying,ОКПД2
+scp_project_ans,28,curret_limit_gsl,numeric,"Текущий лимит кредитования по ГСЛ (в валюте утверждаемого кредита), в т.ч. по предоставленным банковским гарантиям, кроме продуктов в рамках льготного финансирования (ПП 422 и ПП 696)"
+scp_project_ans,29,new_limit_gsl,numeric,"Лимит кредитования по ГСЛ с учетом нового лимита, кроме продуктов в рамках льготного финансирования (ПП 422 и ПП 696)"
+scp_project_ans,30,current_limit_borow,numeric,Текущий установленный лимит по Заемщику  по продуктам в рамках льготного финансирования (ПП 422 и ПП 696)
+scp_project_ans,31,new_limit_borow,numeric,Лимит по Заемщику с учетом нового лимита  по продуктам в рамках льготного финансирования (ПП 422 и ПП 696)
+scp_project_ans,32,set_matrix_limit,numeric,"Лимит кредитования, установленный (принятый) Уполномоченными менеджерами на Матрице полномочий в рамках технологий кредитования МСБ"
+scp_project_ans,33,real_estate_class_id,bigint,Классификация недвижимого имущества
+scp_project_ans,34,loan_type_id,bigint,_Форма предоставления
+scp_project_ans,35,amount_rub,numeric,Сумма (руб.) для реестра
+scp_project_ans,36,credit_line_term,numeric,_Срок кредитной линии (кредита) (мес.)
+scp_project_ans,37,summ_tranche,numeric,_Сумма транша
+scp_project_ans,38,tranche_term,numeric,_Срок транша (мес.)
+scp_project_ans,39,monthly_contribution,numeric,"_Ежемесячный взнос, руб."
+scp_project_ans,40,payment_delay_months,bigint,_Отсрочка платежа (мес.)
+scp_project_ans,41,amount_blanc_deal,numeric,_Сумма бланкочасти рассчитанная по сделке исходя из указанного обеспечения
+scp_project_ans,42,blanc_deal_asmt_result,bigint,_Результат оценки допустимой бланко-части по сделке
+scp_project_ans,43,individual_repay_sched,text,_Индивидуальный график погашения
+scp_project_ans,44,rate_increase_blanc,numeric,_Увеличение ставки для бланкового кредитования
+scp_project_ans,45,repayment_type_id,bigint,_Форма погашения
+scp_project_ans,46,susp_cond_prev_id,bigint,_Выполнены ли отлагательные условия по ранее принятым решениям?
+scp_project_ans,47,curator_head_id,bigint,Куратор ГО
+scp_project_ans,48,resp_head_cm_id,bigint,Руководитель КМ
+scp_project_ans,49,credit_analyst_id,bigint,Кредитный аналитик
+scp_project_ans,50,is_infinite_vkl,smallint,"_Наличие опции ""Вечная ВКЛ"""
+scp_project_ans,51,is_blanc_credit,smallint,_Бланковое кредитование
+scp_project_ans,52,exp_limit_credit_rub,numeric,Расчетный лимит кредитования (руб.)
+scp_project_ans,53,refer_empl,bigint,"Сотрудник, привлекший клиента"
+scp_project_ans,54,spec_fa,bigint,"_Специалист, проводивший финансовый анализ"
+scp_project_ans,55,attr_market_val,numeric,Рыночная стоимость
+scp_project_ans,56,attr_fair_val,numeric,Справедливая стоимость
+scp_project_ans,57,product_security,numeric,_Обеспеченность продукта (руб.)
+scp_project_ans,58,attr_collateral_val,numeric,Залоговая стоимость
+scp_project_ans,59,collateral_monit,bigint,_Периодичность мониторинга залога
+scp_project_ans,60,limit_confirmation,bigint,Подтверждение лимита
+scp_project_ans,61,amdp_parent_product_id,bigint,Ссылка на продукт РУМ
+scp_project_ans,62,scp_state_id,bigint,Итоговое решение
+scp_project_ans,63,rm_ra_decis_level_id,bigint,Уровень принятия решения РМ РА
+scp_project_ans,64,voting_rm_id,bigint,Риск-менеджер
+scp_project_ans,65,plan_deal_date,timestamp without time zone,Плановая дата сделки
+scp_project_ans,66,is_active_pj,smallint,Экспертиза проф.су на выдачу запущена
+scp_project_ans,67,okved_activity_id,bigint,_Вид деятельности (по ОКВЭД)
+scp_project_ans,68,is_poci_active,smallint,POCI-актив
+scp_project_ans,69,mon_col_type_id,bigint,_Тип залога для мониторинга
+scp_project_ans,70,prod_sec,numeric,Обеспеченность продукта (%)
+scp_project_ans,71,el_individual,numeric,EL индивидуальный
+scp_project_ans,72,clc_grade_id,bigint,Посчитанный из АСПР грейд
+scp_project_ans,73,resp_risk_manager_id,bigint,Уполномоченный риск-менеджер
+scp_project_ans,74,cancel_manage_desic,character varying,Отменить Решение уполномоченных менеджеров №
+scp_project_ans,75,cancel_manag_desic,text,_Отменить Решение уполномоченных менеджеров №
+scp_project_ans,76,undwrit_appl_id,bigint,Заявка РМ РА
+scp_project_ans,77,is_refresh_state,smallint,Состояние Залоговых Заключений не пересчитывается
+scp_project_ans,78,industry_code_id,bigint,Код отрасли
+scp_project_ans,79,scp_subl_bor,bigint,Заемщик
+scp_project_ans,80,client_type_id,bigint,Тип клиента
+scp_project_ans,81,gsl_comparison,character varying,_Состав ГСЛ (для сравнения)
+scp_project_ans,82,clc_zone_id,bigint,Посчитанная из АСПР зона
+scp_project_ans,83,restruct_init_id,bigint,Инициатор реструктуризации
+scp_project_ans,84,monit_viol_txt,text,Нарушение мониторинга (ручной ввод)
+scp_project_ans,85,analys_res_cl_txt,text,Итоговый результат анализа клиента (ручной ввод)
+scp_project_ans,86,analys_res_cl_restr_id,bigint,Итоговый результат анализа клиента (для реструктуризации)
+scp_project_ans,87,deal_change_txt,text,Изменение сделки/условий (ручной ввод)
+scp_project_ans,88,changed_decision_num,character varying,Номера изменяемых решений
+scp_project_ans,89,deal_change_restr_txt,text,Изменения по реструктуризации (ручной ввод)
+scp_project_ans,90,scp_type_restruct_id,bigint,Тип реструктуризации
+scp_project_ans,91,min_decis_level_id,bigint,Минимальный уровень принятия решения
+scp_project_ans,92,modif_num_deals,character varying,Номера договоров
+scp_project_ans,93,scp_matrix_type,bigint,Тип матрицы
+scp_project_ans,94,is_need_agr_cd_co,smallint,Требуется согласование ДК ГО
+scp_project_ans,95,state_id,bigint,Состояние
+scp_project_ans,96,is_old_visual_needed,smallint,Нужно отобразить сокращенный визуал МРИ
+scp_project_ans,97,change_initiator_id,bigint,Инициатор изменений
+scp_project_ans,98,scp_is_individual,smallint,Индивидуальные ценовые условия
+scp_project_ans,99,lidm_cur_limit,numeric,"Текущий лимит кредитования по ГСЛ в рамках продукта ""Покрытая банковская гарантия"", а также покрытые банковские гарантии, утвержденные до 01.09.2024 года на ЛСПР"
+scp_project_ans,100,lidm_cur_limit_new,numeric,"Текущий лимит кредитования по ГСЛ в рамках продукта ""Покрытая банковская гарантия"" (в валюте утверждаемого продукта) а также покрытые банковские гарантии, утвержденные до 01.09.2024 года на ЛСПР с учетом нового лимита"
+scp_project_ans,101,scp_bg_owner_lidm,bigint,Владелец ЛСПР
+scp_project_ans,102,scp_chief_ca_id,bigint,Руководитель КА
+scp_project_ans,103,total_looped_sum,numeric,Сумма лимитов с учетом закольцованности лимитов
+scp_project_ans,104,gsl_compare_txt,text,Состав ГСЛ (для сравнения)
+scp_project_ans,105,limit_confirm_str,character varying,Подтверждение лимита (строка)
+scp_project_ans,106,proj_city_str,character varying,Город
+scp_project_ans,107,is_primary_preparation,smallint,Первичная подготовка ПР завершена
+scp_project_ans,108,req_type_id,bigint,Класс заявки
+scp_project_ans,109,is_cov_bank_garant,smallint,Покрытая Банковская гарантия
+scp_project_ans,110,memo_deal_log,smallint,Финансирование деятельности в НС
+scp_project_ans,111,ns_deal_cond_log,smallint,Более 50% и территориальная приближенность активов и (или) логистических путей Клиента (ГСЛ) составляет менее 50 км от ЛБС
+scp_project_ans,112,confirm_cred_limit_log,smallint,Подтвердить лимит кредитования
+scp_project_ans,113,confirm_csd_log,smallint,Внести изменения в условия кредитования и привести кредитно-обеспечительную документацию
+scp_project_ans,114,limit_due_date,timestamp without time zone,Срок лимита
+scp_project_ans,115,limit_review_date,timestamp without time zone,Дата пересмотра
+scp_project_ans,116,credit_group_id,bigint,Группа кредитоспособности
+scp_project_ans,117,raroc_roe,numeric,Прогнозный ROE
+scp_project_ans,118,weighted_margin,numeric,Средневзвешенная маржа
+scp_project_ans,119,raroc_perc,numeric,Прогнозный RAROC с учетом кросс-продаж
+scp_project_ans,120,is_risk_consideration,smallint,Отправлен на риски/голосование
+scp_sec_check_res,1,id,bigint,ID
+scp_sec_check_res,2,name__ru,character varying,"Name, languageSchema=ru"
+scp_sec_check_res,3,name__en,character varying,"Name, languageSchema=en"
+scp_sec_check_res,4,name,character varying,Name
+scp_sec_check_res,5,create_date,timestamp without time zone,Create date
+scp_sec_check_res,6,type_id,bigint,Тип объекта
+scp_sec_check_res,7,status,smallint,Status
+scp_sec_check_res,8,org_id,bigint,Подразделение
+scp_sec_check_res,9,user_id,bigint,Пользователь
+scp_sec_check_res,10,last_modified_date,timestamp without time zone,Last modified date
+scp_sec_check_res,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+scp_sec_check_res,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+scp_sec_check_res,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+scp_sec_check_res,14,is_system,smallint,System object
+scp_sec_check_res,15,expertise_obj_id,bigint,Участник проверки
+scp_sec_check_res,16,sec_date_check,timestamp without time zone,Дата проверки (итоговая)
+scp_sec_check_res,17,emp_id,bigint,Сотрудник СЭБ
+scp_sec_check_res,18,tech_atr_bool,smallint,Тех атр. отображение подсказки
+scp_sec_check_res,19,check_completed,smallint,Проверка произведена
+scp_sec_check_res,20,is_hide_check_manual,smallint,Скрыть ручные проверки
+scp_sec_check_res,21,scp_cl_role_str,character varying,_Проверяемые роли (строковый)
+scp_sec_check_res,22,other_comment,character varying,Прочее (комментарий)
+scp_sec_check_res,23,settle_accounts_comm,character varying,Сведения о расчетных счетах (комментарий)
+scp_sec_check_res,24,family_status_comm,character varying,Сведения о семейном положении (комментарий)
+scp_sec_check_res,25,credit_history_comm,character varying,Кредитная история (комментарий)
+scp_sec_check_res,26,affil_client_str,character varying,Список аффилированных лиц
+scp_sec_check_res,27,aspr_link_zone_id,bigint,Зона АСПР по связке
+scp_sec_check_res,28,aspr_zone_id,bigint,Зона по результатам АСПР
+scp_sec_check_res,29,aspr_affil_res_id,bigint,Результат проверки аффилированности
+scp_sec_check_res,30,aspr_route_id,bigint,Маршрутизация по результатам АСПР
+scp_sec_check_res,31,bch_mem_res_id,bigint,Результат проверки КИ участника
+scp_sec_check_res,32,aspr_cred_hist_comm,character varying,Комментарии к решению по КИ
+scp_sec_check_res,33,affil_check_comm,character varying,Проверка аффилированности
+scp_sec_check_res,34,supp_check_res_id,bigint,Результат проверки поставщика
+scp_sec_check_res,35,sf_family_status_comm,text,(ФС) Сведения о семейном положении
+scp_sec_check_res,36,sf_settle_accounts_comm,text,(ФС) Сведения о расчетных счетах
+scp_sec_check_res,37,sf_credit_history_comm,text,(ФС) Кредитная история
+scp_sec_check_res,38,sf_other_comment,text,(ФС) Прочее
+scp_sec_check_res,39,sf_affil_client_str,text,(ФС) Список аффилированных лиц
+scp_sec_check_res,40,sf_affil_check_comm,text,(ФС) Проверка аффилированности
+scp_sec_expertise,1,id,bigint,ID
+scp_sec_expertise,2,name__ru,character varying,"Name, languageSchema=ru"
+scp_sec_expertise,3,name__en,character varying,"Name, languageSchema=en"
+scp_sec_expertise,4,name,character varying,Name
+scp_sec_expertise,5,create_date,timestamp without time zone,Create date
+scp_sec_expertise,6,type_id,bigint,Тип объекта
+scp_sec_expertise,7,status,smallint,Status
+scp_sec_expertise,8,org_id,bigint,Подразделение
+scp_sec_expertise,9,user_id,bigint,Пользователь
+scp_sec_expertise,10,last_modified_date,timestamp without time zone,Last modified date
+scp_sec_expertise,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+scp_sec_expertise,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+scp_sec_expertise,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+scp_sec_expertise,14,is_system,smallint,System object
+scp_sec_expertise,15,afl_doc_num,character varying,Номер документа
+scp_sec_expertise,16,afl_doc_data,timestamp without time zone,Дата документа
+scp_sec_expertise,17,afp_state_id,bigint,Состояние
+scp_sec_expertise,18,emp_id,bigint,Ответственный менеджер
+scp_sec_expertise,19,sec_end_date,timestamp without time zone,Срок действия экспертизы
+scp_sec_expertise,20,expertise_obj_id,bigint,Объект экспертизы
+scp_sec_expertise,21,risk_zone_id,bigint,Зона риска
+scp_sec_expertise,22,is_appeal,smallint,Апелляция по заявке
+scp_sec_expertise,23,is_special_inform,smallint,Особые сведения
+scp_sec_expertise,24,sec_recall_reason,character varying,Обоснование отзыва экспертизы СЭБ
+scp_sec_expertise,25,sec_date_check,timestamp without time zone,Дата проверки СЭБ (итоговая)
+scp_sec_expertise,26,is_ses_withdrawn,smallint,КМ отозвал экспертизу
+scp_sec_expertise,27,reg_resp_emp,bigint,Ответственный РС
+scp_sec_expertise,28,scp_application_id,bigint,Заявка СКП
+scp_sec_expertise,29,is_region_work,smallint,В работе у регионов
+scp_sec_expertise,30,start_sec_date,timestamp without time zone,Дата поступления заявки в СЭБ
+scp_sec_expertise,31,dataminer_in_process,smallint,Выполняется Dataminer
+scp_sec_expertise,32,sf_app_obj_id,bigint,Ссылка на заявку ФС
+scp_sec_expertise,33,traf_lights_response_id,bigint,Результат проверки Светофор
+scp_sec_expertise,34,ident,character varying,Сист. Идентификатор
+scp_sec_expertise,35,sf_exp_term_date,timestamp without time zone,Срок действия
+scp_sec_expertise,36,end_date,timestamp without time zone,Дата завершения экспертизы
+scp_sec_expertise,37,reason_revision_str,character varying,Причина доработки
+scp_sec_expertise,38,reason_restart_str,character varying,Причина перезапуска
+scp_sec_expertise,39,reason_cancel_str,character varying,Причина отмены
+scp_sec_expertise,40,sec_exp_copy_id,bigint,Ссылка на копируемую экспертизу
+scp_sec_expertise,41,deleg_region_id,bigint,Регион назначения
+scp_sec_expertise,42,is_company_state_top,smallint,Госкомпания/ТОП-600
+scp_sec_expertise,43,app_obj_id,bigint,Ссылка на заявку КТ
+scp_sec_expertise,44,ct_sec_check_res_id,bigint,Результаты проверки (КТ)
+scp_sec_expertise,45,psb_office_id,bigint,Офис делегирования
+scp_sec_expertise,46,csd_expertise_obj_id,bigint,Объект экспертизы (КОД)
+scp_sec_expertise,47,print_form_date,timestamp without time zone,Дата СЭБ для вывода в ПФ
+scp_sec_expertise,48,deleg_emp_id,bigint,Сотрудник для делегирования
+scp_techcred,1,id,bigint,ID
+scp_techcred,2,name__ru,character varying,"Name, languageSchema=ru"
+scp_techcred,3,name,character varying,Name
+scp_techcred,4,create_date,timestamp without time zone,Create date
+scp_techcred,5,type_id,bigint,Тип объекта
+scp_techcred,6,status,smallint,Status
+scp_techcred,7,org_id,bigint,Подразделение
+scp_techcred,8,user_id,bigint,Пользователь
+scp_techcred,9,last_modified_date,timestamp without time zone,Last modified date
+scp_techcred,10,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+scp_techcred,11,created_emp_id,bigint,"Сотрудник, создавший объект"
+scp_techcred,12,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+scp_techcred,13,is_system,smallint,System object
+scp_techcred,14,ord,bigint,Порядок
+scp_techcred,15,ident,character varying,Идентификатор
+scp_techcred,16,name__en,character varying,"Name, languageSchema=en"
+sys_algorithm,1,id,bigint,"Код, SysTypeAttrEffective{} AbstractAttrEffective{id=101002, ident='ID'}"
+sys_algorithm,2,name__en,character varying,"Наименование версии, languageSchema=en"
+sys_algorithm,3,name__ru,character varying,"Наименование версии, languageSchema=ru"
+sys_algorithm,4,name,character varying,Наименование версии
+sys_algorithm,5,create_date,timestamp without time zone,Дата создания
+sys_algorithm,6,type_id,bigint,Тип объекта
+sys_algorithm,7,status,smallint,Статус
+sys_algorithm,8,org_id,bigint,Подразделение
+sys_algorithm,9,user_id,bigint,Пользователь
+sys_algorithm,10,amy_ident,character varying,Сист. Идентификатор
+sys_algorithm,11,amy_frml_text,text,Формула
+sys_algorithm,12,amy_alg_type_id,bigint,Тип алгоритма
+sys_algorithm,13,amy_base_type_id,bigint,Базовый тип объектов
+sys_algorithm,14,amy_sys_alg_not_replace_null,smallint,Не заменять null на 0
+sys_algorithm,15,amy_compiled_code,text,Скомпилированный код
+sys_algorithm,16,created_emp_id,bigint,"Сотрудник, создавший объект"
+sys_algorithm,17,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+sys_algorithm,18,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+sys_algorithm,19,last_modified_date,timestamp without time zone,Дата последнего изменения
+sys_algorithm,20,is_system,smallint,Системный объект
+sys_algorithm,21,amy_ver_num,bigint,Номер версии
+sys_algorithm,22,amy_alg_name,character varying,Наименование алгоритма
+sys_algorithm,23,amy_use_null_if_src_empty,smallint,"Вернуть null, если все исходные данные пустые"
+sys_company,1,id,bigint,"Код, SysTypeAttrEffective{id=101002, ident='ID'}"
+sys_company,2,name,character varying,Name
+sys_company,3,short_name,character varying,Short name
+sys_company,4,inn,character varying,TIN
+sys_company,5,type_id,bigint,Тип объекта
+sys_company,6,org_id,bigint,Подразделение
+sys_company,7,status,smallint,Status
+sys_company,8,create_date,timestamp without time zone,Create date
+sys_company,9,user_id,bigint,Пользователь
+sys_company,10,name__en,character varying,"Name, languageSchema=en"
+sys_company,11,name__ru,character varying,"Name, languageSchema=ru"
+sys_company,12,attr_email,character varying,Email
+sys_company,13,attr_web_site,character varying,Website
+sys_company,14,created_emp_id,bigint,"Сотрудник, создавший объект"
+sys_company,15,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+sys_company,16,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+sys_company,17,last_modified_date,timestamp without time zone,Last modified date
+sys_company,18,is_system,smallint,System object
+sys_company,19,attr_reg_country,character varying,Адрес регистрации: страна
+sys_company,20,contact_phone,character varying,Phone
+sys_company,21,main_okved,bigint,Basic OKVED code
+sys_company,22,business_segment,bigint,Business segment
+sys_company,23,comp_reg_date,timestamp without time zone,Registration date
+sys_company,24,group_company_link,bigint,Group of companies
+sys_company,25,company_record_date,timestamp without time zone,Tax registration date
+sys_company,26,company_registrator,character varying,Registrar
+sys_company,27,company_tax_authority,character varying,Tax authority
+sys_company,28,crmd_client_id,character varying,Код контрагента CRMD
+sys_company,29,act_addr_city,character varying,Фактический адрес: город
+sys_company,30,act_addr_street,character varying,Фактический адрес: улица
+sys_company,31,reg_addr_street,character varying,Адрес регистрации: улица
+sys_company,32,reg_addr_city,character varying,Адрес регистрации: город
+sys_company,33,attr_attr_abs,character varying,Идентификатор АБС
+sys_company,34,tax_authority_reg,character varying,"Налоговый орган, в котором лицо зарегистрировано"
+sys_company,35,tax_authority_account,character varying,"Налоговый орган, в котором лицо состоит на учёте"
+sys_company,36,customer_type_id,bigint,Тип клиента
+sys_company,37,sign_of_sme,smallint,Признак МСП
+sys_company,38,date_of_registration,timestamp without time zone,_Дата регистрации ЕГРЮЛ
+sys_company,39,newly_founded,smallint,Вновь созданное?
+sys_company,40,offices_psb_id,bigint,Офисы
+sys_company,41,sign_of_bankruptcy,smallint,Признак банкротства
+sys_company,42,stage_of_bankruptcy,bigint,Стадия банкротства
+sys_company,43,granting_consent,smallint,Согласие предоставлено
+sys_company,44,date_of_consent,timestamp without time zone,Дата согласия
+sys_company,45,fo_okved,bigint,ОКВЭД из отчётности
+sys_company,46,busines_segment_id,bigint,Сегмент по размеру бизнеса
+sys_company,47,d_storage_balance_txt,character varying,Атрибут для хранения дат (виджет баланса)
+sys_company,48,d_storage_finrep_txt,character varying,Атрибут для хранения дат (виджет ОФР)
+sys_company,49,is_rko,smallint,Наличие открытого расчетного счета
+sys_company,50,afina_segment_id,bigint,Сегмент по размеру бизнеса (Н. Афина)
+sys_company,51,neg_comment,character varying,Комментарий к признаку негатива
+sys_company,52,neg_status,smallint,Статус признака негатива
+sys_company,53,attr_launch_neg_etl,smallint,Признак запуска интеграции по негативу
+sys_employee,1,id,bigint,"Код, SysTypeAttrEffective{} AbstractAttrEffective{id=101002, ident='ID'}"
+sys_employee,2,name,character varying,Name
+sys_employee,3,type_id,bigint,Тип объекта
+sys_employee,4,org_id,bigint,Подразделение
+sys_employee,5,status,smallint,Status
+sys_employee,6,create_date,timestamp without time zone,Create date
+sys_employee,7,user_id,bigint,Пользователь
+sys_employee,8,emp_org_id,bigint,Office of the employee
+sys_employee,9,name__en,character varying,"Name, languageSchema=en"
+sys_employee,10,name__ru,character varying,"Name, languageSchema=ru"
+sys_employee,11,first_name,character varying,Name
+sys_employee,12,second_name,character varying,Middle name
+sys_employee,13,sur_name,character varying,Family name
+sys_employee,14,job_pos_id,bigint,Position
+sys_employee,15,email,character varying,E-MAIL
+sys_employee,16,birthday,timestamp without time zone,Birthday
+sys_employee,17,phone,character varying,Phone
+sys_employee,18,skype,character varying,Skype
+sys_employee,19,created_emp_id,bigint,"Сотрудник, создавший объект"
+sys_employee,20,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+sys_employee,21,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+sys_employee,22,last_modified_date,timestamp without time zone,Last modified date
+sys_employee,23,is_system,smallint,System object
+sys_employee,24,time_zone,bigint,Time zone
+sys_employee,25,sys_image,bigint,Photo
+sys_employee,26,is_locked,smallint,Lock a staff member
+sys_employee,27,workday_schedule_id,bigint,Working hours
+sys_employee,28,email_confirmed,smallint,EMAIL confirmed
+sys_employee,29,phone_confirmed,smallint,Phone number confirmed
+sys_employee,30,ban_send_notifications,smallint,Do not send notifications to email
+sys_employee,31,city_id,bigint,Locality
+sys_employee,32,sex_id,bigint,Sex
+sys_employee,33,locale_id,bigint,Locale
+sys_employee,34,sur_name__ru,character varying,"Family name, languageSchema=ru"
+sys_employee,35,sur_name__en,character varying,"Family name, languageSchema=en"
+sys_employee,36,first_name__ru,character varying,"Name, languageSchema=ru"
+sys_employee,37,first_name__en,character varying,"Name, languageSchema=en"
+sys_employee,38,second_name__ru,character varying,"Middle name, languageSchema=ru"
+sys_employee,39,second_name__en,character varying,"Middle name, languageSchema=en"
+sys_employee,40,ps_office,bigint,ОФИС ПСБ
+sys_employee,41,adress_ad,character varying,Расположение объекта в AD
+sys_employee,42,pers_emp_number,character varying,Табельный номер сотрудника
+sys_employee,43,inner_emp_phone,character varying,Внутренний номер сотрудника
+sys_employee,44,pers_opt_dmm_link,bigint,Персональная настройка модуля обновлений
+sys_obj_resp,1,id,bigint,"Сист. Код, SysAttribute{id='10000', name='Сист. Код', ident='ID', isTimeDepended='false'}"
+sys_obj_resp,2,name__en,character varying,"Сист. Наименование, SysAttribute{id='10001', name='Сист. Наименование', ident='NAME', isTimeDepended='false'}, languageSchema=en"
+sys_obj_resp,3,name__ru,character varying,"Сист. Наименование, SysAttribute{id='10001', name='Сист. Наименование', ident='NAME', isTimeDepended='false'}, languageSchema=ru"
+sys_obj_resp,4,name,character varying,"Сист. Наименование, SysAttribute{id='10001', name='Сист. Наименование', ident='NAME', isTimeDepended='false'}"
+sys_obj_resp,5,create_date,timestamp without time zone,"Сист. Дата создания, SysAttribute{id='10002', name='Сист. Дата создания', ident='CREATE_DATE', isTimeDepended='false'}"
+sys_obj_resp,6,type_id,bigint,"Сист. Тип объекта, SysAttribute{id='10003', name='Сист. Тип объекта', ident='TYPE_ID', isTimeDepended='false'}"
+sys_obj_resp,7,status,smallint,"Сист. Статус, SysAttribute{id='10004', name='Сист. Статус', ident='STATUS', isTimeDepended='false'}"
+sys_obj_resp,8,org_id,bigint,"Сист. Подразделение, SysAttribute{id='10005', name='Сист. Подразделение', ident='ORG_ID', isTimeDepended='false'}"
+sys_obj_resp,9,user_id,bigint,"Сист. Пользователь, SysAttribute{id='10006', name='Сист. Пользователь', ident='USER_ID', isTimeDepended='false'}"
+sys_obj_resp,10,afe_emp_id,bigint,"Сист. Сотрудник, SysAttribute{id='10017', name='Сист. Сотрудник', ident='EMP_ID', isTimeDepended='false'}"
+sys_obj_resp,11,afe_obj_id,bigint,"Объект мониторинга, SysAttribute{id='103836', name='Объект мониторинга', ident='OBJ_ID', isTimeDepended='false'}"
+sys_obj_resp,12,afe_subject_id,bigint,"Сист. Субъект безопасности, SysAttribute{id='108531', name='Сист. Субъект безопасности', ident='SUBJECT_ID', isTimeDepended='false'}"
+sys_obj_resp,13,created_emp_id,bigint,"Сист. Сотрудник, создавший объект, SysAttribute{id='10039', name='Сист. Сотрудник, создавший объект', ident='CREATED_EMP_ID', isTimeDepended='false'}"
+sys_obj_resp,14,last_modified_user_id,bigint,"Сист. Пользователь, кто последним изменил, SysAttribute{id='10038', name='Сист. Пользователь, кто последним изменил', ident='LAST_MODIFIED_USER_ID', isTimeDepended='false'}"
+sys_obj_resp,15,last_modified_emp_id,bigint,"Сист. Сотрудник, кто последним изменил, SysAttribute{id='10040', name='Сист. Сотрудник, кто последним изменил', ident='LAST_MODIFIED_EMP_ID', isTimeDepended='false'}"
+sys_obj_resp,16,last_modified_date,timestamp without time zone,"Сист. Дата последнего изменения, SysAttribute{id='10037', name='Сист. Дата последнего изменения', ident='LAST_MODIFIED_DATE', isTimeDepended='false'}"
+sys_obj_resp,17,is_system,smallint,"Сист. Системный объект, SysAttribute{id='10016', name='Сист. Системный объект', ident='SYS_OBJ_TYPE_IS_SYSTEM', isTimeDepended='false'}"
+sys_obj_resp,18,afe_ext_obj_id,bigint,"Дополнительный объект, SysAttribute{id='237411', name='Дополнительный объект', ident='EXT_OBJ_ID'}"
+sys_obj_resp,19,afe_resp_comment,text,"Комментарий, SysAttribute{id='586710', name='Комментарий', ident='RESP_COMMENT'}"
+sys_obj_resp,20,afe_short_name,character varying,"Краткое наименование, SysAttribute{id='108398', name='Краткое наименование', ident='ORG_STR_SHORT_NAME'}"
+sys_obj_resp,21,afe_start_stamp,timestamp without time zone,
+sys_obj_resp,22,afe_end_stamp,timestamp without time zone,
+sys_obj_resp,23,afe_current_resp,bigint,
+sys_obj_resp,24,afe_manage_emp,bigint,
+sys_obj_type,1,id,bigint,"Код, SysTypeAttrEffective{} AbstractAttrEffective{id=101002, ident='ID'}"
+sys_obj_type,2,name,character varying,"Наименование, SysTypeAttrEffective{} AbstractAttrEffective{id=101003, ident='NAME'}"
+sys_obj_type,3,ident,character varying,"Идентификатор, SysTypeAttrEffective{} AbstractAttrEffective{id=105050, ident='IDENT'}"
+sys_obj_type,4,table_name,character varying,"Наименование таблицы, SysTypeAttrEffective{} AbstractAttrEffective{id=105051, ident='TABLE_NAME'}"
+sys_obj_type,5,parent_id,bigint,"Родитель, SysTypeAttrEffective{} AbstractAttrEffective{id=105052, ident='SYS_OBJ_TYPE_PARENT_ID'}"
+sys_obj_type,6,field_name_prefix,character varying,"Префикс наименования поля, SysTypeAttrEffective{} AbstractAttrEffective{id=105056, ident='SYS_OBJ_TYPE_FIELD_NAME_PREFIX'}"
+sys_obj_type,7,is_hierarchy,smallint,"Иерархический тип, SysTypeAttrEffective{} AbstractAttrEffective{id=105076, ident='SYS_OBJ_TYPE_IS_HIERARCHY'}"
+sys_obj_type,8,is_system,smallint,"Системный объект, SysTypeAttrEffective{} AbstractAttrEffective{id=105077, ident='SYS_OBJ_TYPE_IS_SYSTEM'}"
+sys_obj_type,9,type_id,bigint,"Тип объекта, SysTypeAttrEffective{} AbstractAttrEffective{id=101005, ident='TYPE_ID'}"
+sys_obj_type,10,org_id,bigint,"Подразделение, SysTypeAttrEffective{} AbstractAttrEffective{id=101007, ident='ORG_ID'}"
+sys_obj_type,11,status,smallint,"Статус, SysTypeAttrEffective{} AbstractAttrEffective{id=101006, ident='STATUS'}"
+sys_obj_type,12,create_date,timestamp without time zone,"Дата создания, SysTypeAttrEffective{} AbstractAttrEffective{id=101004, ident='CREATE_DATE'}"
+sys_obj_type,13,user_id,bigint,"Пользователь, SysTypeAttrEffective{} AbstractAttrEffective{id=101008, ident='USER_ID'}"
+sys_obj_type,14,name__en,character varying,"Наименование, SysTypeAttrEffective{} AbstractAttrEffective{id=101003, ident='NAME'}, languageSchema=en"
+sys_obj_type,15,name__ru,character varying,"Наименование, SysTypeAttrEffective{} AbstractAttrEffective{id=101003, ident='NAME'}, languageSchema=ru"
+sys_obj_type,16,full_access_mask,bigint,"Маска полных прав доступа, SysTypeAttrEffective{} AbstractAttrEffective{id=108029, ident='SYS_OBJ_TYPE_FULL_ACCESS_MASK'}"
+sys_obj_type,17,use_curmtx_rights,smallint,"Права по матрице курируемости, вместо системных, SysTypeAttrEffective{} AbstractAttrEffective{id=112075, ident='USE_CURMTX_RIGHTS'}"
+sys_obj_type,18,java_handler,character varying,"Сист. обработчик, SysTypeAttrEffective{} AbstractAttrEffective{id=119605, ident='SYS_OBJ_TYPE_JAVA_HANDLER'}"
+sys_obj_type,19,not_copy,smallint,"Не копировать, SysTypeAttrEffective{} AbstractAttrEffective{id=160716, ident='SYS_OBJECT_DO_NOT_COPY'}"
+sys_obj_type,20,created_emp_id,bigint,"Сотрудник, создавший объект, SysTypeAttrEffective{} AbstractAttrEffective{id=101011, ident='CREATED_EMP_ID'}"
+sys_obj_type,21,last_modified_user_id,bigint,"Пользователь, кто последним изменил, SysTypeAttrEffective{} AbstractAttrEffective{id=101010, ident='LAST_MODIFIED_USER_ID'}"
+sys_obj_type,22,last_modified_emp_id,bigint,"Сотрудник, кто последним изменил, SysTypeAttrEffective{} AbstractAttrEffective{id=101012, ident='LAST_MODIFIED_EMP_ID'}"
+sys_obj_type,23,last_modified_date,timestamp without time zone,"Дата последнего изменения, SysTypeAttrEffective{} AbstractAttrEffective{id=101009, ident='LAST_MODIFIED_DATE'}"
+sys_obj_type,24,obj_type_attr_id,bigint,"Атрибут иерархии, SysTypeAttrEffective{} AbstractAttrEffective{id=129163, ident='SYS_OBJ_TYPE_HIER_ATTR_ID'}"
+sys_obj_type,25,is_time_depended,smallint,"Атрибуты могут зависеть от времени, SysTypeAttrEffective{} AbstractAttrEffective{id=124834, ident='IS_TIME_DEPENDED'}"
+sys_obj_type,26,js_handler,character varying,"JS обработчик, SysTypeAttrEffective{} AbstractAttrEffective{id=10054, ident='SYS_OBJ_TYPE_JS_HANDLER'}"
+sys_obj_type,27,is_readonly_by_default,smallint,"Открывать объекты в режиме только чтение, SysTypeAttrEffective{} AbstractAttrEffective{id=11270, ident='IS_READONLY_BY_DEFAULT'}"
+sys_obj_type,28,alg_saving_id,bigint,"Жизненный цикл: перед сохранением, SysTypeAttrEffective{} AbstractAttrEffective{id=11651, ident='ALG_SAVING'}"
+sys_obj_type,29,alg_saved_id,bigint,"Жизненный цикл: после сохранения, SysTypeAttrEffective{} AbstractAttrEffective{id=11666, ident='ALG_SAVED'}"
+sys_obj_type,30,id_seq_name,character varying,
+sys_obj_type,31,ext_types_multiselect,smallint,"Выбор нескольких расширений в рамках одного экземпляра, SysTypeAttrEffective{id=756321, ident='EXT_TYPES_MULTISELECT'}"
+sys_obj_type,32,use_cache,smallint,"Использовать кэш, SysTypeAttrEffective{id=758811, ident='USE_CACHE'}"
+sys_obj_type,33,hist_attr_force_create,smallint,"Принудительное создание версий исторических атрибутов, SysTypeAttrEffective{id=822891, ident='HIST_ATTR_FORCE_CREATE'}"
+sys_obj_type,34,link_access_attr_id,bigint,"Атрибут для наследования прав, SysTypeAttrEffective{id=825793, ident='LINK_ACCESS_ATTR'}"
+sys_obj_type,35,access_type_id,bigint,"Вид контроля прав, SysTypeAttrEffective{id=825791, ident='ACCESS_TYPE'}"
+sys_obj_type,36,ext_types_widget_name,character varying,"Заголовок потенциального типа в карточке, SysTypeAttrEffective{id=835476, ident='EXT_TYPES_WIDGET_NAME'}"
+sys_obj_type,37,ext_types_hide_btn,smallint,"Скрывать кнопку Расширения в карточке объекта, SysTypeAttrEffective{id=835474, ident='EXT_TYPES_HIDE_BTN'}"
+sys_obj_type,38,rf_connection,bigint,Соединение с внешней БД
+sys_obj_type,39,attr_with_name,bigint,Атрибут для наименования
+sys_obj_type,40,alg_deleting_id,bigint,Событие перед удалением
+sys_obj_type,41,display_obj_inst,bigint,Отображение экземпляра объекта
+sys_obj_type,42,is_enabled_change_audit,smallint,Записывать изменения в аудит
+sys_obj_type,43,allow_ignore_lifecycle,smallint,Возможно сохранение объекта без выполнения выражений/ЖЦ
+sys_obj_type,44,sys_content_type_id,bigint,Тип содержимого
+sys_obj_type,45,init_cache,smallint,Добавлять в кэш при инициализации
+sys_obj_type,46,sys_obj_type_is_mdata,smallint,Метадата
+sys_obj_type,47,note,character varying,Описание
+sys_obj_type,48,note__ru,character varying,"Описание, languageSchema=ru"
+sys_obj_type,49,note__en,character varying,"Описание, languageSchema=en"
+sys_object,1,id,bigint,"Сист. Код, SysAttribute{id='10000', name='Сист. Код', ident='ID', isTimeDepended='false'}"
+sys_object,2,name,character varying,"Наименование, SysTypeAttrEffective{} AbstractAttrEffective{id=101003, ident='NAME'}"
+sys_object,3,type_id,bigint,"Тип объекта, SysTypeAttrEffective{} AbstractAttrEffective{id=101005, ident='TYPE_ID'}"
+sys_object,4,org_id,bigint,"Подразделение, SysTypeAttrEffective{} AbstractAttrEffective{id=101007, ident='ORG_ID'}"
+sys_object,5,status,smallint,"Сист. Статус, SysAttribute{id='10004', name='Сист. Статус', ident='STATUS', isTimeDepended='false'}"
+sys_object,6,create_date,timestamp without time zone,"Дата создания, SysTypeAttrEffective{} AbstractAttrEffective{id=101004, ident='CREATE_DATE'}"
+sys_object,7,user_id,bigint,"Сист. Пользователь, SysAttribute{id='10006', name='Сист. Пользователь', ident='USER_ID', isTimeDepended='false'}"
+sys_object,8,name__en,character varying,"Сист. Наименование, SysAttribute{id='10001', name='Сист. Наименование', ident='NAME', isTimeDepended='false'}, languageSchema=en"
+sys_object,9,name__ru,character varying,"Сист. Наименование, SysAttribute{id='10001', name='Сист. Наименование', ident='NAME', isTimeDepended='false'}, languageSchema=ru"
+sys_object,10,created_emp_id,bigint,"Сотрудник, создавший объект, SysTypeAttrEffective{} AbstractAttrEffective{id=101011, ident='CREATED_EMP_ID'}"
+sys_object,11,last_modified_user_id,bigint,"Пользователь, кто последним изменил, SysTypeAttrEffective{} AbstractAttrEffective{id=101010, ident='LAST_MODIFIED_USER_ID'}"
+sys_object,12,last_modified_emp_id,bigint,"Сист. Сотрудник, кто последним изменил, SysAttribute{id='10040', name='Сист. Сотрудник, кто последним изменил', ident='LAST_MODIFIED_EMP_ID', isTimeDepended='false'}"
+sys_object,13,last_modified_date,timestamp without time zone,"Сист. Дата последнего изменения, SysAttribute{id='10037', name='Сист. Дата последнего изменения', ident='LAST_MODIFIED_DATE', isTimeDepended='false'}"
+sys_object,14,is_system,smallint,"Сист. Системный объект, SysAttribute{id='10016', name='Сист. Системный объект', ident='SYS_OBJ_TYPE_IS_SYSTEM', isTimeDepended='false'}"
+sys_state,1,id,bigint,"Сист. Код, SysAttribute{id='10000', name='Сист. Код', ident='ID', isTimeDepended='false'}"
+sys_state,2,name,character varying,Name
+sys_state,3,create_date,timestamp without time zone,Create date
+sys_state,4,type_id,bigint,Тип объекта
+sys_state,5,status,smallint,Status
+sys_state,6,org_id,bigint,Подразделение
+sys_state,7,user_id,bigint,Пользователь
+sys_state,8,afr_ident,character varying,Identifier
+sys_state,9,afr_ord,bigint,Order
+sys_state,10,afr_note,character varying,Description
+sys_state,11,name__ru,character varying,"Name, languageSchema=ru"
+sys_state,12,name__en,character varying,"Name, languageSchema=en"
+sys_state,13,created_emp_id,bigint,"Сотрудник, создавший объект"
+sys_state,14,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+sys_state,15,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+sys_state,16,last_modified_date,timestamp without time zone,Last modified date
+sys_state,17,is_system,smallint,System object
+tbs_type,1,id,bigint,ID
+tbs_type,2,name__ru,character varying,"Name, languageSchema=ru"
+tbs_type,3,name,character varying,Name
+tbs_type,4,create_date,timestamp without time zone,Create date
+tbs_type,5,type_id,bigint,Тип объекта
+tbs_type,6,status,smallint,Status
+tbs_type,7,org_id,bigint,Подразделение
+tbs_type,8,user_id,bigint,Пользователь
+tbs_type,9,last_modified_date,timestamp without time zone,Last modified date
+tbs_type,10,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+tbs_type,11,created_emp_id,bigint,"Сотрудник, создавший объект"
+tbs_type,12,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+tbs_type,13,is_system,smallint,System object
+tbs_type,14,ord,bigint,Порядок
+tbs_type,15,identif,character varying,Идентификатор
+tbs_type,16,acc_subconto_type_id,bigint,Сокращенное название
+tbs_type,17,name__en,character varying,"Name, languageSchema=en"
+type_loan,1,id,bigint,ID
+type_loan,2,name__ru,character varying,"Name, languageSchema=ru"
+type_loan,3,name,character varying,Name
+type_loan,4,create_date,timestamp without time zone,Create date
+type_loan,5,type_id,bigint,Тип объекта
+type_loan,6,status,smallint,Status
+type_loan,7,org_id,bigint,Подразделение
+type_loan,8,user_id,bigint,Пользователь
+type_loan,9,last_modified_date,timestamp without time zone,Last modified date
+type_loan,10,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+type_loan,11,created_emp_id,bigint,"Сотрудник, создавший объект"
+type_loan,12,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+type_loan,13,is_system,smallint,System object
+type_loan,14,prod_type_upp_lev_id,bigint,Не использовать! Форма продукта_верхнеуровневая
+type_loan,15,ord,bigint,Порядок
+type_loan,16,ident,character varying,Сист. Идентификатор
+type_loan,17,rel_submis_form,smallint,Актуальность формы предоставления
+type_loan,18,seq_prod_number,bigint,Порядковый номер (для нумерации субпродуктов)
+type_loan,19,name__en,character varying,"Name, languageSchema=en"
+users,1,id,integer,
+users,2,tg_id,bigint,
+users,3,username,character varying,
+yaig_client_gen_agr,1,id,bigint,ID
+yaig_client_gen_agr,2,name__ru,character varying,"Name, languageSchema=ru"
+yaig_client_gen_agr,3,name__en,character varying,"Name, languageSchema=en"
+yaig_client_gen_agr,4,name,character varying,Name
+yaig_client_gen_agr,5,create_date,timestamp without time zone,Create date
+yaig_client_gen_agr,6,type_id,bigint,Тип объекта
+yaig_client_gen_agr,7,status,smallint,Status
+yaig_client_gen_agr,8,org_id,bigint,Подразделение
+yaig_client_gen_agr,9,user_id,bigint,Пользователь
+yaig_client_gen_agr,10,last_modified_date,timestamp without time zone,Last modified date
+yaig_client_gen_agr,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+yaig_client_gen_agr,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+yaig_client_gen_agr,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+yaig_client_gen_agr,14,is_system,smallint,System object
+yaig_client_gen_agr,15,yaig_client_princip_id,bigint,УАиГ клиент
+yaig_client_gen_agr,16,yaig_gen_agr_id,bigint,ID генерального соглашения
+yaig_client_gen_agr,17,yaig_gen_agr_sum,numeric,Сумма генерального соглашения
+yaig_client_gen_agr,18,yaig_date_close,timestamp without time zone,Дата истечения
+yaig_client_gen_agr,19,yaig_date_open,timestamp without time zone,Дата подписания
+yaig_client_gen_agr,20,yaig_gen_agr_num,character varying,Номер генерального соглашения
+yaig_client_gen_agr,21,yaig_unused_limit,numeric,Сумма неиспользованного лимита
+yaig_client_gen_agr,22,yaig_gen_agr_type_id,bigint,Тип генерального соглашения
+yaig_client_gen_agr,23,yaig_cur_id,bigint,Валюта генерального соглашения
+yaig_client_gen_agr,24,yaig_client_link,bigint,Ссылка на клиента
+yaig_client_gen_agr,25,yaig_base_code,bigint,Код базы НА
+yaig_client_guarantee,1,id,bigint,ID
+yaig_client_guarantee,2,name__ru,character varying,"Name, languageSchema=ru"
+yaig_client_guarantee,3,name__en,character varying,"Name, languageSchema=en"
+yaig_client_guarantee,4,name,character varying,Name
+yaig_client_guarantee,5,create_date,timestamp without time zone,Create date
+yaig_client_guarantee,6,type_id,bigint,Тип объекта
+yaig_client_guarantee,7,status,smallint,Status
+yaig_client_guarantee,8,org_id,bigint,Подразделение
+yaig_client_guarantee,9,user_id,bigint,Пользователь
+yaig_client_guarantee,10,last_modified_date,timestamp without time zone,Last modified date
+yaig_client_guarantee,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+yaig_client_guarantee,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+yaig_client_guarantee,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+yaig_client_guarantee,14,is_system,smallint,System object
+yaig_client_guarantee,15,yaig_client_princip_id,bigint,УАиГ клиент
+yaig_client_guarantee,16,yaig_product_id,bigint,Продукт
+yaig_client_guarantee,17,yaig_guar_summ,numeric,Сумма гарантии
+yaig_client_guarantee,18,yaig_manager_name,character varying,Менеджер клиента
+yaig_client_guarantee,19,yaig_risk_group,bigint,Группа риска
+yaig_client_guarantee,20,yaig_manager_code,bigint,Табельный номер клиентского менеджера
+yaig_client_guarantee,21,yaig_quality_categ,bigint,Категория качества
+yaig_client_guarantee,22,yaig_guar_type_id,bigint,Тип гарантии
+yaig_client_guarantee,23,yaig_prnt_gen_agr_id,bigint,Генеральное соглашение
+yaig_client_guarantee,24,yaig_cur_id,bigint,Валюта гарантии
+yaig_client_guarantee,25,yaig_client_link,bigint,Ссылка на клиента
+yaig_client_guarantee,26,yaig_date_close,timestamp without time zone,Дата истечения гарантии
+yaig_client_guarantee,27,yaig_date_open,timestamp without time zone,Дата открытия гарантии
+yaig_client_guarantee,28,yaig_guar_num,character varying,Номер гарантии
+yaig_client_guarantee,29,yaig_guarantee_id,bigint,ID гарантии
+yaig_client_guarantee,30,yaig_sum_commis,numeric,Сумма комиссий
+yaig_client_guarantee,31,yaig_manager_code_str,character varying,Табельный номер клиентского менеджера (Строка)
+yaig_client_guarantee,32,yaig_guar_disclosure,timestamp without time zone,Дата раскрытия гарантии
+yaig_client_guarantee,33,yaig_guar_payments_bool,smallint,Признак раскрытия гарантии
+yaig_client_guarantee,34,yaig_guar_payment,bigint,(Число) Признак раскрытия гарантии
+yaig_client_guarantee,35,contr_group_id,bigint,Контрактная группа
+yaig_client_guarantee,36,aggr_protocol_num,character varying,Номер протокола
+yaig_client_guarantee,37,appl_documentum_num,character varying,Номер заявки в Documentum
+yaig_client_guarantee,38,yaig_base_code,bigint,Код базы НА
+yaig_product_dict,1,id,bigint,ID
+yaig_product_dict,2,name__ru,character varying,"Name, languageSchema=ru"
+yaig_product_dict,3,name__en,character varying,"Name, languageSchema=en"
+yaig_product_dict,4,name,character varying,Name
+yaig_product_dict,5,create_date,timestamp without time zone,Create date
+yaig_product_dict,6,type_id,bigint,Тип объекта
+yaig_product_dict,7,status,smallint,Status
+yaig_product_dict,8,org_id,bigint,Подразделение
+yaig_product_dict,9,user_id,bigint,Пользователь
+yaig_product_dict,10,last_modified_date,timestamp without time zone,Last modified date
+yaig_product_dict,11,last_modified_user_id,bigint,"Пользователь, внесший последние изменения"
+yaig_product_dict,12,created_emp_id,bigint,"Сотрудник, создавший объект"
+yaig_product_dict,13,last_modified_emp_id,bigint,"Сотрудник, внесший последние изменения"
+yaig_product_dict,14,is_system,smallint,System object
+yaig_product_dict,15,ident,character varying,Сист. Идентификатор

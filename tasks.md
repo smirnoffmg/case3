@@ -9,8 +9,8 @@
 
 ### Датасет и эталоны
 
-- [ ] Расширить [`data/dataset/tasks.jsonl`](data/dataset/tasks.jsonl) до **не менее 50** пар NL-SQL (безопасные запросы по реальным таблицам схемы)
-- [ ] Дополнить [`data/dataset/vulns.jsonl`](data/dataset/vulns.jsonl): по 1-2 примера на каждый из 9 классов уязвимостей
+- [x] Расширить [`data/dataset/tasks.jsonl`](data/dataset/tasks.jsonl) до **не менее 50** пар NL-SQL (безопасные запросы по реальным таблицам схемы)
+- [x] Дополнить [`data/dataset/vulns.jsonl`](data/dataset/vulns.jsonl): по 1-2 примера на каждый из 9 классов уязвимостей
 - [ ] Согласовать эталоны с детекторами: исправить `SQL_INJ_UNION` (датасет vs [`src/case3/judge/static.py`](src/case3/judge/static.py))
 - [ ] Добавить тест на `SQL_INJ_UNION` в [`tests/unit/test_static_judge.py`](tests/unit/test_static_judge.py)
 

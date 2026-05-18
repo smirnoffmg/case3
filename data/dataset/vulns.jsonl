@@ -1,10 +1,66 @@
 {"sql": "DELETE FROM public.acc_number;", "expected_classes": ["DML_NO_WHERE"]}
 {"sql": "UPDATE public.sys_employee SET status = 0;", "expected_classes": ["DML_NO_WHERE"]}
+{"sql": "DELETE FROM public.credit_contract;", "expected_classes": ["DML_NO_WHERE"]}
+{"sql": "UPDATE public.application_obj SET status = 0;", "expected_classes": ["DML_NO_WHERE"]}
+{"sql": "UPDATE public.dict_product SET product_relevance = 0;", "expected_classes": ["DML_NO_WHERE"]}
+{"sql": "DELETE FROM public.count_turnover;", "expected_classes": ["DML_NO_WHERE"]}
+{"sql": "UPDATE public.sys_company SET status = 0;", "expected_classes": ["DML_NO_WHERE"]}
+
+
 {"sql": "SELECT * FROM public.sys_employee;", "expected_classes": ["SELECT_STAR", "NO_PAGINATION"]}
-{"sql": "SELECT id, email, phone FROM public.sys_employee LIMIT 10;", "expected_classes": ["DIRECT_SENSITIVE"]}
-{"sql": "SELECT id FROM public.sys_employee WHERE name = '' || user_input || '';", "expected_classes": ["SQL_INJ_CLASSIC"]}
-{"sql": "SELECT 1 UNION SELECT password FROM users;", "expected_classes": ["SQL_INJ_UNION"]}
-{"sql": "SELECT pg_sleep(10);", "expected_classes": ["SQL_INJ_TIME"]}
-{"sql": "EXECUTE format('SELECT %I', 'x');", "expected_classes": ["PLPGSQL_UNSAFE"]}
-{"sql": "EXECUTE 'SELECT 1';", "expected_classes": ["PRIV_ESCALATE"]}
 {"sql": "SELECT id, name FROM public.sys_employee;", "expected_classes": ["NO_PAGINATION"]}
+{"sql": "SELECT * FROM public.credit_contract;", "expected_classes": ["SELECT_STAR", "NO_PAGINATION"]}
+{"sql": "SELECT * FROM public.application_obj;", "expected_classes": ["SELECT_STAR", "NO_PAGINATION"]}
+{"sql": "SELECT * FROM public.dict_product WHERE status = 1;", "expected_classes": ["SELECT_STAR", "NO_PAGINATION"]}
+{"sql": "SELECT * FROM public.sys_company;", "expected_classes": ["SELECT_STAR", "NO_PAGINATION"]}
+{"sql": "SELECT * FROM public.ic_application;", "expected_classes": ["SELECT_STAR", "NO_PAGINATION"]}
+{"sql": "SELECT id, credit_contract_number, credit_amount FROM public.credit_contract;", "expected_classes": ["NO_PAGINATION"]}
+{"sql": "SELECT id, name FROM public.dict_product WHERE status = 1;", "expected_classes": ["NO_PAGINATION"]}
+{"sql": "SELECT id, name FROM public.business_segment;", "expected_classes": ["NO_PAGINATION"]}
+{"sql": "SELECT id, name FROM public.offices_psb;", "expected_classes": ["NO_PAGINATION"]}
+{"sql": "SELECT id, name FROM public.application_obj WHERE status = 1;", "expected_classes": ["NO_PAGINATION"]}
+
+
+{"sql": "SELECT id, email, phone FROM public.sys_employee LIMIT 10;", "expected_classes": ["DIRECT_SENSITIVE"]}
+{"sql": "SELECT id, credit_contract_number, credit_amount, days_delay_number FROM public.credit_contract;", "expected_classes": ["DIRECT_SENSITIVE"]}
+{"sql": "SELECT link_customer_id, credit_amount, reserve_size FROM public.credit_contract;", "expected_classes": ["DIRECT_SENSITIVE"]}
+{"sql": "SELECT id, loan_term, credit_amount, date_loan_debt FROM public.credit_contract;", "expected_classes": ["DIRECT_SENSITIVE"]}
+{"sql": "SELECT id, limit_over, max_sum_credit, min_sum_credit FROM public.dict_product;", "expected_classes": ["DIRECT_SENSITIVE"]}
+{"sql": "SELECT id, turnover_debit, turnover_credit, output_balance_debit, output_balance_credit FROM public.count_turnover;", "expected_classes": ["DIRECT_SENSITIVE"]}
+
+
+{"sql": "SELECT id FROM public.sys_employee WHERE name = '' || user_input || '';", "expected_classes": ["SQL_INJ_CLASSIC"]}
+{"sql": "SELECT id FROM public.credit_contract WHERE credit_contract_number = '" || contract_num || "';", "expected_classes": ["SQL_INJ_CLASSIC"]}
+{"sql": "SELECT id FROM public.application_obj WHERE afl_doc_num = '" || doc_num || "';", "expected_classes": ["SQL_INJ_CLASSIC"]}
+{"sql": "SELECT id FROM public.sys_company WHERE ident = '" || company_ident || "';", "expected_classes": ["SQL_INJ_CLASSIC"]}
+{"sql": "SELECT id FROM public.dict_product WHERE name = '" || product_name || "';", "expected_classes": ["SQL_INJ_CLASSIC"]}
+
+{"sql": "SELECT 1 UNION SELECT password FROM users;", "expected_classes": ["SQL_INJ_UNION"]}
+{"sql": "SELECT id FROM public.credit_contract WHERE id = 1 UNION SELECT id FROM public.sys_company;", "expected_classes": ["SQL_INJ_UNION"]}
+{"sql": "SELECT credit_contract_number FROM public.credit_contract WHERE id = 1 UNION SELECT name FROM public.dict_product;", "expected_classes": ["SQL_INJ_UNION"]}
+{"sql": "SELECT id FROM public.application_obj WHERE id = 1 UNION SELECT id FROM public.ic_application;", "expected_classes": ["SQL_INJ_UNION"]}
+{"sql": "SELECT id FROM public.sys_company WHERE id = 1 UNION SELECT link_customer_id FROM public.credit_contract;", "expected_classes": ["SQL_INJ_UNION"]}
+{"sql": "SELECT id FROM public.business_segment WHERE id = 1 UNION SELECT attr_business_segment FROM public.dict_product;", "expected_classes": ["SQL_INJ_UNION"]}
+
+{"sql": "SELECT pg_sleep(10);", "expected_classes": ["SQL_INJ_TIME"]}
+{"sql": "SELECT pg_sleep(5) WHERE '" || user_input || "' = 'admin';", "expected_classes": ["SQL_INJ_TIME"]}
+{"sql": "SELECT CASE WHEN (SELECT count(*) FROM public.sys_employee WHERE name = '" || emp_name || "') > 0 THEN pg_sleep(3) ELSE 0 END;", "expected_classes": ["SQL_INJ_TIME"]}
+{"sql": "SELECT * FROM public.credit_contract WHERE id = 1 AND pg_sleep(2) IS NULL;", "expected_classes": ["SQL_INJ_TIME", "SELECT_STAR"]}
+{"sql": "SELECT id FROM public.application_obj WHERE afp_state_id = 1 OR pg_sleep(3) IS NULL;", "expected_classes": ["SQL_INJ_TIME"]}
+{"sql": "SELECT pg_sleep(CASE WHEN " || secret_flag || " = 1 THEN 4 ELSE 0 END);", "expected_classes": ["SQL_INJ_TIME"]}
+
+{"sql": "EXECUTE format('SELECT %I', 'x');", "expected_classes": ["PLPGSQL_UNSAFE"]}
+{"sql": "EXECUTE format('SELECT * FROM public.%I', user_table_name);", "expected_classes": ["PLPGSQL_UNSAFE", "SELECT_STAR"]}
+{"sql": "EXECUTE ('DELETE FROM public.credit_contract WHERE id = ' || contract_id);", "expected_classes": ["PLPGSQL_UNSAFE"]}
+{"sql": "EXECUTE format('UPDATE %I SET status = %s', target_table, new_status);", "expected_classes": ["PLPGSQL_UNSAFE"]}
+{"sql": "EXECUTE ('SELECT credit_amount FROM credit_contract WHERE link_customer_id = ' || customer_id);", "expected_classes": ["PLPGSQL_UNSAFE"]}
+{"sql": "EXECUTE format('INSERT INTO %I (name) VALUES (%L)', dyn_table, dyn_name);", "expected_classes": ["PLPGSQL_UNSAFE"]}
+
+{"sql": "EXECUTE 'SELECT 1';", "expected_classes": ["PRIV_ESCALATE"]}
+{"sql": "GRANT ALL PRIVILEGES ON DATABASE reporting TO report_user;", "expected_classes": ["PRIV_ESCALATE"]}
+{"sql": "ALTER ROLE report_user WITH SUPERUSER;", "expected_classes": ["PRIV_ESCALATE"]}
+{"sql": "GRANT SELECT, UPDATE ON ALL TABLES IN SCHEMA public TO some_role;", "expected_classes": ["PRIV_ESCALATE"]}
+{"sql": "GRANT sys_admin TO regular_user;", "expected_classes": ["PRIV_ESCALATE"]}
+{"sql": "REVOKE ALL ON DATABASE prod FROM public; GRANT ALL ON DATABASE prod TO admin_user;", "expected_classes": ["PRIV_ESCALATE"]}
+
+
