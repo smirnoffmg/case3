@@ -43,8 +43,8 @@ def _build_fk_adjacency(index: SchemaIndex) -> dict[str, set[str]]:
 
 
 class SchemaRetriever:
-    _MIN_SCORE = 0.5   # below this, BM25 result is noise — use fallback
-    _FK_BUDGET = 3     # max FK-expanded tables appended after BM25 results
+    _MIN_SCORE = 0.5  # below this, BM25 result is noise — use fallback
+    _FK_BUDGET = 3  # max FK-expanded tables appended after BM25 results
 
     def __init__(self, index: SchemaIndex) -> None:
         self._index = index
@@ -74,7 +74,9 @@ class SchemaRetriever:
                 f"{c.name} ({c.data_type})" + (" [PII]" if c.sensitive else "")
                 for c in t.columns[:30]
             )
-            out.append(TableContext(name=name, comment=t.comment, columns_text=cols, score=float(score)))
+            out.append(
+                TableContext(name=name, comment=t.comment, columns_text=cols, score=float(score))
+            )
 
         out = out or self._fallback(top_k)
         return self._expand_fk(out)
@@ -91,7 +93,9 @@ class SchemaRetriever:
                     f"{c.name} ({c.data_type})" + (" [PII]" if c.sensitive else "")
                     for c in t.columns[:30]
                 )
-                additions.append(TableContext(name=neighbor, comment=t.comment, columns_text=cols, score=0.0))
+                additions.append(
+                    TableContext(name=neighbor, comment=t.comment, columns_text=cols, score=0.0)
+                )
                 present.add(neighbor)
         return bm25_results + additions
 

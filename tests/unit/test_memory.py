@@ -48,6 +48,17 @@ def test_not_stuck_when_classes_change():
     assert not mem.is_stuck()
 
 
+def test_lessons_marks_regression():
+    mem = FeedbackMemory()
+    mem.update(_audit(["SQL_INJ_UNION", "DIRECT_SENSITIVE"]), 1)
+    mem.update(_audit(["DIRECT_SENSITIVE"]), 2)
+    lessons = mem.lessons()
+    repeat = [lesson for lesson in lessons if "REPEAT MISTAKE" in lesson]
+    normal = [lesson for lesson in lessons if "REPEAT MISTAKE" not in lesson]
+    assert any("SQL_INJ_UNION" in lesson for lesson in repeat)
+    assert any("DIRECT_SENSITIVE" in lesson for lesson in normal)
+
+
 def test_stuck_requires_min_iterations():
     mem = FeedbackMemory()
     mem.update(_audit(["DIRECT_SENSITIVE"]), 1)

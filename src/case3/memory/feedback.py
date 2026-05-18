@@ -22,9 +22,16 @@ class FeedbackMemory:
                 self._resolved.add(cls)
 
     def lessons(self) -> list[str]:
-        return [
-            f"[{v.vuln_class}] {v.description}. {v.recommendation}" for v in self._by_class.values()
-        ]
+        result = []
+        for v in self._by_class.values():
+            if v.vuln_class in self._resolved:
+                result.append(
+                    f"⚠️ THIS IS A REPEAT MISTAKE [{v.vuln_class}] "
+                    f"You fixed this before but it came back. {v.description}. {v.recommendation}"
+                )
+            else:
+                result.append(f"[{v.vuln_class}] {v.description}. {v.recommendation}")
+        return result
 
     def all_vulnerabilities(self) -> list[Vulnerability]:
         return list(self._by_class.values())
