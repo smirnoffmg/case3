@@ -84,13 +84,21 @@ def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict
         compare_vuln_classes(hybrid_predicted, expected, judge_m)
         update_class_metrics(hybrid_predicted, expected, judge_by_class)
 
+    provider = settings.resolve_llm_provider()
     _, llm_base = settings.resolve_llm_credentials()
+    llm_info: dict[str, str | None] = {
+        "provider": provider.value,
+    }
+    if provider.value == "anthropic":
+        llm_info["model"] = settings.anthropic_model
+        llm_info["base_url"] = None
+    else:
+        llm_info["model"] = settings.openai_model
+        llm_info["base_url"] = llm_base
+
     report = {
         "timestamp": datetime.now(UTC).isoformat(),
-        "llm": {
-            "model": settings.openai_model,
-            "base_url": llm_base,
-        },
+        "llm": llm_info,
         "pipeline": {
             "total": pipeline_m.total,
             "approval_rate": pipeline_m.approval_rate,

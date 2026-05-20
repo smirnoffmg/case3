@@ -81,7 +81,22 @@ uv run case3 eval
 make eval
 ```
 
-Report JSON in `reports/` includes `llm.model` and `llm.base_url`.
+Report JSON in `reports/` includes `llm.provider`, `llm.model`, and `llm.base_url`.
+
+### Validate with OpenAI
+
+```bash
+LLM_PROVIDER=openai OPENAI_API_KEY=sk-... OPENAI_MODEL=gpt-4o-mini \
+  uv run case3 run "Список сотрудников с email, лимит 10"
+```
+
+### Validate with Claude (Anthropic)
+
+```bash
+LLM_PROVIDER=anthropic ANTHROPIC_API_KEY=sk-ant-... \
+  ANTHROPIC_MODEL=claude-sonnet-4-20250514 \
+  uv run case3 run "Список сотрудников с email, лимит 10"
+```
 
 ### Streamlit UI
 
@@ -94,8 +109,9 @@ uv run streamlit run streamlit_app.py
 
 | Symptom                                  | Likely cause                                                                 |
 | ---------------------------------------- | ---------------------------------------------------------------------------- |
-| Cloud API 401 / forbidden                | Set real `OPENAI_API_KEY`; empty key only works with local `OPENAI_BASE_URL` |
-| `PermissionDeniedError` / api.openai.com | `OPENAI_BASE_URL` missing or wrong                                           |
+| Cloud API 401 / forbidden                | Set real `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` for the chosen provider     |
+| Both keys set, startup error             | Set explicit `LLM_PROVIDER=openai` or `anthropic`                            |
+| `PermissionDeniedError` / api.openai.com | `OPENAI_BASE_URL` missing or wrong (OpenAI path)                             |
 | Connection refused                       | Ollama not on port 11434                                                     |
 | Model not found                          | `ollama pull <OPENAI_MODEL>`                                                 |
 | Timeout / exit 1                         | Raise `TIMEOUT_SEC` or use a smaller model                                   |

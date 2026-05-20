@@ -6,53 +6,117 @@ from typing import Literal
 
 import streamlit as st
 
-from case3.config import DEFAULT_OLLAMA_BASE_URL, Settings, get_settings
+from case3.config import DEFAULT_OLLAMA_BASE_URL, LLMProvider, Settings, get_settings
+from case3.logging_config import (
+    LLMExchange,
+    begin_llm_exchange_log,
+    configure_logging,
+)
 from case3.pipeline import run_sql_security_pipeline
 
 DetailLevel = Literal["minimal", "standard", "full"]
+ProviderOption = Literal["ollama", "openai", "anthropic"]
+_PROVIDER_LABELS: dict[ProviderOption, str] = {
+    "ollama": "Ollama (локально)",
+    "openai": "OpenAI",
+    "anthropic": "Claude (Anthropic)",
+}
 
 
 def _init_session_defaults(settings: Settings) -> None:
+    if "ui_provider" not in st.session_state:
+        try:
+            st.session_state.ui_provider = settings.resolve_llm_provider().value
+        except Exception:
+            st.session_state.ui_provider = "ollama"
     if "ui_model" not in st.session_state:
         st.session_state.ui_model = settings.openai_model
+    if "ui_anthropic_model" not in st.session_state:
+        st.session_state.ui_anthropic_model = settings.anthropic_model
     if "ui_base_url" not in st.session_state:
         st.session_state.ui_base_url = settings.openai_base_url or ""
     if "api_key_ui" not in st.session_state:
         st.session_state.api_key_ui = ""
+    if "anthropic_api_key_ui" not in st.session_state:
+        st.session_state.anthropic_api_key_ui = ""
 
 
 def _build_effective_settings(settings: Settings) -> Settings:
+    provider = str(st.session_state.ui_provider)
     updates: dict[str, object] = {
-        "openai_model": str(st.session_state.ui_model).strip() or settings.openai_model,
-        "openai_base_url": str(st.session_state.ui_base_url).strip() or None,
+        "llm_provider": provider,
         "retriever_top_k": int(st.session_state.retriever_top_k),
     }
-    api_key_ui = str(st.session_state.api_key_ui).strip()
-    if api_key_ui:
-        updates["openai_api_key"] = api_key_ui
+
+    if provider == "anthropic":
+        updates["anthropic_model"] = (
+            str(st.session_state.ui_anthropic_model).strip() or settings.anthropic_model
+        )
+        anthropic_key_ui = str(st.session_state.anthropic_api_key_ui).strip()
+        if anthropic_key_ui:
+            updates["anthropic_api_key"] = anthropic_key_ui
+    else:
+        updates["openai_model"] = str(st.session_state.ui_model).strip() or settings.openai_model
+        updates["openai_base_url"] = str(st.session_state.ui_base_url).strip() or None
+        api_key_ui = str(st.session_state.api_key_ui).strip()
+        if api_key_ui:
+            updates["openai_api_key"] = api_key_ui
+
     return settings.model_copy(update=updates)
 
 
 def _render_llm_sidebar(settings: Settings) -> None:
     st.sidebar.subheader("LLM")
 
-    st.sidebar.text_input(
-        "LLM URL",
-        key="ui_base_url",
-        placeholder=DEFAULT_OLLAMA_BASE_URL,
-        help="OPENAI_BASE_URL — OpenAI-совместимый API.",
+    st.sidebar.selectbox(
+        "Провайдер",
+        options=list(_PROVIDER_LABELS.keys()),
+        format_func=lambda x: _PROVIDER_LABELS[x],
+        key="ui_provider",
+        help="LLM_PROVIDER — ollama, openai или anthropic.",
     )
-    st.sidebar.text_input(
-        "LLM MODEL",
-        key="ui_model",
-        help="OPENAI_MODEL",
-    )
-    st.sidebar.text_input(
-        "LLM API KEY",
-        type="password",
-        key="api_key_ui",
-        help="Не сохраняется на диск; только сессия Streamlit. Пустое — ключ из `.env`.",
-    )
+
+    provider = st.session_state.ui_provider
+
+    if provider == "anthropic":
+        st.sidebar.text_input(
+            "Claude model",
+            key="ui_anthropic_model",
+            help="ANTHROPIC_MODEL",
+        )
+        st.sidebar.text_input(
+            "Anthropic API KEY",
+            type="password",
+            key="anthropic_api_key_ui",
+            help="Не сохраняется на диск; пустое — ключ из `.env`.",
+        )
+    else:
+        if provider == "ollama":
+            st.sidebar.text_input(
+                "LLM URL",
+                key="ui_base_url",
+                placeholder=DEFAULT_OLLAMA_BASE_URL,
+                help="OPENAI_BASE_URL — OpenAI-совместимый API (Ollama).",
+            )
+        st.sidebar.text_input(
+            "LLM MODEL",
+            key="ui_model",
+            help="OPENAI_MODEL",
+        )
+        if provider == "openai":
+            st.sidebar.text_input(
+                "OpenAI API KEY",
+                type="password",
+                key="api_key_ui",
+                help="Не сохраняется на диск; пустое — ключ из `.env`.",
+            )
+        else:
+            st.sidebar.text_input(
+                "LLM API KEY (опционально)",
+                type="password",
+                key="api_key_ui",
+                help="Для Ollama обычно не нужен.",
+            )
 
 
 def _render_pipeline_sidebar(settings: Settings) -> tuple[int, float, int, DetailLevel]:
@@ -84,6 +148,11 @@ def _render_pipeline_sidebar(settings: Settings) -> tuple[int, float, int, Detai
         format_func=lambda x: {"minimal": "Минимум", "standard": "Стандарт", "full": "Полная"}[x],
         index=1,
         key="detail_level",
+    )
+    st.sidebar.checkbox(
+        "Показать LLM промпты/ответы",
+        key="show_llm_log",
+        help="Промпты и ответы модели в интерфейсе; только в RAM сессии, на диск не пишется.",
     )
     return max_iter, float(timeout_sec), retriever_top_k, detail_level
 
@@ -155,6 +224,45 @@ def _render_results(
                         st.warning(f"{v.vuln_class}: {v.description}")
 
 
+def _render_llm_exchanges(exchanges: list[LLMExchange], show: bool) -> None:
+    if not show:
+        return
+    st.subheader("LLM")
+    if not exchanges:
+        st.caption("Нет записей LLM за этот прогон.")
+        return
+    for i, ex in enumerate(exchanges, start=1):
+        with st.expander(
+            f"Вызов {i} — промпт {len(ex.prompt)} симв., ответ {len(ex.response)} симв."
+        ):
+            st.markdown("**Промпт**")
+            st.code(ex.prompt, language="text")
+            st.markdown("**Ответ**")
+            st.code(ex.response, language="text")
+
+
+def _render_provider_hint(effective: Settings) -> None:
+    try:
+        provider = effective.resolve_llm_provider()
+    except Exception as exc:
+        st.error(str(exc))
+        return
+
+    if (
+        provider == LLMProvider.OLLAMA
+        and not effective.openai_api_key
+        and not effective.openai_base_url
+    ):
+        st.info(
+            f"`OPENAI_API_KEY` не задан — используется локальный Ollama "
+            f"({DEFAULT_OLLAMA_BASE_URL}). Укажите модель в боковой панели или `.env`."
+        )
+    elif provider == LLMProvider.ANTHROPIC and not effective.anthropic_api_key:
+        st.warning("Задайте `ANTHROPIC_API_KEY` в `.env` или в боковой панели.")
+    elif provider == LLMProvider.OPENAI and not effective.openai_api_key:
+        st.warning("Задайте `OPENAI_API_KEY` в `.env` или в боковой панели.")
+
+
 def main() -> None:
     settings = get_settings()
     layout = (
@@ -169,11 +277,7 @@ def main() -> None:
     effective = _build_effective_settings(settings)
 
     model_label = effective.llm_endpoint_label()
-    if not effective.openai_api_key and not effective.openai_base_url:
-        st.info(
-            f"`OPENAI_API_KEY` не задан — используется локальный Ollama "
-            f"({DEFAULT_OLLAMA_BASE_URL}). Укажите модель в боковой панели или `.env`."
-        )
+    _render_provider_hint(effective)
 
     if not settings.schema_json_path.is_file():
         st.warning(
@@ -191,14 +295,28 @@ def main() -> None:
     )
 
     if st.button("Сгенерировать и проверить", type="primary") and task.strip():
+        show_llm_log = bool(st.session_state.get("show_llm_log"))
+        if show_llm_log:
+            configure_logging(3)
         with st.spinner("Генерация и аудит..."):
-            result = run_sql_security_pipeline(
-                task.strip(),
-                max_iterations=max_iter,
-                timeout_sec=timeout_sec,
-                settings_override=effective,
-            )
+            if show_llm_log:
+                with begin_llm_exchange_log() as llm_exchanges:
+                    result = run_sql_security_pipeline(
+                        task.strip(),
+                        max_iterations=max_iter,
+                        timeout_sec=timeout_sec,
+                        settings_override=effective,
+                    )
+            else:
+                result = run_sql_security_pipeline(
+                    task.strip(),
+                    max_iterations=max_iter,
+                    timeout_sec=timeout_sec,
+                    settings_override=effective,
+                )
+                llm_exchanges = []
         _render_results(result, detail_level, model_label)
+        _render_llm_exchanges(llm_exchanges, show_llm_log)
 
 
 if __name__ == "__main__":

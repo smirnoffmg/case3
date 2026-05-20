@@ -106,6 +106,21 @@ def _guess_table(prompt: str) -> str:
     return "sys_employee"
 
 
+def _patch_get_llm_client(monkeypatch: pytest.MonkeyPatch) -> None:
+    fake = _FakeLLM()
+
+    def _fake_get_llm_client(*_a: object, **_k: object) -> _FakeLLM:
+        return fake
+
+    for target in (
+        "case3.llm.client.get_llm_client",
+        "case3.pipeline.get_llm_client",
+        "case3.generator.prompt_rag.get_llm_client",
+        "case3.judge.auditor.get_llm_client",
+    ):
+        monkeypatch.setattr(target, _fake_get_llm_client)
+
+
 @pytest.fixture(autouse=True)
 def _mock_llm(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr("case3.llm.client.get_llm_client", lambda *a, **k: _FakeLLM())
+    _patch_get_llm_client(monkeypatch)

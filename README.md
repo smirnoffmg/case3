@@ -66,11 +66,14 @@ uv run streamlit run streamlit_app.py
 
 | Параметр                                           | В UI                                        |
 | -------------------------------------------------- | ------------------------------------------- |
-| `OPENAI_API_KEY`                                   | Поле с маскировкой; пустое — ключ из `.env` |
-| `OPENAI_MODEL`, `OPENAI_BASE_URL`                  | Текстовые поля                              |
+| `LLM_PROVIDER`                                     | Выбор: Ollama / OpenAI / Claude             |
+| `OPENAI_API_KEY`, `OPENAI_MODEL`, `OPENAI_BASE_URL` | Для Ollama и OpenAI                         |
+| `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`             | Для Claude                                  |
 | `MAX_ITERATIONS`, `TIMEOUT_SEC`, `RETRIEVER_TOP_K` | Слайдеры                                    |
 
 Скачивание markdown-лога аудита — кнопка после прогона.
+
+В боковой панели: **«Показать LLM промпты/ответы»** — полные промпты и ответы модели в интерфейсе (аналог `case3 run -vvv`; только в RAM сессии).
 
 См. [`.env.example`](.env.example) и [`.streamlit/config.toml`](.streamlit/config.toml) для темы и демо-режима.
 
@@ -81,12 +84,17 @@ uv run streamlit run streamlit_app.py
 
 ### LLM и модель
 
-| Переменная        | По умолчанию  | Описание                                                                                                                                     |
-| ----------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OPENAI_API_KEY`  | не задан      | Ключ облачного API. **Не нужен для Ollama** — при пустом ключе используется `http://localhost:11434/v1`.                                     |
-| `OPENAI_MODEL`    | `gpt-4o-mini` | Идентификатор модели (OpenAI, Ollama, vLLM, API GreenData и т.д.).                                                                           |
-| `OPENAI_BASE_URL` | не задан      | Базовый URL **OpenAI-совместимого** API (без `/chat/completions`). Подхватывается LangChain. Пример для Ollama: `http://localhost:11434/v1`. |
-| `LLM_TEMPERATURE` | `0.0`         | Температура вызова LLM (генератор и LLM-судья).                                                                                              |
+| Переменная          | По умолчанию                   | Описание                                                                                                                                    |
+| ------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LLM_PROVIDER`      | авто                           | `ollama`, `openai` или `anthropic`. Если не задан — определяется по ключам и URL (см. ниже).                                                |
+| `OPENAI_API_KEY`    | не задан                       | Ключ OpenAI или прокси. **Не нужен для Ollama** — при пустом ключе используется `http://localhost:11434/v1`.                                |
+| `OPENAI_MODEL`      | `gpt-4o-mini`                  | Модель для Ollama / OpenAI / OpenAI-совместимых API.                                                                                        |
+| `OPENAI_BASE_URL`   | не задан                       | Базовый URL **OpenAI-совместимого** API (без `/chat/completions`). Пример для Ollama: `http://localhost:11434/v1`.                          |
+| `ANTHROPIC_API_KEY` | не задан                       | Ключ API Anthropic для Claude.                                                                                                              |
+| `ANTHROPIC_MODEL`   | `claude-sonnet-4-20250514`     | Идентификатор модели Claude.                                                                                                                |
+| `LLM_TEMPERATURE`   | `0.0`                          | Температура вызова LLM (генератор и LLM-судья).                                                                                             |
+
+**Автовыбор провайдера** (если `LLM_PROVIDER` не задан): при наличии `ANTHROPIC_API_KEY` → Claude; иначе при `OPENAI_API_KEY` без `OPENAI_BASE_URL` → OpenAI; иначе при `OPENAI_BASE_URL` или по умолчанию → Ollama. Если заданы оба облачных ключа — укажите `LLM_PROVIDER` явно.
 
 **Локальная модель (Ollama):**
 
@@ -106,11 +114,20 @@ uv run case3 run "Список сотрудников, лимит 10"
 **Облако (OpenAI):**
 
 ```bash
+LLM_PROVIDER=openai
 OPENAI_API_KEY=sk-...
 OPENAI_MODEL=gpt-4o-mini
 ```
 
-**API GreenData:** укажите выданные хост, ключ и имя модели в тех же переменных.
+**Claude (Anthropic):**
+
+```bash
+LLM_PROVIDER=anthropic
+ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_MODEL=claude-sonnet-4-20250514
+```
+
+**API GreenData:** укажите выданные хост, ключ и имя модели в переменных `OPENAI_*` (OpenAI-совместимый API).
 
 ### Пайплайн
 
@@ -165,7 +182,7 @@ HARD_BLOCK_RISK=8.0
 
 Перед генерацией LLM проверяет, что в сообщении есть запрос к данным (чистое приветствие без запроса отклоняется с `TASK_NOT_ACTIONABLE`; «Привет!» + список/отчёт — допустимо). При аудите LLM сверяет SQL с задачей (`TASK_SQL_MISMATCH`), игнорируя вежливые вступления.
 
-Без ключа и без `OPENAI_BASE_URL` по умолчанию вызывается локальный Ollama. Для OpenAI Cloud задайте `OPENAI_API_KEY`.
+Без ключей и без `OPENAI_BASE_URL` по умолчанию вызывается локальный Ollama. Для OpenAI Cloud задайте `OPENAI_API_KEY`; для Claude — `ANTHROPIC_API_KEY` и `LLM_PROVIDER=anthropic` (или только ключ Anthropic при автовыборе).
 
 Рекомендации по кейсу: модели до ~30B параметров, контекст до 256k токенов; полный DDL в промпт не передается, только выборка схемы через RAG.
 

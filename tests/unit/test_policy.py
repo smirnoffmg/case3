@@ -5,6 +5,7 @@ from case3.judge.policy import (
     sql_contains_destructive_dml,
     task_requests_destruction,
 )
+from case3.llm.client import LLMClient
 
 
 def test_destructive_task_russian():
@@ -28,8 +29,14 @@ def test_policy_rejects_mismatch():
     assert not is_approved(max(f.risk_score for f in findings), findings)
 
 
+class _StubLLM:
+    def complete(self, prompt: str) -> str:
+        return "[]"
+
+
 def test_refusal_comment_not_approved():
-    audit = HybridAuditor().audit(
+    llm: LLMClient = _StubLLM()
+    audit = HybridAuditor(llm=llm).audit(
         "-- Отказ: деструктивные операции не поддерживаются.",
         task_description="Дай список всех транзакций",
     )
@@ -38,7 +45,8 @@ def test_refusal_comment_not_approved():
 
 
 def test_hybrid_auditor_with_task():
-    audit = HybridAuditor().audit(
+    llm: LLMClient = _StubLLM()
+    audit = HybridAuditor(llm=llm).audit(
         "SELECT id FROM public.sys_employee LIMIT 10",
         task_description="Удалить всех сотрудников",
     )
