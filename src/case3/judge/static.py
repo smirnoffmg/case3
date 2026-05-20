@@ -180,7 +180,7 @@ class StaticAnalyzer:
                         vuln_class="DIRECT_SENSITIVE",
                         risk_score=_DEFAULT_RISKS["DIRECT_SENSITIVE"],
                         description=f"Запрос обращается к чувствительному полю: {s}.",
-                        recommendation="Исключите PII или используйте маскирование/агрегацию.",
+                        recommendation="Замените чувствительное поле фиксированной маской: '***' AS column_name. Не используйте current_setting() или условную логику по ролям.",
                     )
                 )
                 break

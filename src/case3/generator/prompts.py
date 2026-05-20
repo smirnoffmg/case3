@@ -2,16 +2,34 @@
 
 from __future__ import annotations
 
+import re
+
 from case3.models import AuditResult, Vulnerability
 from case3.schema_index.retriever import TableContext
+
+_BOILERPLATE = re.compile(r",?\s*(?:Sys|Abstract)\w*\{[^}]*\}")
+
+_HARD_BLOCK_RISK = 8.0
+
+_DOMAIN_CONTEXT = """\
+You are a PostgreSQL expert working with a Russian banking system database.
+Table naming convention: sys_ (system objects/employees), scp_ (lending/SCP), \
+acc_ (accounting), yaig_ (guarantees/agreements), ms_ (multi-select links).
+Column names and comments may be in Russian or English.\
+"""
+
+
+def _clean_comment(s: str) -> str:
+    return _BOILERPLATE.sub("", s).strip().strip(",").strip()
 
 
 def format_schema_context(tables: list[TableContext]) -> str:
     lines = []
     for t in tables:
         lines.append(f"Table: {t.name}")
-        if t.comment:
-            lines.append(f"  Comment: {t.comment}")
+        comment = _clean_comment(t.comment)
+        if comment:
+            lines.append(f"  Comment: {comment}")
         lines.append(f"  Columns: {t.columns_text}")
     return "\n".join(lines)
 
@@ -30,14 +48,15 @@ def build_initial_prompt(
     schema_context: str,
     few_shot: str = "",
 ) -> str:
-    return f"""You are a PostgreSQL expert. Generate a single safe read-only PostgreSQL SELECT for the task.
+    return f"""{_DOMAIN_CONTEXT}
+Generate a single safe read-only PostgreSQL SELECT for the task.
 Rules:
 - Output exactly one SELECT query (read-only). Never use DELETE, TRUNCATE, DROP, INSERT, or UPDATE.
 - If the message has no concrete data retrieval request (only greeting/chit-chat/meta), return only:
   -- Отказ: уточните задачу на естественном языке (что выбрать из БД).
 - If the message has a greeting plus a data request, ignore the greeting and generate SQL for the data part.
 - Listing or reporting data (including "all" rows) is allowed: use SELECT with an appropriate LIMIT.
-- Explicit column list (no SELECT *), always include LIMIT, avoid sensitive columns unless required.
+- Explicit column list (no SELECT *), always include LIMIT. For sensitive/PII columns (marked [PII] in schema): replace with a fixed mask literal '***' AS column_name — never use current_setting(), session_user, or role-based CASE logic.
 Dialect: PostgreSQL.
 
 Schema:
@@ -59,8 +78,19 @@ def build_repair_prompt(
     schema_context: str,
 ) -> str:
     history = "\n---\n".join(sql_history[-3:]) if sql_history else ""
-    vulns = format_vulnerabilities(audit_feedback.vulnerabilities if audit_feedback else [])
+    raw_vulns = audit_feedback.vulnerabilities if audit_feedback else []
+    sorted_vulns = sorted(raw_vulns, key=lambda v: v.risk_score, reverse=True)
+    vulns_text = format_vulnerabilities(sorted_vulns)
     lesson_text = "\n".join(f"- {lesson}" for lesson in lessons) or "Нет."
+
+    top = sorted_vulns[0] if sorted_vulns else None
+    critical_note = ""
+    if top and top.risk_score >= _HARD_BLOCK_RISK:
+        critical_note = (
+            f"\nCRITICAL: fix [{top.vuln_class}] first (risk={top.risk_score:.0f}) — "
+            "this is a hard block that will reject the query regardless of other issues."
+        )
+
     return f"""REPAIR: Fix the PostgreSQL query based on security audit feedback.
 
 Schema:
@@ -71,8 +101,8 @@ Task: {task}
 Previous SQL attempts:
 {history}
 
-Audit findings:
-{vulns}
+Audit findings (sorted by risk, highest first):{critical_note}
+{vulns_text}
 
 Accumulated lessons (do not repeat these mistakes):
 {lesson_text}
