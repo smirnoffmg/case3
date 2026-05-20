@@ -43,7 +43,19 @@ def invalid_sql_finding(sql: str) -> Vulnerability:
     )
 
 
+_KNOWN_NON_SELECT = re.compile(
+    r"^\s*(DELETE|UPDATE|INSERT|TRUNCATE|DROP|GRANT|REVOKE|ALTER|CREATE|EXECUTE|DO|CALL)\b",
+    re.I,
+)
+
+
 def analyze_sql_validity(sql: str) -> list[Vulnerability]:
     if is_read_only_select(sql):
+        return []
+    # Known dangerous statement types are caught by dedicated detectors
+    # (DML_NO_WHERE, PRIV_ESCALATE, PLPGSQL_UNSAFE). NOT_VALID_SELECT is only
+    # meaningful when the generator returns gibberish instead of a SELECT.
+    body = _strip_sql_comments(sql)
+    if _KNOWN_NON_SELECT.match(body):
         return []
     return [invalid_sql_finding(sql)]

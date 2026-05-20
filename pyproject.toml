@@ -68,8 +68,10 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "doc/**" = ["RUF001", "RUF003", "RUF012"]
-"scripts/**" = ["E402"]
-"src/case3/**" = ["RUF001"]
+# Russian seed strings and human-readable docstrings: Cyrillic letters that
+# look like Latin (О/H/А/...) and en-dash are intentional, not bugs.
+"scripts/**" = ["E402", "RUF001", "RUF002", "RUF003"]
+"src/case3/**" = ["RUF001", "RUF003"]
 "streamlit_app.py" = ["RUF001"]
 "tests/**" = ["RUF001"]
 
@@ -87,6 +89,7 @@ pretty = true
 exclude = [
   "^\\.venv/",
   "^doc/",
+  "^scripts/seed_db\\.py$",
   "^streamlit_app\\.py$",
   "^tests/",
 ]

@@ -51,6 +51,58 @@ make check
 
 ## Как это работает внутри
 
+### Что за БД лежит в `data/schema/data_model.sql`
+
+Файл — слепок (~20 700 строк) реальной кредитной системы банка ПСБ. В дампе **60 таблиц**, **287 объявленных FK** (из них **активны только 12**, остальные закомментированы — ссылаются на 164 таблицы, которые в слепок не попали).
+
+**Домены по префиксам таблиц:**
+
+| Префикс                                                         | Подсистема банка                                           | Примеры                                                            |
+| --------------------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------ |
+| `sys_`                                                          | Системные сущности                                         | `sys_employee` (сотрудник), `sys_company` (контрагент/юрлицо)      |
+| `acc_`                                                          | ОСВ (оборотно-сальдовая ведомость)                         | `acc_number` — банковский счёт клиента, `count_turnover` — обороты |
+| `scp_`                                                          | СКП — Система Корпоративного Принятия решений (28 таблиц)  | `scp_application`, `scp_collateral_app`, `scp_decision_quest`      |
+| `ic_`                                                           | ИУ — Индивидуальные Условия                                | `ic_application` (с `reason_refusal_id`, `pricing_id`)             |
+| `mler_`                                                         | МЮЭР — Малая Юр. Экспертная Регистрация                    | `mler_application` (с `date_amd_decision`, `mler_decis_id`)        |
+| `corp_tech_`                                                    | КТ — Корпоративные Технологии (овердрафты)                 | `corp_tech_application`                                            |
+| `yaig_`                                                         | УАиГ — Управление Активами и Гарантиями                    | `yaig_client_gen_agr`, `yaig_client_guarantee`                     |
+| `cb_`                                                           | Ставки ЦБ                                                  | `cb_interest_rate`                                                 |
+| `afhd_`                                                         | АФХД — Анализ финансово-хоз. деятельности                  | `afhd_ac_trans_link`                                               |
+| `dict_`, `tbs_`, `business_segment`, `type_loan`, `offices_psb` | Справочники                                                |                                                                    |
+| `ms_*`                                                          | **Служебные** MultiSelect-контейнеры с UUID-хэшами в имени | `ms_d1oakp9uq175ak3dbhpzbu81d` — не несут бизнес-смысла            |
+| `application_obj`, `credit_contract`, `participant_app`         | Заявка-родитель и кредитный договор                        |                                                                    |
+
+**Общая основа всех сущностей.** Каждая таблица начинается с одних и тех же 14 базовых полей:
+
+```
+id, name, name__ru, name__en, create_date, type_id, status, org_id, user_id,
+last_modified_date, last_modified_user_id, created_emp_id, last_modified_emp_id, is_system
+```
+
+Это **наследование на уровне приложения** через ORM-фреймворк (`OWNER = moon_tuning` в комментариях DDL). `sys_object` хранит ровно эти 14 полей — это корневой объектный тип. Все остальные «расширяют» его на уровне фреймворка, а не на уровне БД.
+
+**Дубли потоков заявок.** `application_obj`, `scp_application`, `ic_application`, `mler_application`, `corp_tech_application` имеют **одинаковые 14 базовых полей + почти одинаковые расширения** (`lim_sum`, `gsl_limit`, `afl_doc_num`, `initiator_id`, `emp_id`, `processing_steps_id`). FK-связи между ними нет — это **параллельные потоки заявок из разных систем-источников** (СКП / ИУ / МЮЭР / КТ), а не наследники базовой заявки. Поэтому при задаче «покажи заявки» **легитимны несколько таблиц** — это известная двусмысленность.
+
+**Чувствительные данные.**
+
+- `sys_employee` — `email`, `phone`, `birthday`, `first_name`, `second_name`, `sur_name`, `skype`, `adress_ad`, `pers_emp_number`, `inner_emp_phone`.
+- `sys_company` — `inn`, `contact_phone`, `attr_email`, регистрационные данные юрлица.
+- `credit_contract` — финансовые поля договора: `credit_amount`, `loan_term`, `reserve_size`, `cred_interest_rate`, `days_delay_number`, `date_loan_debt`, `link_customer_id`, `bank_ident_number`, `penalty_rate`, `max_loan_amount_ever`.
+- `count_turnover` — обороты по счёту: `turnover_debit`, `turnover_credit`, `output_balance_*`, `vat`.
+
+Соответствующие паттерны — в `data/sensitivity.yaml`; статический аудитор детектирует прямое обращение к этим полям как `DIRECT_SENSITIVE`.
+
+**JOIN-семантика.** Имя инициатора заявки **не лежит в `application_obj.name__ru`** — это имя самой заявки. Имя контрагента-инициатора живёт в `sys_company`, связь через `application_obj.initiator_id → sys_company.id`. Поэтому фильтр «по имени инициатора X» **требует JOIN**. Это критическая семантическая ловушка для генератора и причина двух дополнительных JOIN-примеров в `data/examples/few_shot.yaml`.
+
+**PL/pgSQL и хранимые процедуры.** В DDL **отсутствуют** `CREATE FUNCTION`, `CREATE TRIGGER`, `CREATE VIEW`, `CREATE INDEX`. Бонусный критерий «поддержка PL/pgSQL» закрывается синтетическими примерами в `data/dataset/vulns.jsonl` (классы `PLPGSQL_UNSAFE`, `PRIV_ESCALATE`), а не запросами к реальной БД.
+
+**Что важно для retrieval / RAG.**
+
+- 15 таблиц `ms_*` — служебные контейнеры с UUID-именами, бизнес-смысла нет. Они индексируются BM25, но в реальных задачах никогда не нужны.
+- Активных FK только 12 — `_expand_fk` в `SchemaRetriever` почти не работает. Закомментированные FK можно подсасывать в FK-граф для retrieval (БД от этого не зависит — это только подсказка для подбора таблиц).
+
+---
+
 ### Схема данных: от DDL до индекса
 
 Всё начинается с файла `data/schema/data_model.sql` — это обычный PostgreSQL DDL-дамп.

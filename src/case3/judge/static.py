@@ -46,6 +46,7 @@ class StaticAnalyzer:
         findings.extend(self._check_no_pagination(sql))
         findings.extend(self._check_sensitive(sql, sensitive))
         findings.extend(self._check_execute(sql, upper))
+        findings.extend(self._check_priv_escalate(sql, upper))
         findings.extend(analyze_sql_validity(sql))
 
         return findings
@@ -142,6 +143,9 @@ class StaticAnalyzer:
         # allow COUNT-only queries
         if parsed.find(exp.AggFunc):
             return []
+        # scalar SELECT (no FROM) — no result set to paginate
+        if not parsed.find(exp.From):
+            return []
         return [
             Vulnerability(
                 vuln_class="NO_PAGINATION",
@@ -188,23 +192,41 @@ class StaticAnalyzer:
 
     def _check_execute(self, sql: str, upper: str) -> list[Vulnerability]:
         out: list[Vulnerability] = []
-        if re.search(r"\bEXECUTE\b", upper):
-            if re.search(r"EXECUTE\s+format\s*\(", upper, re.I) and "USING" not in upper:
-                out.append(
-                    Vulnerability(
-                        vuln_class="PLPGSQL_UNSAFE",
-                        risk_score=_DEFAULT_RISKS["PLPGSQL_UNSAFE"],
-                        description="EXECUTE format(...) без USING, SQL injection в PL/pgSQL.",
-                        recommendation="Используйте EXECUTE ... USING для параметров.",
-                    )
+        if not re.search(r"\bEXECUTE\b", upper):
+            return out
+        is_format = re.search(r"EXECUTE\s+format\s*\(", upper, re.I) and "USING" not in upper
+        # EXECUTE 'literal' || var  — concatenation inside dynamic SQL
+        is_concat = re.search(r"EXECUTE\b[^;]*\|\|", upper, re.I)
+        if is_format or is_concat:
+            out.append(
+                Vulnerability(
+                    vuln_class="PLPGSQL_UNSAFE",
+                    risk_score=_DEFAULT_RISKS["PLPGSQL_UNSAFE"],
+                    description="Динамический SQL в PL/pgSQL без USING-параметров (format/конкатенация).",
+                    recommendation="Используйте EXECUTE ... USING $1 или format(%L, val) с %L/%I.",
                 )
-            else:
-                out.append(
-                    Vulnerability(
-                        vuln_class="PRIV_ESCALATE",
-                        risk_score=_DEFAULT_RISKS["PRIV_ESCALATE"],
-                        description="Динамический EXECUTE, риск privilege escalation.",
-                        recommendation="Избегайте динамического EXECUTE или ограничьте права.",
-                    )
+            )
+        else:
+            out.append(
+                Vulnerability(
+                    vuln_class="PRIV_ESCALATE",
+                    risk_score=_DEFAULT_RISKS["PRIV_ESCALATE"],
+                    description="Динамический EXECUTE, риск privilege escalation.",
+                    recommendation="Избегайте динамического EXECUTE или ограничьте права.",
                 )
+            )
         return out
+
+    def _check_priv_escalate(self, sql: str, upper: str) -> list[Vulnerability]:
+        if not re.search(
+            r"\b(GRANT|REVOKE|ALTER\s+ROLE|ALTER\s+USER|SET\s+ROLE|CREATE\s+ROLE)\b", upper
+        ):
+            return []
+        return [
+            Vulnerability(
+                vuln_class="PRIV_ESCALATE",
+                risk_score=_DEFAULT_RISKS["PRIV_ESCALATE"],
+                description="DDL по правам (GRANT/REVOKE/ALTER ROLE) — попытка изменить привилегии.",
+                recommendation="Управление правами должно быть вне рантайма приложения.",
+            )
+        ]

@@ -11,6 +11,7 @@ Usage:
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import sys
@@ -37,7 +38,9 @@ def substitute(sql: str) -> str:
 
 
 def validate(path: Path, dsn: str) -> int:
-    rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    rows = [
+        json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()
+    ]
     print(f"Loaded {len(rows)} rows from {path}")
 
     ok = 0
@@ -56,11 +59,9 @@ def validate(path: Path, dsn: str) -> int:
                 ok += 1
                 if not result:
                     empty_rowsets.append((i, task))
-            except Exception as exc:  # noqa: BLE001
-                try:
+            except Exception as exc:
+                with contextlib.suppress(Exception):
                     cur.execute("ROLLBACK")
-                except Exception:
-                    pass
                 short = " ".join(str(exc).split())[:160]
                 failures.append((i, task, sql, short))
 

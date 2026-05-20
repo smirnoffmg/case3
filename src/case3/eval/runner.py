@@ -8,12 +8,8 @@ import re
 from datetime import UTC, datetime
 from typing import Any
 
-# Template tasks use placeholders like {number}, {date}, {name}, {from}, {to}.
-# They aren't EA-evaluable without context-aware substitution, so we skip them
-# from the pipeline loop and report the count separately.
-_TEMPLATE_PLACEHOLDER = re.compile(r"\{[a-z_]+\}")
-
 from case3.config import Settings, get_settings
+from case3.eval.db import EvalDB, result_sets_equal, strip_limit
 from case3.eval.metrics import (
     JudgeMetrics,
     PipelineMetrics,
@@ -22,11 +18,15 @@ from case3.eval.metrics import (
     sql_match,
     update_class_metrics,
 )
-from case3.eval.db import EvalDB, result_sets_equal
 from case3.judge.auditor import HybridAuditor
 from case3.judge.static import StaticAnalyzer
 from case3.pipeline import run_sql_security_pipeline
 from case3.schema_index.loader import load_schema_index
+
+# Template tasks use placeholders like {number}, {date}, {name}, {from}, {to}.
+# They aren't EA-evaluable without context-aware substitution, so we skip them
+# from the pipeline loop and report the count separately.
+_TEMPLATE_PLACEHOLDER = re.compile(r"\{[a-z_]+\}")
 
 logger = logging.getLogger(__name__)
 
@@ -62,10 +62,8 @@ def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict
             db = EvalDB(settings.eval_database_url)
             match_mode = "result_set"
             logger.info("DB-backed eval at %s", settings.eval_database_url)
-        except Exception as exc:  # noqa: BLE001
-            logger.warning(
-                "EvalDB unavailable (%s) — falling back to AST match", exc
-            )
+        except Exception as exc:
+            logger.warning("EvalDB unavailable (%s) — falling back to AST match", exc)
 
     results: list[dict[str, Any]] = []
     gold_valid = 0
@@ -96,13 +94,15 @@ def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict
         if gold:
             gold_total_with_sql += 1
             if db is not None:
-                pred_rows = db.fetch(result.final_sql)
-                gold_rows = db.fetch(gold)
-                if gold_rows is not None:
+                # Strip LIMIT for comparison only — audit still sees the real SQL,
+                # so NO_PAGINATION findings still apply to the generator output.
+                pred_res = db.fetch(strip_limit(result.final_sql))
+                gold_res = db.fetch(strip_limit(gold))
+                if gold_res is not None:
                     gold_valid += 1
                 else:
                     logger.warning("Gold SQL failed to execute: %s", gold[:80])
-                if result_sets_equal(pred_rows, gold_rows):
+                if result_sets_equal(pred_res, gold_res):
                     matched = True
             elif sql_match(result.final_sql, gold):
                 matched = True
@@ -178,7 +178,7 @@ def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict
                 for cls, m in sorted(judge_by_class.items())
             },
         },
-        "samples": results[:10],
+        "samples": results,
     }
 
     settings.reports_dir.mkdir(parents=True, exist_ok=True)

@@ -24,8 +24,6 @@ def _normalize_ast(sql: str) -> str | None:
         tree = parse_one(sql, dialect="postgres")
     except Exception:
         return None
-    if tree is None:
-        return None
 
     # Drop projection aliases at the top-level SELECT — `COUNT(*) AS cnt`
     # is semantically identical to `COUNT(*)`.

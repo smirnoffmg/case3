@@ -86,15 +86,28 @@ def parse_ddl(text: str) -> SchemaIndex:
         else:
             col.comment = comment
 
+    # FKs appear in active and commented ALTER blocks. Many reference tables
+    # that aren't included in this DDL slice — we keep only edges between
+    # known tables so the FK graph stays useful for retrieval.
+    known = set(tables.keys())
+    seen: set[tuple[str, str, str, str]] = set()
     for m in _FK_REF.finditer(text):
-        # FK lines appear in commented ALTER blocks too
         from_col, to_table, to_col = m.group(1), m.group(2), m.group(3)
-        # find table from preceding ADD CONSTRAINT context
+        if to_table not in known:
+            continue
         start = max(0, m.start() - 500)
         chunk = text[start : m.start()]
-        tm = re.search(r"ALTER TABLE\s+public\.(\w+)", chunk, re.IGNORECASE)
-        if tm:
-            fk_edges.append((tm.group(1), from_col, to_table, to_col))
+        tm = re.search(r"ALTER\s+TABLE(?:\s+ONLY)?\s+public\.(\w+)", chunk, re.IGNORECASE)
+        if not tm:
+            continue
+        from_table = tm.group(1)
+        if from_table not in known or from_table == to_table:
+            continue
+        key = (from_table, from_col, to_table, to_col)
+        if key in seen:
+            continue
+        seen.add(key)
+        fk_edges.append(key)
 
     return SchemaIndex(tables=tables, fk_edges=fk_edges)
 

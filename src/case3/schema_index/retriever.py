@@ -27,8 +27,27 @@ _TOKEN_RE = re.compile(r"[а-яёa-z0-9]+")
 # Prepositions and conjunctions that are never meaningful schema terms.
 _STOPWORDS = frozenset(
     {
-        "по", "с", "в", "из", "для", "и", "или", "без", "к", "на", "за",
-        "от", "об", "не", "но", "а", "да", "это", "уже", "при", "до",
+        "по",
+        "с",
+        "в",
+        "из",
+        "для",
+        "и",
+        "или",
+        "без",
+        "к",
+        "на",
+        "за",
+        "от",
+        "об",
+        "не",
+        "но",
+        "а",
+        "да",
+        "это",
+        "уже",
+        "при",
+        "до",
     }
 )
 
@@ -43,7 +62,7 @@ def _lemmatize(token: str) -> str:
     if _CYRILLIC.search(token):
         parsed = _get_morph().parse(token)
         if parsed:
-            return parsed[0].normal_form
+            return str(parsed[0].normal_form)
     # Light English desinflection: strip trailing -s (not -es) so "employees" → "employee"
     if len(token) > 3 and token.endswith("s") and not token.endswith("ss"):
         return token[:-1]
@@ -70,7 +89,7 @@ def _split_identifier(ident: str) -> str:
 def _table_document(table: TableInfo) -> str:
     clean_name = _split_identifier(table.name)
     clean_comment = _clean_comment(table.comment)
-    # BM25 document contains only table identity (name + comment), repeated 3×.
+    # BM25 document contains only table identity (name + comment), repeated 3x.
     # Column names and comments are excluded: with 50+ columns per table, they
     # dominate document length and skew BM25 length-normalization against large tables.
     # The LLM receives full column lists separately via TableContext.columns_text.
@@ -94,13 +113,20 @@ class TableContext(BaseModel):
     score: float = 0.0
 
 
+def _is_business_table(name: str, table: TableInfo) -> bool:
+    """Drop ms_* MultiSelect containers — UUID-named, no business meaning."""
+    if name.startswith("ms_"):
+        return False
+    return "MultiSelect container" not in table.comment
+
+
 class SchemaRetriever:
     _MIN_SCORE = 0.5  # below this, BM25 result is noise — use fallback
     _FK_BUDGET = 3  # max FK-expanded tables appended after BM25 results
 
     def __init__(self, index: SchemaIndex) -> None:
         self._index = index
-        self._names = list(index.tables.keys())
+        self._names = [n for n, t in index.tables.items() if _is_business_table(n, t)]
         self._docs = [_table_document(index.tables[n]) for n in self._names]
         tokenized = [_tokenize(d) for d in self._docs]
         self._bm25 = BM25Okapi(tokenized)
@@ -129,8 +155,7 @@ class SchemaRetriever:
     def _make_context(self, name: str, score: float = 0.0) -> TableContext:
         t = self._index.tables[name]
         cols = ", ".join(
-            f"{c.name} ({c.data_type})" + (" [PII]" if c.sensitive else "")
-            for c in t.columns[:30]
+            f"{c.name} ({c.data_type})" + (" [PII]" if c.sensitive else "") for c in t.columns[:30]
         )
         return TableContext(
             name=name,

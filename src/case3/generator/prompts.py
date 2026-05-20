@@ -57,8 +57,11 @@ Rules:
 - If the message has a greeting plus a data request, ignore the greeting and generate SQL for the data part.
 - Listing or reporting data (including "all" rows) is allowed: use SELECT with an appropriate LIMIT.
 - Explicit column list (no SELECT *). Use LIMIT for row-listing queries; aggregate queries (COUNT/MIN/MAX/SUM/AVG without GROUP BY) don't need LIMIT.
-- Add WHERE only when the task explicitly asks for it (e.g. "активные" → status = 1, "у которых заполнен X" → X IS NOT NULL, "после даты Y" → date comparison). Do not invent filters that aren't in the task.
+- Add WHERE only when the task explicitly asks for it (e.g. "активные" → status = 1, "у которых заполнен X" / "с X" / "по X" → X IS NOT NULL, "после даты Y" → date comparison, "содержит/начинается с строки" → ILIKE). Do not invent filters that aren't in the task.
+- Never use placeholder literals like 'your_X_here', '<replace_me>' or any '???'. If the task lacks a specific value, use IS NOT NULL or the appropriate broad filter.
 - Use the LIMIT value mentioned in the task ("лимит N", "не более N", "N записей"); otherwise pick a reasonable default (10–100).
+- Column choice: when both a canonical column (`name`, `description`) and locale-suffixed variants (`name__ru`, `name__en`, `description__ru`) exist on the same table, prefer the canonical column unless the task explicitly asks for a specific locale ("на русском", "in English").
+- Table choice for "заявки/applications": the schema has parallel application streams — use `application_obj` for generic "заявки" without subsystem name. Only use `scp_application` if the task mentions СКП/SCP, `ic_application` for ИУ/IC, `mler_application` for МЮЭР/MLER, `corp_tech_application` for КТ/корпоративные техзаявки.
 - For sensitive/PII columns (marked [PII] in schema): replace with a fixed mask literal '***' AS column_name — never use current_setting(), session_user, or role-based CASE logic.
 Dialect: PostgreSQL.
 

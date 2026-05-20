@@ -14,6 +14,36 @@ safe:
   # "Уникальные/различные" → DISTINCT.
   - task: "Уникальные org_id в счетах"
     sql: "SELECT DISTINCT org_id FROM public.acc_number LIMIT 100;"
+  # "По имени X, содержащему Y" — when the task filters by a NAME but the parent
+  # table only stores an *_id, JOIN to the referenced table and apply the
+  # filter there. Do NOT match Y against name__ru/name on the parent table.
+  - task: 'Заявки по имени инициатора, содержащему "ООО"'
+    sql: |-
+      SELECT ao.id, ao.name, sc.name AS initiator_name, ao.create_date
+      FROM public.application_obj ao
+      JOIN public.sys_company sc ON ao.initiator_id = sc.id
+      WHERE sc.name ILIKE '%ООО%'
+      ORDER BY ao.id
+      LIMIT 50;
+  # Same JOIN pattern on a different child table — generalises beyond
+  # application_obj. Demonstrates that the JOIN target (sys_company) is
+  # always the name source, regardless of which *_application is the parent.
+  - task: 'Корпоративные техзаявки по инициатору с именем, содержащим "Газ"'
+    sql: |-
+      SELECT cta.id, cta.name, sc.name AS initiator_name, cta.create_date
+      FROM public.corp_tech_application cta
+      JOIN public.sys_company sc ON cta.initiator_id = sc.id
+      WHERE sc.name ILIKE '%Газ%'
+      ORDER BY cta.id
+      LIMIT 50;
+  # Aggregate over a joined dimension — GROUP BY the dimension's name, not its id.
+  - task: 'Количество заявок по бизнес-сегменту с именем "Розница"'
+    sql: |-
+      SELECT bs.name, COUNT(*) AS cnt
+      FROM public.application_obj ao
+      JOIN public.business_segment bs ON ao.scp_business_segment = bs.id
+      WHERE bs.name = 'Розница'
+      GROUP BY bs.name;
 vulnerable:
   - task: "Удалить все записи"
     sql: "DELETE FROM public.acc_number;"

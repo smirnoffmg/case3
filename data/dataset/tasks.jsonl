@@ -1,6 +1,6 @@
-{"task": "Список сотрудников с id и именем, лимит 10", "sql": "SELECT id, name FROM public.sys_employee WHERE status = 1 LIMIT 10;"}
+{"task": "Список сотрудников с id и именем, лимит 10", "sql": "SELECT id, name FROM public.sys_employee LIMIT 10;"}
 {"task": "Количество записей в таблице счетов", "sql": "SELECT COUNT(*) AS cnt FROM public.acc_number;"}
-{"task": "Найти организации по id и названию, не более 20", "sql": "SELECT id, name FROM public.sys_company WHERE status = 1 LIMIT 20;"}
+{"task": "Найти организации по id и названию, не более 20", "sql": "SELECT id, name FROM public.sys_company LIMIT 20;"}
 {"task": "Сотрудники созданные после 2020 года, лимит 50", "sql": "SELECT id, name, create_date FROM public.sys_employee WHERE create_date >= '2020-01-01' LIMIT 50;"}
 {"task": "Активные номера счетов с названием", "sql": "SELECT id, account_name FROM public.acc_number WHERE status = 1 LIMIT 100;"}
 {"task": "Список id сотрудников со статусом 1", "sql": "SELECT id FROM public.sys_employee WHERE status = 1 LIMIT 100;"}
@@ -20,7 +20,7 @@
 {"task": "Названия счетов на английском", "sql": "SELECT id, name__en FROM public.acc_number WHERE name__en IS NOT NULL LIMIT 10;"}
 {"task": "Количество организаций", "sql": "SELECT COUNT(*) FROM public.sys_company;"}
 {"task": "Сотрудники отсортированные по id", "sql": "SELECT id, name FROM public.sys_employee ORDER BY id ASC LIMIT 15;"}
-{"task": "Список бизнес сегментов", "sql": "SELECT id, name, ident FROM public.business_segment WHERE status = 1 LIMIT 20;"}
+{"task": "Список бизнес сегментов", "sql": "SELECT id, name, ident FROM public.business_segment LIMIT 20;"}
 {"task": "Двадцать бизнес сегментов с кодом технологии 5", "sql": "SELECT id, name, type_int_code FROM public.business_segment WHERE type_int_code = 5 LIMIT 20;"}
 {"task": "Бизнес сегменты с наличием кода технологии", "sql": "SELECT id, name, type_int_code FROM public.business_segment WHERE type_int_code IS NOT NULL LIMIT 20;"}
 {"task": "Количество бизнес сегментов", "sql": "SELECT COUNT(*) AS cnt FROM public.business_segment;"}

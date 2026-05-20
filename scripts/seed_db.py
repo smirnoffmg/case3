@@ -299,17 +299,22 @@ def _dict_product_rows() -> list[tuple]:
 
 def _dict_div_presence_rows() -> list[tuple]:
     regions = [
-        "Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург", "Казань",
-        "Нижний Новгород", "Челябинск", "Самара", "Омск", "Ростов-на-Дону",
+        "Москва",
+        "Санкт-Петербург",
+        "Новосибирск",
+        "Екатеринбург",
+        "Казань",
+        "Нижний Новгород",
+        "Челябинск",
+        "Самара",
+        "Омск",
+        "Ростов-на-Дону",
     ]
     return [(i, regions[(i - 1) % len(regions)]) for i in range(1, N_DICT_ROWS + 1)]
 
 
 def _offices_psb_rows() -> list[tuple]:
-    return [
-        (i, f"Офис {i}", f"OFC_{i:03d}")
-        for i in range(1, N_DICT_ROWS + 1)
-    ]
+    return [(i, f"Офис {i}", f"OFC_{i:03d}") for i in range(1, N_DICT_ROWS + 1)]
 
 
 def _scp_amd_product_rows() -> list[tuple]:

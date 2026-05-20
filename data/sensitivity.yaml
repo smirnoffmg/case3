@@ -12,6 +12,19 @@ column_patterns:
   - inn
   - snils
   - card_number
+  # financial / credit fields — treated as sensitive
+  - credit_amount
+  - reserve_size
+  - loan_term
+  - days_delay
+  - date_loan_debt
+  - limit_over
+  - max_sum_credit
+  - min_sum_credit
+  - turnover_debit
+  - turnover_credit
+  - output_balance
+  - link_customer_id
 columns:
   - sys_employee.email
   - sys_employee.phone

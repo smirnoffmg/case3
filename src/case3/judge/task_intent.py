@@ -44,6 +44,35 @@ _REFUSAL_SQL = (
     "-- Отказ: задача не является запросом к данным. Переформулируйте как SELECT с LIMIT."
 )
 
+# Heuristic actionable markers — when any of these match, the task is a data
+# request and the LLM-based classifier is skipped. False positives here would
+# let chit-chat through, so the patterns must match real data-request shapes
+# only. Destructive intent is checked separately in policy.py and is not
+# affected by this fast-path.
+_ACTIONABLE_PATTERNS = (
+    # Russian data nouns commonly used in tasks
+    r"\b(сотрудник|счет|счёт|заявк|клиент|организаци|компани|операци|"
+    r"договор|кредит|продукт|ставк|сегмент|роль|транзакц|отдел|"
+    r"филиал|офис|пользовател|систем|категор|обращени|обеспечени|"
+    r"залог|вопрос|тип\b|техзаявк|инициатор|реш|оценк|причин)",
+    # Russian data verbs / quantifiers
+    r"\b(показ|выбер|выбрат|найт|перечисл|вывести|список|количество|"
+    r"число|сумма|среднее|максимум|минимум|сколько|уникальн|активн|"
+    r"последн|первы|топ)",
+    # English data verbs / SQL terms
+    r"\b(show|list|select|count|find|return|fetch|how\s+many|distinct|"
+    r"limit|group\s+by|order\s+by|top\s+\d+|employees?|accounts?|"
+    r"applications?|companies|organizations?|customers?|clients?)",
+    # Aggregate noun + entity shape ("Количество X", "Среднее значение Y")
+    r"\b(количество|число|сумма|среднее)\s+\w+",
+)
+_ACTIONABLE_RE = re.compile("|".join(_ACTIONABLE_PATTERNS), re.IGNORECASE)
+
+
+def is_obviously_actionable(task: str) -> bool:
+    """Return True when the task clearly references data — bypasses LLM gate."""
+    return bool(_ACTIONABLE_RE.search(task))
+
 
 @dataclass(frozen=True)
 class TaskIntentResult:
@@ -74,6 +103,8 @@ def classify_task_intent(task: str, llm: LLMClient) -> TaskIntentResult:
 
 def classify_task_intent_safe(task: str, llm: LLMClient) -> TaskIntentResult:
     """Fail closed: treat parse/LLM errors as non-actionable."""
+    if is_obviously_actionable(task):
+        return TaskIntentResult(actionable=True, reason="")
     try:
         return classify_task_intent(task, llm)
     except (json.JSONDecodeError, KeyError, TypeError, ValueError) as exc:
