@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: case3_postgres
+    environment:
+      POSTGRES_USER: case3
+      POSTGRES_PASSWORD: case3
+      POSTGRES_DB: demo_db
+    ports:
+      - "55432:5432"
+    volumes:
+      - ./doc/arch/data_model.sql:/schema/data_model.sql:ro
+      - ./scripts/docker:/docker-entrypoint-initdb.d:ro
+      - case3_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U case3 -d demo_db"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  case3_pgdata:

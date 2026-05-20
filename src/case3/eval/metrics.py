@@ -16,8 +16,45 @@ def normalize_sql(sql: str) -> str:
     return s
 
 
+def _normalize_ast(sql: str) -> str | None:
+    """Canonicalise SQL via sqlglot AST, ignoring cosmetic differences."""
+    try:
+        from sqlglot import exp, parse_one
+
+        tree = parse_one(sql, dialect="postgres")
+    except Exception:
+        return None
+    if tree is None:
+        return None
+
+    # Drop projection aliases at the top-level SELECT — `COUNT(*) AS cnt`
+    # is semantically identical to `COUNT(*)`.
+    select = tree.find(exp.Select)
+    if select is not None:
+        select.set(
+            "expressions",
+            [e.this if isinstance(e, exp.Alias) else e for e in select.expressions],
+        )
+
+    # Drop `OFFSET 0` — no effect on the result set.
+    offset = tree.args.get("offset")
+    if offset is not None:
+        inner = getattr(offset, "expression", None)
+        if isinstance(inner, exp.Literal) and str(inner.this) == "0":
+            tree.set("offset", None)
+
+    return tree.sql(dialect="postgres", normalize=True)
+
+
 def sql_match(pred: str, gold: str) -> bool:
-    return normalize_sql(pred) == normalize_sql(gold)
+    """True if `pred` matches `gold` exactly or after AST canonicalisation."""
+    if normalize_sql(pred) == normalize_sql(gold):
+        return True
+    p_ast = _normalize_ast(pred)
+    g_ast = _normalize_ast(gold)
+    if p_ast is None or g_ast is None:
+        return False
+    return p_ast == g_ast
 
 
 @dataclass

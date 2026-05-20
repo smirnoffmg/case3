@@ -63,13 +63,15 @@ def test_ambiguous_dual_key_raises():
         s.resolve_llm_provider()
 
 
-def test_placeholder_openai_key_with_anthropic_not_ambiguous():
+def test_explicit_base_url_outranks_stray_anthropic_key():
+    # Real-world: ANTHROPIC_API_KEY leaks in from the shell while .env points
+    # at local Ollama via OPENAI_BASE_URL. The explicit base URL should win.
     s = _settings(
         openai_api_key="local",
         openai_base_url="http://localhost:11434/v1",
         anthropic_api_key="sk-ant-test",
     )
-    assert s.resolve_llm_provider() == LLMProvider.ANTHROPIC
+    assert s.resolve_llm_provider() == LLMProvider.OLLAMA
 
 
 def test_ollama_explicit_over_anthropic_key():

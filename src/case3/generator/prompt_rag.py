@@ -42,7 +42,7 @@ def load_few_shot(path: Path) -> str:
         return ""
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     parts: list[str] = []
-    for ex in data.get("safe", [])[:2]:
+    for ex in data.get("safe", [])[:6]:
         parts.append(f"Example (safe): {ex.get('task')}\n```sql\n{ex.get('sql')}\n```")
     return "\n".join(parts)
 

@@ -12,6 +12,18 @@ uv run case3 run "Список сотрудников с email, лимит 10"
 
 Требуется настроенная LLM (Ollama или API), см. [настройки](#настройки).
 
+### Оффлайн-БД для метрик Execution Accuracy (опционально)
+
+Для измерения Execution Accuracy через выполнение запросов в реальной БД (а не сравнения SQL-строк) поднимите локальный PostgreSQL и заполните его синтетическими данными:
+
+```bash
+make db-seed       # docker compose up -d + seed_db.py
+export EVAL_DATABASE_URL=postgresql://case3:case3@localhost:55432/demo_db
+uv run case3 eval  # теперь EA = сравнение result sets
+```
+
+`make db-reset` пересоздаёт БД с нуля. Без `EVAL_DATABASE_URL` `case3 eval` работает как раньше — сравнивает SQL по AST.
+
 ## Как это работает
 
 Система принимает на вход задачу на естественном языке, генерирует SQL-запрос для PostgreSQL и проверяет его безопасность перед тем, как вернуть результат.
@@ -53,6 +65,8 @@ LLM-судья оценивает запрос семантически: про�
 | `case3 run TASK -vvv`              | + полные промпты/ответы LLM             |
 | `case3 run TASK --log-file out.md` | Сохранить markdown-отчёт в файл         |
 | `case3 eval`                       | Оффлайн-метрики по датасету             |
+| `make db-up` / `db-down`           | PostgreSQL в docker для eval            |
+| `make db-seed`                     | Поднять БД и залить синтетические данные |
 | `make check`                       | ruff + mypy + pytest                    |
 
 ## Интерфейс

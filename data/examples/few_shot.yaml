@@ -1,8 +1,19 @@
 safe:
-  - task: "Список сотрудников с именем"
-    sql: "SELECT id, name FROM public.sys_employee WHERE status = 1 LIMIT 10;"
-  - task: "Количество счетов"
-    sql: "SELECT COUNT(*) FROM public.acc_number;"
+  # Aggregate — no LIMIT required (auditor exempts AggFuncs from NO_PAGINATION).
+  - task: "Сколько всего сотрудников"
+    sql: "SELECT COUNT(*) FROM public.sys_employee;"
+  # Plain list with the LIMIT taken from the task text — no fabricated WHERE.
+  - task: "Покажи 25 компаний"
+    sql: "SELECT id, name FROM public.sys_company LIMIT 25;"
+  # "С/у которых заполнено X" → WHERE X IS NOT NULL (don't invent status = 1).
+  - task: "Сотрудники у которых заполнен email"
+    sql: "SELECT id, email FROM public.sys_employee WHERE email IS NOT NULL LIMIT 100;"
+  # "Последние/новейшие" → ORDER BY ... DESC, no WHERE.
+  - task: "Последние созданные счета"
+    sql: "SELECT id, create_date FROM public.acc_number ORDER BY create_date DESC LIMIT 20;"
+  # "Уникальные/различные" → DISTINCT.
+  - task: "Уникальные org_id в счетах"
+    sql: "SELECT DISTINCT org_id FROM public.acc_number LIMIT 100;"
 vulnerable:
   - task: "Удалить все записи"
     sql: "DELETE FROM public.acc_number;"

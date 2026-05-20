@@ -16,14 +16,23 @@ _INTENT_MARKER = "TASK_INTENT_CLASSIFIER"
 _INTENT_PROMPT = f"""{_INTENT_MARKER}
 You classify whether a user message is a concrete PostgreSQL read-only data request.
 
-Actionable (actionable=true): list, count, filter, report, or fetch rows from the database.
-Examples: "Список сотрудников, лимит 10", "Количество счетов", "show active employees".
-Also actionable when a greeting or polite phrase appears together with a data request, e.g.:
-"Привет! Покажи список сотрудников с email, лимит 10", "Добрый день, сколько счетов в таблице".
+Actionable (actionable=true) — anything that names a table/entity and optionally
+its filters or columns. Verbs are NOT required. Bare noun phrases like
+"X с Y" / "X по Y" / "Активные X" / "Уникальные X" all imply a SELECT.
+Examples (all actionable):
+  - "Список сотрудников, лимит 10"  (verb-led)
+  - "Количество счетов"             (aggregate)
+  - "show active employees"         (English verb-led)
+  - "Сотрудники с email"            (nominal phrase, implies WHERE email IS NOT NULL)
+  - "Компании с типом объекта"      (nominal phrase, implies WHERE type_id IS NOT NULL)
+  - "Активные номера счетов"        (filter-led noun phrase)
+  - "Уникальные org_id"             (DISTINCT phrase)
+  - "Привет! Покажи список сотрудников"  (greeting + request)
 
-NOT actionable (actionable=false): only when there is NO data/SQL intent — pure greeting, thanks only,
-chit-chat, empty text, meta questions ("what can you do?"), jokes, or delete/truncate/drop requests.
-A greeting alone without a data request is NOT actionable.
+NOT actionable (actionable=false) — only when there is NO data/SQL intent:
+pure greeting, thanks only, chit-chat, empty text, meta questions ("what can you do?"),
+jokes, or destructive requests (delete/truncate/drop). A greeting alone without
+a data request is NOT actionable.
 
 Task:
 {{TASK}}

@@ -51,6 +51,7 @@ class Settings(BaseSettings):
     llm_temperature: float = 0.0
     risk_threshold: float = 4.0
     hard_block_risk: float = 8.0
+    eval_database_url: str | None = None
     streamlit_page_title: str = "SQL Security System"
     streamlit_layout: str = "wide"
 
@@ -71,12 +72,15 @@ class Settings(BaseSettings):
                 "Set LLM_PROVIDER to 'openai' or 'anthropic' explicitly."
             )
 
-        if self.anthropic_api_key:
-            return LLMProvider.ANTHROPIC
-        if self._is_openai_cloud_key() and not self.openai_base_url:
-            return LLMProvider.OPENAI
+        # An explicit OPENAI_BASE_URL is a deliberate endpoint choice (local
+        # Ollama, OpenAI-compat proxy). Honor it even when ANTHROPIC_API_KEY
+        # leaks in from the shell environment.
         if self.openai_base_url:
             return LLMProvider.OLLAMA
+        if self.anthropic_api_key:
+            return LLMProvider.ANTHROPIC
+        if self._is_openai_cloud_key():
+            return LLMProvider.OPENAI
         return LLMProvider.OLLAMA
 
     def resolve_llm_credentials(self) -> tuple[str, str | None]:

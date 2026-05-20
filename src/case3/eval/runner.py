@@ -4,8 +4,14 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from datetime import UTC, datetime
 from typing import Any
+
+# Template tasks use placeholders like {number}, {date}, {name}, {from}, {to}.
+# They aren't EA-evaluable without context-aware substitution, so we skip them
+# from the pipeline loop and report the count separately.
+_TEMPLATE_PLACEHOLDER = re.compile(r"\{[a-z_]+\}")
 
 from case3.config import Settings, get_settings
 from case3.eval.metrics import (
@@ -16,6 +22,7 @@ from case3.eval.metrics import (
     sql_match,
     update_class_metrics,
 )
+from case3.eval.db import EvalDB, result_sets_equal
 from case3.judge.auditor import HybridAuditor
 from case3.judge.static import StaticAnalyzer
 from case3.pipeline import run_sql_security_pipeline
@@ -28,8 +35,15 @@ def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict
     settings = settings or get_settings()
     index = load_schema_index(settings.schema_json_path)
 
-    tasks = load_jsonl(settings.dataset_tasks_path)
+    all_tasks = load_jsonl(settings.dataset_tasks_path)
     vulns = load_jsonl(settings.dataset_vulns_path)
+    tasks = [
+        row
+        for row in all_tasks
+        if not _TEMPLATE_PLACEHOLDER.search(row.get("sql", ""))
+        and not _TEMPLATE_PLACEHOLDER.search(row.get("task", ""))
+    ]
+    template_skipped = len(all_tasks) - len(tasks)
     if limit:
         tasks = tasks[:limit]
         vulns = vulns[:limit]
@@ -40,9 +54,29 @@ def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict
     static = StaticAnalyzer(schema_index=index)
     auditor = HybridAuditor(schema_index=index)
 
-    results: list[dict[str, Any]] = []
+    # Result-set EA when a DB is reachable; otherwise AST/exact-string match.
+    db: EvalDB | None = None
+    match_mode = "ast"
+    if settings.eval_database_url:
+        try:
+            db = EvalDB(settings.eval_database_url)
+            match_mode = "result_set"
+            logger.info("DB-backed eval at %s", settings.eval_database_url)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(
+                "EvalDB unavailable (%s) — falling back to AST match", exc
+            )
 
-    logger.info("Eval: %s pipeline tasks, %s vuln samples", len(tasks), len(vulns))
+    results: list[dict[str, Any]] = []
+    gold_valid = 0
+    gold_total_with_sql = 0
+
+    logger.info(
+        "Eval: %s pipeline tasks (%s template tasks skipped), %s vuln samples",
+        len(tasks),
+        template_skipped,
+        len(vulns),
+    )
     for i, row in enumerate(tasks, start=1):
         task = row["task"]
         gold = row.get("sql", "")
@@ -57,8 +91,24 @@ def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict
         if result.approved:
             pipeline_m.approved += 1
         pipeline_m.total_iterations += result.iterations_used
-        if gold and sql_match(result.final_sql, gold):
+
+        matched = False
+        if gold:
+            gold_total_with_sql += 1
+            if db is not None:
+                pred_rows = db.fetch(result.final_sql)
+                gold_rows = db.fetch(gold)
+                if gold_rows is not None:
+                    gold_valid += 1
+                else:
+                    logger.warning("Gold SQL failed to execute: %s", gold[:80])
+                if result_sets_equal(pred_rows, gold_rows):
+                    matched = True
+            elif sql_match(result.final_sql, gold):
+                matched = True
+        if matched:
             pipeline_m.execution_matches += 1
+
         risks = [e.audit_result.overall_risk_score for e in result.iterations_log]
         if len(risks) >= 2:
             pipeline_m.risk_deltas.append(risks[0] - risks[-1])
@@ -68,8 +118,12 @@ def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict
                 "approved": result.approved,
                 "iterations": result.iterations_used,
                 "final_sql": result.final_sql,
+                "matched": matched,
             }
         )
+
+    if db is not None:
+        db.close()
 
     for row in vulns:
         sql = row["sql"]
@@ -101,9 +155,15 @@ def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict
         "llm": llm_info,
         "pipeline": {
             "total": pipeline_m.total,
+            "template_skipped": template_skipped,
+            "dataset_size": len(all_tasks),
             "approval_rate": pipeline_m.approval_rate,
             "mean_iterations": pipeline_m.mean_iterations,
             "execution_accuracy": pipeline_m.execution_accuracy,
+            "execution_accuracy_mode": match_mode,
+            "gold_validity_rate": (
+                gold_valid / gold_total_with_sql if gold_total_with_sql else 0.0
+            ),
             "mean_risk_delta": (
                 sum(pipeline_m.risk_deltas) / len(pipeline_m.risk_deltas)
                 if pipeline_m.risk_deltas
