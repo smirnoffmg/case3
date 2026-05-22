@@ -231,9 +231,22 @@ def _render_llm_exchanges(exchanges: list[LLMExchange], show: bool) -> None:
     if not exchanges:
         st.caption("Нет записей LLM за этот прогон.")
         return
+
+    total_in = sum(ex.input_tokens or 0 for ex in exchanges)
+    total_out = sum(ex.output_tokens or 0 for ex in exchanges)
+    has_tokens = any(ex.input_tokens is not None for ex in exchanges)
+    if has_tokens:
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Токены (вход)", f"{total_in:,}")
+        col2.metric("Токены (выход)", f"{total_out:,}")
+        col3.metric("Токены (итого)", f"{total_in + total_out:,}")
+
     for i, ex in enumerate(exchanges, start=1):
+        token_info = ""
+        if ex.input_tokens is not None:
+            token_info = f" | {ex.input_tokens:,}→{ex.output_tokens:,} токенов"
         with st.expander(
-            f"Вызов {i} — промпт {len(ex.prompt)} симв., ответ {len(ex.response)} симв."
+            f"Вызов {i} — промпт {len(ex.prompt)} симв., ответ {len(ex.response)} симв.{token_info}"
         ):
             st.markdown("**Промпт**")
             st.code(ex.prompt, language="text")

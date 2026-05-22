@@ -19,6 +19,8 @@ _verbosity: int = 0
 class LLMExchange:
     prompt: str
     response: str
+    input_tokens: int | None = None
+    output_tokens: int | None = None
 
 
 _llm_exchange_log: ContextVar[list[LLMExchange] | None] = ContextVar(
@@ -75,11 +77,24 @@ def begin_llm_exchange_log() -> Iterator[list[LLMExchange]]:
         _llm_exchange_log.reset(token)
 
 
-def log_llm_exchange(logger: logging.Logger, prompt: str, response: str) -> None:
+def log_llm_exchange(
+    logger: logging.Logger,
+    prompt: str,
+    response: str,
+    input_tokens: int | None = None,
+    output_tokens: int | None = None,
+) -> None:
     """Append to the active exchange log and/or log to stderr per -v depth."""
     log = _llm_exchange_log.get()
     if log is not None:
-        log.append(LLMExchange(prompt=prompt, response=response))
+        log.append(
+            LLMExchange(
+                prompt=prompt,
+                response=response,
+                input_tokens=input_tokens,
+                output_tokens=output_tokens,
+            )
+        )
 
     v = _verbosity
     if v < 2:

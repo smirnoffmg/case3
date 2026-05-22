@@ -50,7 +50,14 @@ class LangChainOpenAIClient:
         response = llm.invoke([HumanMessage(content=prompt)])
         content = response.content
         text = content if isinstance(content, str) else str(content)
-        log_llm_exchange(logger, prompt, text)
+        um = response.usage_metadata
+        log_llm_exchange(
+            logger,
+            prompt,
+            text,
+            input_tokens=um["input_tokens"] if um else None,
+            output_tokens=um["output_tokens"] if um else None,
+        )
         return text
 
 
@@ -76,7 +83,14 @@ class LangChainAnthropicClient:
         response = llm.invoke([HumanMessage(content=prompt)])
         content = response.content
         text = content if isinstance(content, str) else str(content)
-        log_llm_exchange(logger, prompt, text)
+        um = response.usage_metadata
+        log_llm_exchange(
+            logger,
+            prompt,
+            text,
+            input_tokens=um["input_tokens"] if um else None,
+            output_tokens=um["output_tokens"] if um else None,
+        )
         return text
 
 
