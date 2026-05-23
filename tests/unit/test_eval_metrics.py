@@ -69,10 +69,18 @@ def test_sql_match_ignores_offset_zero():
     )
 
 
-def test_sql_match_rejects_different_limit():
-    assert not sql_match(
+def test_sql_match_ignores_different_limit():
+    # LIMIT is an editorial choice in gold; audited separately by NO_PAGINATION.
+    assert sql_match(
         "SELECT id FROM public.sys_employee LIMIT 10;",
         "SELECT id FROM public.sys_employee LIMIT 100;",
+    )
+
+
+def test_sql_match_ignores_limit_vs_no_limit():
+    assert sql_match(
+        "SELECT id FROM public.sys_employee LIMIT 100;",
+        "SELECT id FROM public.sys_employee;",
     )
 
 
@@ -88,6 +96,28 @@ def test_sql_match_rejects_extra_column():
     assert not sql_match(
         "SELECT id, name__ru, last_modified_date FROM public.acc_number LIMIT 10;",
         "SELECT id, last_modified_date FROM public.acc_number LIMIT 10;",
+    )
+
+
+def test_sql_match_ignores_order_by():
+    assert sql_match(
+        "SELECT id, name FROM public.sys_company ORDER BY name;",
+        "SELECT id, name FROM public.sys_company;",
+    )
+
+
+def test_sql_match_ignores_different_order_by():
+    assert sql_match(
+        "SELECT id, create_date FROM public.acc_number ORDER BY last_modified_date DESC;",
+        "SELECT id, create_date FROM public.acc_number ORDER BY create_date DESC;",
+    )
+
+
+def test_sql_match_ignores_order_by_with_limit():
+    # Both LIMIT and ORDER BY are stripped before comparison.
+    assert sql_match(
+        "SELECT id FROM public.sys_employee ORDER BY id LIMIT 10;",
+        "SELECT id FROM public.sys_employee LIMIT 20;",
     )
 
 

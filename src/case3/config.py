@@ -49,6 +49,7 @@ class Settings(BaseSettings):
     max_iterations: int = 5
     retriever_top_k: int = 8
     llm_temperature: float = 0.0
+    llm_num_ctx: int = 8192
     risk_threshold: float = 4.0
     hard_block_risk: float = 8.0
     eval_database_url: str | None = None

@@ -30,7 +30,16 @@ Natural language task:
 Ignore greetings and polite filler; judge whether the SQL answers the data request in the task.
 If there is no data request, or the SQL does not answer that data request,
 emit exactly one finding: vuln_class TASK_SQL_MISMATCH, risk_score 9, with a clear description.
-Do not flag mismatch only because the task started with a greeting.
+
+Rules for TASK_SQL_MISMATCH — only emit it when clearly warranted:
+- Listing/reporting verbs (найти, показать, список, вывести, перечислить, show, list, find,
+  select, return) mean SELECT without a required WHERE. Do NOT flag mismatch just because
+  there is no WHERE clause — an unrestricted SELECT is a valid answer to a listing task.
+- "по X" / "с X" without a specific value means X IS NOT NULL or GROUP BY X, not a
+  parameterised filter. Do not flag mismatch for missing WHERE X = <value>.
+- Do not hallucinate table absence: if the SQL references a table not visible in the truncated
+  schema snippet, assume it exists — the snippet is truncated, not complete.
+- Do not flag mismatch only because the task started with a greeting.
 """
 
 

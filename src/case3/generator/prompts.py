@@ -12,10 +12,49 @@ _BOILERPLATE = re.compile(r",?\s*(?:Sys|Abstract)\w*\{[^}]*\}")
 _HARD_BLOCK_RISK = 8.0
 
 _DOMAIN_CONTEXT = """\
-You are a PostgreSQL expert working with a Russian banking system database.
-Table naming convention: sys_ (system objects/employees), scp_ (lending/SCP), \
-acc_ (accounting), yaig_ (guarantees/agreements), ms_ (multi-select links).
+You are a PostgreSQL expert working with a Russian corporate-lending database (Promsvyazbank).
+Table naming convention: sys_ (system entities — employees, companies/counterparties), \
+scp_ (СКП lending decisions), acc_ (accounting/ОСВ), yaig_ (guarantees), \
+ms_ (multi-select links — never query directly).
+Every table has 14 shared base columns (id, name, name__ru, name__en, status, \
+create_date, org_id, user_id, …). Always prefer `name` over `name__ru`/`name__en`.
+Key semantic facts:
+- "Организации/компании" → sys_company. Do NOT use sys_obj_type or tbs_type.
+- The initiator's human-readable name lives in sys_company, NOT in application_obj.name.
+  JOIN sys_company only when filtering or selecting BY the initiator's name string.
+- Generic "заявки" → application_obj. Subsystem-specific: scp_application (СКП), \
+ic_application (ИУ), mler_application (МЮЭР), corp_tech_application (КТ).
 Column names and comments may be in Russian or English.\
+"""
+
+_CORE_RULES = """\
+Rules:
+- Use column names EXACTLY as shown in the schema. Never invent column names.
+- Qualify all tables with the `public.` schema prefix.
+- Explicit column list (no SELECT *). Always include `id` when selecting rows.
+- Use LIMIT for row-listing queries; pure aggregate queries (COUNT/MIN/MAX/SUM/AVG \
+without GROUP BY) don't need LIMIT. GROUP BY queries are row-listing — add LIMIT.
+- Column choice: prefer canonical `name` over `name__ru`/`name__en` unless the task \
+explicitly asks for a locale ("на русском", "in English").
+- Table for generic "заявки": use `application_obj`. Only switch to a subsystem table \
+when the task names СКП/SCP, ИУ/IC, МЮЭР/MLER, or КТ explicitly.
+- "По признаку X" / "по признаку участия/наличия в X" → GROUP BY the raw column X \
+with COUNT(*). Do NOT filter (WHERE X = 1) and do NOT JOIN to a lookup table.
+- Aggregates ("минимальный/максимальный/средний X") → MIN/MAX/AVG/SUM. \
+Never substitute ORDER BY + LIMIT 1 for MIN or MAX.
+- "с <col>" as a selection criterion (not sorting, not grouping) → include <col> in SELECT and \
+add WHERE <col> IS NOT NULL. The word after "с" IS the column name — do not replace it with `name`. \
+Example: "Сотрудники с org_id" → SELECT id, name, org_id … WHERE org_id IS NOT NULL LIMIT … \
+Exception: "с именем инициатора" / "с именем X" → JOIN the lookup table to get the name string.
+- "отсортированные по X" / "по возрастанию/убыванию X" → ORDER BY X only. Do NOT add WHERE X IS NOT NULL.
+- "подсчёт/количество по X" / "по признаку X" → GROUP BY X with COUNT(*). Do NOT add WHERE X IS NOT NULL.
+- JOIN sys_company for initiator name ONLY when the task says "по инициатору с именем, содержащим …" \
+(filtering by the name string). For plain initiator_id lists, use the raw FK column without JOIN.
+- Add WHERE only for conditions explicitly stated in the task. \
+Do not invent IS NOT NULL, status = 1, or any filter not in the task.
+- "без фильтра по X" / "без X" → no WHERE clause on X at all.
+- When selecting a locale-specific column (name__ru, name__en, etc.), \
+always add WHERE <that column> IS NOT NULL.\
 """
 
 
@@ -50,19 +89,15 @@ def build_initial_prompt(
 ) -> str:
     return f"""{_DOMAIN_CONTEXT}
 Generate a single safe read-only PostgreSQL SELECT for the task.
-Rules:
+{_CORE_RULES}
 - Output exactly one SELECT query (read-only). Never use DELETE, TRUNCATE, DROP, INSERT, or UPDATE.
 - If the message has no concrete data retrieval request (only greeting/chit-chat/meta), return only:
   -- Отказ: уточните задачу на естественном языке (что выбрать из БД).
 - If the message has a greeting plus a data request, ignore the greeting and generate SQL for the data part.
-- Listing or reporting data (including "all" rows) is allowed: use SELECT with an appropriate LIMIT.
-- Explicit column list (no SELECT *). Use LIMIT for row-listing queries; aggregate queries (COUNT/MIN/MAX/SUM/AVG without GROUP BY) don't need LIMIT.
-- Add WHERE only when the task explicitly asks for it (e.g. "активные" → status = 1, "у которых заполнен X" / "с X" / "по X" → X IS NOT NULL, "после даты Y" → date comparison, "содержит/начинается с строки" → ILIKE). Do not invent filters that aren't in the task.
-- Never use placeholder literals like 'your_X_here', '<replace_me>' or any '???'. If the task lacks a specific value, use IS NOT NULL or the appropriate broad filter.
-- Use the LIMIT value mentioned in the task ("лимит N", "не более N", "N записей"); otherwise pick a reasonable default (10–100).
-- Column choice: when both a canonical column (`name`, `description`) and locale-suffixed variants (`name__ru`, `name__en`, `description__ru`) exist on the same table, prefer the canonical column unless the task explicitly asks for a specific locale ("на русском", "in English").
-- Table choice for "заявки/applications": the schema has parallel application streams — use `application_obj` for generic "заявки" without subsystem name. Only use `scp_application` if the task mentions СКП/SCP, `ic_application` for ИУ/IC, `mler_application` for МЮЭР/MLER, `corp_tech_application` for КТ/корпоративные техзаявки.
-- For sensitive/PII columns (marked [PII] in schema): replace with a fixed mask literal '***' AS column_name — never use current_setting(), session_user, or role-based CASE logic.
+- Use the LIMIT value from the task ("лимит N", "не более N", "N записей"); otherwise default 10–100.
+- Never use placeholder literals ('your_X_here', '<replace_me>', '???'). If a specific value is missing, use IS NOT NULL or a broad filter.
+- For sensitive/PII columns (marked [PII] in schema): replace with '***' AS column_name.
+- WHERE conditions: "активные" → status = 1; "у которых заполнен X" / "с X" → X IS NOT NULL; "после даты Y" → date comparison; "содержит строку" → ILIKE.
 Dialect: PostgreSQL.
 
 Schema:
@@ -97,7 +132,9 @@ def build_repair_prompt(
             "this is a hard block that will reject the query regardless of other issues."
         )
 
-    return f"""REPAIR: Fix the PostgreSQL query based on security audit feedback.
+    return f"""{_DOMAIN_CONTEXT}
+REPAIR: Fix the PostgreSQL query based on security audit feedback.
+{_CORE_RULES}
 
 Schema:
 {schema_context}

@@ -24,6 +24,18 @@ _CYRILLIC = re.compile(r"[а-яёА-ЯЁ]")
 _BOILERPLATE = re.compile(r",?\s*(?:Sys|Abstract)\w*\{[^}]*\}")
 _TOKEN_RE = re.compile(r"[а-яёa-z0-9]+")
 
+# Maps lemmatized query terms to tables that must always be retrieved.
+# Covers vocabulary gaps where BM25 fails: domain aliases, Russian synonyms,
+# and "implicit JOIN" tables (e.g. initiator name filter always needs sys_company).
+DOMAIN_ALIASES: dict[str, str] = {
+    "org": "sys_company",
+    "организация": "sys_company",
+    "инициатор": "sys_company",
+    "обеспечение": "scp_collateral_app",
+    "залог": "scp_collateral_app",
+    "техзаявка": "corp_tech_application",
+}
+
 # Prepositions and conjunctions that are never meaningful schema terms.
 _STOPWORDS = frozenset(
     {
@@ -135,19 +147,42 @@ class SchemaRetriever:
     def retrieve(self, task: str, top_k: int = 8) -> list[TableContext]:
         if not self._names:
             return []
-        scores = self._bm25.get_scores(_tokenize(task))
-        if max(scores) < self._MIN_SCORE:
+        tokens = _tokenize(task)
+
+        # Tables pinned by domain alias — force-included regardless of BM25 score.
+        pinned: list[str] = sorted(
+            {
+                DOMAIN_ALIASES[tok]
+                for tok in tokens
+                if tok in DOMAIN_ALIASES and DOMAIN_ALIASES[tok] in self._index.tables
+            }
+        )
+
+        scores = self._bm25.get_scores(tokens)
+        if max(scores) < self._MIN_SCORE and not pinned:
             return self._expand_fk(self._fallback(top_k))
+
         ranked = sorted(
             zip(self._names, scores, strict=True),
             key=lambda x: x[1],
             reverse=True,
-        )[:top_k]
-        out: list[TableContext] = []
+        )
+
+        present: set[str] = set(pinned)
+        out: list[TableContext] = [self._make_context(n) for n in pinned]
+        bm25_added = 0
         for name, score in ranked:
-            if score <= 0 and out:
+            if len(out) >= top_k:
+                break
+            if name in present:
+                continue
+            # Stop at first non-positive score once we have any results from BM25
+            # or from alias pinning (avoids appending zero-scoring noise).
+            if score <= 0 and (bm25_added or pinned):
                 break
             out.append(self._make_context(name, float(score)))
+            present.add(name)
+            bm25_added += 1
 
         out = out or self._fallback(top_k)
         return self._expand_fk(out)

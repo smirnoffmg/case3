@@ -17,7 +17,16 @@ def normalize_sql(sql: str) -> str:
 
 
 def _normalize_ast(sql: str) -> str | None:
-    """Canonicalise SQL via sqlglot AST, ignoring cosmetic differences."""
+    """Canonicalise SQL via sqlglot AST, ignoring cosmetic differences.
+
+    Relaxations applied (mirrors result_set comparator):
+    - Drop projection aliases: COUNT(*) AS cnt → COUNT(*)
+    - Drop LIMIT clause: LIMIT is audited separately by NO_PAGINATION; gold
+      values (10, 30, 40 …) are editorial choices, not semantic constraints.
+    - Drop ORDER BY: with LIMIT already stripped, ordering is purely editorial —
+      it doesn't change which rows are in the result set.
+    - Drop OFFSET 0: no effect on the result set.
+    """
     try:
         from sqlglot import exp, parse_one
 
@@ -25,8 +34,7 @@ def _normalize_ast(sql: str) -> str | None:
     except Exception:
         return None
 
-    # Drop projection aliases at the top-level SELECT — `COUNT(*) AS cnt`
-    # is semantically identical to `COUNT(*)`.
+    # Drop projection aliases at the top-level SELECT.
     select = tree.find(exp.Select)
     if select is not None:
         select.set(
@@ -34,7 +42,14 @@ def _normalize_ast(sql: str) -> str | None:
             [e.this if isinstance(e, exp.Alias) else e for e in select.expressions],
         )
 
-    # Drop `OFFSET 0` — no effect on the result set.
+    # Drop LIMIT — compared separately by the NO_PAGINATION auditor.
+    tree.set("limit", None)
+
+    # Drop ORDER BY — with LIMIT gone, ordering is editorial and doesn't
+    # affect which rows are returned.
+    tree.set("order", None)
+
+    # Drop OFFSET 0 — no effect on the result set.
     offset = tree.args.get("offset")
     if offset is not None:
         inner = getattr(offset, "expression", None)

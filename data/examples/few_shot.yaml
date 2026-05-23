@@ -2,6 +2,11 @@ safe:
   # Aggregate — no LIMIT required (auditor exempts AggFuncs from NO_PAGINATION).
   - task: "Сколько всего сотрудников"
     sql: "SELECT COUNT(*) FROM public.sys_employee;"
+  # MIN/MAX → always use aggregate function, never ORDER BY + LIMIT 1.
+  - task: "Минимальный id организации"
+    sql: "SELECT MIN(id) AS min_id FROM public.sys_company;"
+  - task: "Максимальная дата создания счёта"
+    sql: "SELECT MAX(create_date) AS max_date FROM public.acc_number;"
   # Plain list with the LIMIT taken from the task text — no fabricated WHERE.
   - task: "Покажи 25 компаний"
     sql: "SELECT id, name FROM public.sys_company LIMIT 25;"
@@ -44,6 +49,35 @@ safe:
       JOIN public.business_segment bs ON ao.scp_business_segment = bs.id
       WHERE bs.name = 'Розница'
       GROUP BY bs.name;
+  # "По признаку X" → GROUP BY the boolean/enum column directly; never filter
+  # to one value and never JOIN to a dictionary. Shows all distinct values with counts.
+  - task: "Количество заявок по признаку участия в госпрограмме"
+    sql: |-
+      SELECT is_state_program, COUNT(*) AS cnt
+      FROM public.application_obj
+      GROUP BY is_state_program
+      ORDER BY cnt DESC;
+  # "С [specific FK column]" — return the FK column itself with IS NOT NULL.
+  # Do NOT join to the lookup table unless the task asks for the name.
+  - task: "Заявки SCP с причиной отказа"
+    sql: "SELECT id, reason_refusal_id FROM public.scp_application WHERE reason_refusal_id IS NOT NULL LIMIT 20;"
+  - task: "Заявки IC с pricing"
+    sql: "SELECT id, pricing_id FROM public.ic_application WHERE pricing_id IS NOT NULL LIMIT 20;"
+  # mler_client_name is a plain text column — never join, never fabricate.
+  - task: "Заявки MLER с именем клиента"
+    sql: "SELECT id, mler_client_name FROM public.mler_application WHERE mler_client_name IS NOT NULL LIMIT 20;"
+  # date_amd_decision is the decision date column on mler_application.
+  - task: "Заявки MLER с датой решения"
+    sql: "SELECT id, date_amd_decision FROM public.mler_application WHERE date_amd_decision IS NOT NULL LIMIT 20;"
+  # JOIN to sys_company for initiator name applies to any *_application table.
+  - task: 'Заявки MLER по инициатору с именем, содержащим "Инвест"'
+    sql: |-
+      SELECT ma.id, ma.name, sc.name AS initiator_name, ma.create_date
+      FROM public.mler_application ma
+      JOIN public.sys_company sc ON ma.initiator_id = sc.id
+      WHERE sc.name ILIKE '%Инвест%'
+      ORDER BY ma.create_date DESC
+      LIMIT 50;
 vulnerable:
   - task: "Удалить все записи"
     sql: "DELETE FROM public.acc_number;"

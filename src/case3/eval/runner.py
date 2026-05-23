@@ -54,9 +54,9 @@ def run_eval(settings: Settings | None = None, limit: int | None = None) -> dict
     static = StaticAnalyzer(schema_index=index)
     auditor = HybridAuditor(schema_index=index)
 
-    # Result-set EA when a DB is reachable; otherwise AST/exact-string match.
+    # Result-set EA when a DB is reachable; otherwise normalised AST match.
     db: EvalDB | None = None
-    match_mode = "ast"
+    match_mode = "ast_normalized"
     if settings.eval_database_url:
         try:
             db = EvalDB(settings.eval_database_url)
