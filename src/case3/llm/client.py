@@ -40,9 +40,7 @@ class LangChainOpenAIClient:
                 base_url=self._base_url,
                 model=self._settings.openai_model,
                 temperature=temp,
-                # Ollama: override context window so large prompts aren't truncated.
-                # extra_body injects into the raw request body, bypassing OpenAI SDK validation.
-                model_kwargs={"extra_body": {"num_ctx": self._settings.llm_num_ctx}},
+                extra_body={"num_ctx": self._settings.llm_num_ctx},
             )
         else:
             llm = ChatOpenAI(

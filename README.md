@@ -24,9 +24,51 @@ uv run case3 eval  # теперь EA = сравнение result sets
 
 `make db-reset` пересоздаёт БД с нуля. Без `EVAL_DATABASE_URL` `case3 eval` работает как раньше — сравнивает SQL по AST.
 
-## Как это работает
+---
 
-Система принимает на вход задачу на естественном языке, генерирует SQL-запрос для PostgreSQL и проверяет его безопасность перед тем, как вернуть результат.
+## Архитектура
+
+Пайплайн (`src/case3/pipeline.py` → `orchestrator/system.py`):
+
+1. **Task Intent Gate** (`judge/task_intent.py`) — rule-based fast-path по доменным ключевым словам, fallback на LLM-классификатор; отсекает приветствия, мета-вопросы, деструктив
+2. **Generator** (`generator/prompt_rag.py`) — LLM + BM25-retrieval (лемматизация pymorphy3, FK-расширение)
+3. **Hybrid Auditor** (`judge/auditor.py`) — статика (regex + sqlglot) ∪ LLM-судья, дедуп по `(class, line)`
+4. **Approval policy** — `max_risk ≤ 4.0` AND нет hard-block (`risk ≥ 8.0`)
+5. **Repair loop** — `FeedbackMemory` копит уроки + флаг регрессии, лимит 5 итераций / 60 с, early-exit `is_stuck()`
+6. **Audit log** (`audit/log_builder.py`) — markdown-отчёт со всеми итерациями и явным обоснованием порога
+
+Архитектурные диаграммы (C4): [`doc/img/`](doc/img/).
+
+---
+
+## Тестовая БД
+
+`data/schema/data_model.sql` — слепок реальной кредитной системы банка **ПСБ** (~20 700 строк DDL, 60 таблиц).
+
+**Подсистемы по префиксам:**
+
+| Префикс                        | Подсистема                                                                 |
+| ------------------------------ | -------------------------------------------------------------------------- |
+| `sys_`                         | системные сущности (`sys_employee`, `sys_company`)                         |
+| `acc_` / `count_turnover`      | ОСВ (оборотно-сальдовая ведомость)                                         |
+| `scp_` (28 таблиц)             | СКП — Система Корпоративного Принятия решений                              |
+| `ic_` / `mler_` / `corp_tech_` | параллельные потоки заявок (ИУ / МЮЭР / КТ)                                |
+| `yaig_`                        | УАиГ — Управление Активами и Гарантиями                                    |
+| `cb_interest_rate`             | ставки ЦБ                                                                  |
+| `application_obj`              | родовая «заявка»                                                           |
+| `ms_*` (13 таблиц)             | служебные MultiSelect-контейнеры (UUID-имена) — **не несут бизнес-смысла** |
+
+**Известные ловушки и как код их обходит:**
+
+- Все таблицы имеют **14 одинаковых базовых полей** (`id, name, name__ru, name__en, status, ...`) — ORM-наследование на уровне приложения. Промпт явно предписывает предпочитать `name` над `name__ru`/`name__en`.
+- **287 объявленных FK, только 12 активных** (остальные закомментированы в DDL). Парсер схемы извлекает FK и из закомментированных блоков → граф **206 рёбер** для FK-расширения в ретривере.
+- Имя инициатора заявки **не в `application_obj.name`** — это имя самой заявки. Имя контрагента живёт в `sys_company` → требуется JOIN через `initiator_id`. Few-shot примеры в `data/examples/few_shot.yaml` демонстрируют этот паттерн.
+- `*_application` таблицы — **дубли без FK-связей** к `application_obj`; промпт предписывает использовать `application_obj` для общих «заявок» и конкретные таблицы только при явном упоминании подсистемы.
+- Ретривер исключает `ms_*` контейнеры → **47 бизнес-таблиц** в BM25-индексе из 60.
+
+---
+
+## Как это работает
 
 ### Проверка задачи
 
@@ -50,24 +92,197 @@ LLM-судья оценивает запрос семантически: про�
 
 Если запрос отклонён, система запускает следующую итерацию. FeedbackMemory накапливает описания найденных уязвимостей и рекомендации по устранению. На каждой итерации генератор получает эти уроки и предыдущий SQL, чтобы не повторять те же ошибки. Цикл останавливается при одобрении, при достижении лимита итераций (по умолчанию 5), при превышении таймаута (60 секунд) или если две итерации подряд дали одинаковый набор классов уязвимостей.
 
+Детектор **регрессий**: если ранее устранённый класс уязвимости появился снова, генератор получает флаг `THIS IS A REPEAT MISTAKE` в repair-промпте.
+
 ### Отчёт
 
-По завершении система формирует markdown-отчёт со всеми итерациями: SQL-запрос, найденные уязвимости, решение аудитора и итоговый статус. Отчёт можно сохранить через флаг `--log-file` или скачать в веб-интерфейсе.
+По завершении система формирует markdown-отчёт со всеми итерациями: SQL-запрос, найденные уязвимости, решение аудитора и итоговый статус. Формат каждой итерации:
+
+- Строка **«Решение»**: `одобрено — риск 0.0 ≤ порога 4.0 и нет hard-block (≥ 8.0)` или `отклонено — риск 5.0 > порога 4.0`
+- Маркер `⛔ HARD-BLOCK` рядом с находками риском ≥ 8.0
+- Финальное обоснование: `final_risk = 3.0 ≤ 4.0 AND no hard-block (≥ 8.0) → APPROVED`
+- Блок «Параметры аудита» в шапке: пороги и формула одобрения
+
+Отчёт можно сохранить через флаг `--log-file` или скачать в веб-интерфейсе.
+
+---
+
+## Классы уязвимостей
+
+Реализовано 9 классов; по каждому риск 0–10:
+
+| Класс              | Слой         | Risk | Пример                               |
+| ------------------ | ------------ | ---- | ------------------------------------ |
+| `SQL_INJ_CLASSIC`  | static + LLM | 10.0 | `' \|\|` / `' +` конкатенация        |
+| `SQL_INJ_UNION`    | static + LLM | 9.0  | `UNION SELECT password FROM users`   |
+| `SQL_INJ_TIME`     | static + LLM | 8.0  | `pg_sleep(...)` / `WAITFOR DELAY`    |
+| `DML_NO_WHERE`     | static       | 9.0  | `DELETE FROM t` без WHERE            |
+| `DIRECT_SENSITIVE` | static + LLM | 6.0  | прямой `SELECT email, credit_amount` |
+| `SELECT_STAR`      | static       | 5.0  | `SELECT *`                           |
+| `NO_PAGINATION`    | static       | 4.0  | SELECT с FROM без LIMIT              |
+| `PRIV_ESCALATE`    | static       | 8.0  | `GRANT / REVOKE / ALTER ROLE`        |
+| `PLPGSQL_UNSAFE`   | static       | 9.0  | `EXECUTE format(...)` без `USING`    |
+
+Плюс мета-классы судьи: `TASK_NOT_ACTIONABLE`, `TASK_SQL_MISMATCH`, `TASK_DESTRUCTIVE`, `DESTRUCTIVE_DML`, `NOT_VALID_SELECT`.
+
+На собственном датасете `vulns.jsonl` (54 строки, ≥ 5 примеров на класс): **precision = 1.000, recall = 1.000** по всем 9 классам.
+
+---
+
+## Метрики качества (Execution Accuracy)
+
+**Текущий результат (LLM: Ollama qwen2.5:7b, 76 задач):**
+
+| Метрика                | ast_normalized (основной) | result_set (Docker, справочно) |
+| ---------------------- | ------------------------- | ------------------------------ |
+| Execution Accuracy     | **34.2%** (26/76)         | **65.8%** (50/76)              |
+| approval_rate          | 1.000                     | 1.000                          |
+| mean_iterations        | 1.01                      | 1.01                           |
+| judge precision/recall | 1.0 / 1.0                 | 1.0 / 1.0                      |
+
+С Claude Sonnet 4.6 (76 задач): ast_normalized EA **31.6%**, approval_rate **94.7%**.
+
+### Два режима сравнения
+
+**`ast_normalized`** (основной; без Docker) — sqlglot AST с прагматическими послаблениями:
+
+| Послабление              | Обоснование                                                        |
+| ------------------------ | ------------------------------------------------------------------ |
+| Strip LIMIT              | LIMIT — редакторский выбор в gold; пагинацию ловит `NO_PAGINATION` |
+| Drop проекционные алиасы | `COUNT(*) AS cnt` ≡ `COUNT(*)`                                     |
+| Drop `OFFSET 0`          | Нет эффекта на результат                                           |
+
+**`result_set`** (справочный; требует Docker) — выполняет оба SQL на живом PostgreSQL:
+
+1. Strip LIMIT перед `fetch`
+2. **PK-set match** — если оба возвращают `id`, сравниваем множества id (устойчиво к лишним колонкам)
+3. Single-cell fallback для MIN/MAX/COUNT
+4. Single-column fallback для `SELECT DISTINCT col`
+
+|                                      | ast_normalized | result_set                     |
+| ------------------------------------ | -------------- | ------------------------------ |
+| EA                                   | 34.2% (26/76)  | 65.8% (50/76)                  |
+| Что проверяет                        | структуру SQL  | одинаковые строки по `id` в БД |
+| Нужен Docker                         | нет            | да                             |
+| Чувствителен к лишним колонкам       | **да**         | нет (PK-матч)                  |
+| Чувствителен к `WHERE X IS NOT NULL` | **да**         | нет (если все строки не-null)  |
+
+### История роста EA (result_set)
+
+| Шаг                                                                   | EA (result_set) |
+| --------------------------------------------------------------------- | --------------- |
+| baseline (strict tuple match)                                         | 15.8%           |
+| + column projection (gold ⊆ pred columns)                             | 17.1%           |
+| + strip LIMIT before comparison                                       | 28.9%           |
+| + PK-set match (когда есть `id`)                                      | 42.1%           |
+| + Intent Gate fast-path + WHERE-rule prompt                           | 46.1%           |
+| + cleaned gold + JOIN few-shot                                        | 59.2%           |
+| + расширенный _DOMAIN_CONTEXT, правила MIN/MAX, TASK_SQL_MISMATCH fix | **65.8%**       |
+
+### Анализ ошибок ast_normalized
+
+| Причина                     | N   | Пример                                                         |
+| --------------------------- | --- | -------------------------------------------------------------- |
+| Разный набор колонок        | ~18 | pred: `id, name`; gold: `id, name, ident`                      |
+| Лишний JOIN                 | ~12 | pred добавил JOIN к `sys_company` без необходимости            |
+| Лишний/пропущенный ORDER BY | ~10 | pred добавил `ORDER BY create_date DESC` без указания в задаче |
+| Лишний `IS NOT NULL`        | ~5  | `WHERE name IS NOT NULL` при gold без WHERE                    |
+| Пропущенный WHERE           | ~3  | pred без фильтра, gold с `WHERE status = 1`                    |
+
+---
+
+## Датасет
+
+- `data/dataset/tasks.jsonl`: **87 пар** NL → ожидаемый SQL (русские задачи, разные подсистемы)
+- `data/dataset/vulns.jsonl`: **54 строки**, ≥ 5 примеров на каждый из 9 классов уязвимостей
+
+Используется для:
+- Execution Accuracy генератора (на seeded DB через Docker)
+- precision / recall судьи по каждому классу (агрегатно и per-class)
+
+---
+
+## Поддержка PL/pgSQL
+
+Класс `PLPGSQL_UNSAFE` ловит:
+- `EXECUTE format(...)` без `USING`
+- `EXECUTE 'literal' || var` — конкатенация строк в динамическом SQL
+
+Отличается от `PRIV_ESCALATE` (статичный `EXECUTE`, `GRANT/REVOKE/ALTER ROLE`).
+
+В `vulns.jsonl` 7 строк с этим классом: precision / recall = **1.0 / 1.0**.
+
+Примечание: в реальном DDL (`data/schema/data_model.sql`) нет `CREATE FUNCTION/TRIGGER/VIEW/INDEX` — покрытие класса синтетическое, на собственном датасете.
+
+---
+
+## Архитектурные решения (ADR)
+
+ADR находятся в [`doc/adr/`](doc/adr/).
+
+| ADR  | Решение                                              | Отвергнутая альтернатива                                                                            |
+| ---- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| 0002 | Система **не исполняет** SQL                         | sandbox-исполнение — read-only роль не защищает от утечек ПДн через корректный SELECT               |
+| 0003 | **Гибридный судья** (статика + LLM, всегда оба слоя) | только LLM — нестабильно на инъекциях с явным паттерном; только статика — не ловит семантику задачи |
+| 0004 | **max-risk** + hard-block (не сумма рисков)          | сумма рисков — не блокирует одиночные критические находки                                           |
+| 0005 | **Prompt + RAG (BM25)**, без fine-tuning             | fine-tuning — нет размеченного корпуса; ломается при изменении схемы                                |
+
+---
+
+## Демонстрация
+
+**Сценарий 1. Безопасная задача:**
+```bash
+uv run case3 run "Список сотрудников с id и именем, лимит 10"
+# → одобрено за 1 итерацию
+```
+
+**Сценарий 2. Уязвимость → исправление:**
+```bash
+uv run case3 run "Покажи всё из сотрудников" -vv
+# → итерация 1: SELECT_STAR + NO_PAGINATION (risk 5.0) → rejected
+# → итерация 2: явные колонки + LIMIT (risk 0.0) → approved
+```
+
+**Сценарий 3. Деструктив:**
+```bash
+uv run case3 run "Удали всех клиентов старше 2020"
+# → Intent Gate блокирует с риском 9.0 (TASK_DESTRUCTIVE)
+```
+
+**Сценарий 4. Воспроизводимая метрика (без Docker):**
+```bash
+uv run case3 eval
+jq .pipeline reports/eval_<latest>.json
+# → EA = 0.342 (ast_normalized), approval = 1.000, judge P/R = 1.0/1.0
+```
+
+**Сценарий 5. Метрика с Docker:**
+```bash
+make db-seed
+EVAL_DATABASE_URL=postgresql://case3:case3@localhost:55432/demo_db uv run case3 eval
+jq .pipeline reports/eval_<latest>.json
+# → EA = 0.658 (result_set), approval = 1.000, judge P/R = 1.0/1.0
+```
+
+---
 
 ## Команды
 
-| Команда                            | Описание                                |
-| ---------------------------------- | --------------------------------------- |
-| `case3 build-schema`               | Разбор DDL в `data/derived/schema.json` |
-| `case3 run TASK`                   | Полный цикл генерации и аудита          |
-| `case3 run TASK -v`                | Лог итераций (stderr)                   |
-| `case3 run TASK -vv`               | + SQL, замечания, markdown-отчёт        |
-| `case3 run TASK -vvv`              | + полные промпты/ответы LLM             |
-| `case3 run TASK --log-file out.md` | Сохранить markdown-отчёт в файл         |
-| `case3 eval`                       | Оффлайн-метрики по датасету             |
-| `make db-up` / `db-down`           | PostgreSQL в docker для eval            |
+| Команда                            | Описание                                 |
+| ---------------------------------- | ---------------------------------------- |
+| `case3 build-schema`               | Разбор DDL в `data/derived/schema.json`  |
+| `case3 run TASK`                   | Полный цикл генерации и аудита           |
+| `case3 run TASK -v`                | Лог итераций (stderr)                    |
+| `case3 run TASK -vv`               | + SQL, замечания, markdown-отчёт         |
+| `case3 run TASK -vvv`              | + полные промпты/ответы LLM              |
+| `case3 run TASK --log-file out.md` | Сохранить markdown-отчёт в файл          |
+| `case3 eval`                       | Оффлайн-метрики по датасету              |
+| `make db-up` / `db-down`           | PostgreSQL в docker для eval             |
 | `make db-seed`                     | Поднять БД и залить синтетические данные |
-| `make check`                       | ruff + mypy + pytest                    |
+| `make check`                       | ruff + mypy + pytest                     |
+
+---
 
 ## Интерфейс
 
@@ -78,18 +293,20 @@ uv run streamlit run streamlit_app.py
 
 Веб-интерфейс читает те же переменные из `.env`, что и CLI. В боковой панели можно переопределить **только на время сессии** (на диск не пишется):
 
-| Параметр                                           | В UI                                        |
-| -------------------------------------------------- | ------------------------------------------- |
-| `LLM_PROVIDER`                                     | Выбор: Ollama / OpenAI / Claude             |
-| `OPENAI_API_KEY`, `OPENAI_MODEL`, `OPENAI_BASE_URL` | Для Ollama и OpenAI                         |
-| `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`             | Для Claude                                  |
-| `MAX_ITERATIONS`, `TIMEOUT_SEC`, `RETRIEVER_TOP_K` | Слайдеры                                    |
+| Параметр                                            | В UI                            |
+| --------------------------------------------------- | ------------------------------- |
+| `LLM_PROVIDER`                                      | Выбор: Ollama / OpenAI / Claude |
+| `OPENAI_API_KEY`, `OPENAI_MODEL`, `OPENAI_BASE_URL` | Для Ollama и OpenAI             |
+| `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`              | Для Claude                      |
+| `MAX_ITERATIONS`, `TIMEOUT_SEC`, `RETRIEVER_TOP_K`  | Слайдеры                        |
 
 Скачивание markdown-лога аудита — кнопка после прогона.
 
 В боковой панели: **«Показать LLM промпты/ответы»** — полные промпты и ответы модели в интерфейсе (аналог `case3 run -vvv`; только в RAM сессии).
 
 См. [`.env.example`](.env.example) и [`.streamlit/config.toml`](.streamlit/config.toml) для темы и демо-режима.
+
+---
 
 ## Настройки
 
@@ -98,17 +315,17 @@ uv run streamlit run streamlit_app.py
 
 ### LLM и модель
 
-| Переменная          | По умолчанию                   | Описание                                                                                                                                    |
-| ------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `LLM_PROVIDER`      | авто                           | `ollama`, `openai` или `anthropic`. Если не задан — определяется по ключам и URL (см. ниже).                                                |
-| `OPENAI_API_KEY`    | не задан                       | Ключ OpenAI или прокси. **Не нужен для Ollama** — при пустом ключе используется `http://localhost:11434/v1`.                                |
-| `OPENAI_MODEL`      | `gpt-4o-mini`                  | Модель для Ollama / OpenAI / OpenAI-совместимых API.                                                                                        |
-| `OPENAI_BASE_URL`   | не задан                       | Базовый URL **OpenAI-совместимого** API (без `/chat/completions`). Пример для Ollama: `http://localhost:11434/v1`.                          |
-| `ANTHROPIC_API_KEY` | не задан                       | Ключ API Anthropic для Claude.                                                                                                              |
-| `ANTHROPIC_MODEL`   | `claude-sonnet-4-20250514`     | Идентификатор модели Claude.                                                                                                                |
-| `LLM_TEMPERATURE`   | `0.0`                          | Температура вызова LLM (генератор и LLM-судья).                                                                                             |
+| Переменная          | По умолчанию               | Описание                                                                                                     |
+| ------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `LLM_PROVIDER`      | авто                       | `ollama`, `openai` или `anthropic`. Если не задан — определяется по ключам и URL.                            |
+| `OPENAI_API_KEY`    | не задан                   | Ключ OpenAI или прокси. **Не нужен для Ollama** — при пустом ключе используется `http://localhost:11434/v1`. |
+| `OPENAI_MODEL`      | `gpt-4o-mini`              | Модель для Ollama / OpenAI / OpenAI-совместимых API.                                                         |
+| `OPENAI_BASE_URL`   | не задан                   | Базовый URL OpenAI-совместимого API (без `/chat/completions`).                                               |
+| `ANTHROPIC_API_KEY` | не задан                   | Ключ API Anthropic для Claude.                                                                               |
+| `ANTHROPIC_MODEL`   | `claude-sonnet-4-20250514` | Идентификатор модели Claude.                                                                                 |
+| `LLM_TEMPERATURE`   | `0.0`                      | Температура вызова LLM (генератор и LLM-судья).                                                              |
 
-**Автовыбор провайдера** (если `LLM_PROVIDER` не задан): при наличии `ANTHROPIC_API_KEY` → Claude; иначе при `OPENAI_API_KEY` без `OPENAI_BASE_URL` → OpenAI; иначе при `OPENAI_BASE_URL` или по умолчанию → Ollama. Если заданы оба облачных ключа — укажите `LLM_PROVIDER` явно.
+**Автовыбор провайдера** (если `LLM_PROVIDER` не задан): при наличии `ANTHROPIC_API_KEY` → Claude; иначе при `OPENAI_API_KEY` без `OPENAI_BASE_URL` → OpenAI; иначе → Ollama. Если заданы оба облачных ключа — укажите `LLM_PROVIDER` явно.
 
 **Локальная модель (Ollama):**
 
@@ -195,8 +412,6 @@ HARD_BLOCK_RISK=8.0
 Гибридный аудит: статические правила (sqlglot) и семантический слой LLM всегда включены. Генератор SQL тоже вызывает LLM.
 
 Перед генерацией LLM проверяет, что в сообщении есть запрос к данным (чистое приветствие без запроса отклоняется с `TASK_NOT_ACTIONABLE`; «Привет!» + список/отчёт — допустимо). При аудите LLM сверяет SQL с задачей (`TASK_SQL_MISMATCH`), игнорируя вежливые вступления.
-
-Без ключей и без `OPENAI_BASE_URL` по умолчанию вызывается локальный Ollama. Для OpenAI Cloud задайте `OPENAI_API_KEY`; для Claude — `ANTHROPIC_API_KEY` и `LLM_PROVIDER=anthropic` (или только ключ Anthropic при автовыборе).
 
 Рекомендации по кейсу: модели до ~30B параметров, контекст до 256k токенов; полный DDL в промпт не передается, только выборка схемы через RAG.
 

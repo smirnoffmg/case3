@@ -12,7 +12,7 @@ import typer
 
 from case3.config import get_settings
 from case3.eval.runner import run_eval
-from case3.logging_config import configure_logging, verbosity
+from case3.logging_config import begin_llm_exchange_log, configure_logging, verbosity
 from case3.pipeline import run_sql_security_pipeline
 from case3.schema_index.loader import save_schema_index
 from case3.schema_index.parser import build_schema_index
@@ -59,11 +59,16 @@ def run_task(
     if verbose >= 1:
         logger.info("LLM: %s", get_settings().llm_endpoint_label())
 
-    result = run_sql_security_pipeline(task, max_iterations=max_iterations)
+    with begin_llm_exchange_log() as exchanges:
+        result = run_sql_security_pipeline(task, max_iterations=max_iterations)
+
+    total_in = sum(e.input_tokens or 0 for e in exchanges)
+    total_out = sum(e.output_tokens or 0 for e in exchanges)
+    token_info = f" | Tokens: {total_in}↑ {total_out}↓" if (total_in or total_out) else ""
 
     # Final SQL always on stdout
     typer.echo(result.final_sql)
-    typer.echo(f"\nApproved: {result.approved} | Iterations: {result.iterations_used}")
+    typer.echo(f"\nApproved: {result.approved} | Iterations: {result.iterations_used}{token_info}")
 
     if verbosity() >= 2:
         typer.echo("\n" + result.audit_log, err=True)
