@@ -1,20 +1,38 @@
-# Презентация: Кейс 3 — Генерация SQL и аудит безопасности (v2)
+---
+title: "Кейс 3 — Генерация SQL и аудит безопасности"
+lang: ru-RU
+aspectratio: 169
+classoption: 8pt
+header-includes:
+  - \usepackage{etoolbox}
+  - \usepackage{graphicx}
+  - \setbeamersize{text margin left=8mm, text margin right=8mm}
+  - \setbeamerfont{normal text}{size=\small}
+  - \setbeamerfont{itemize/enumerate body}{size=\small}
+  - \setbeamerfont{itemize/enumerate subbody}{size=\footnotesize}
+  - \setkeys{Gin}{width=0.88\textwidth, keepaspectratio}
+  - \AtBeginEnvironment{tabular}{\scriptsize}
+  - \AtBeginEnvironment{verbatim}{\footnotesize}
+---
 
 ---
 
-## Слайд 1. Титул
+## Задание и представление команды
 
 **Кейс 3. Генерация SQL и аудит безопасности**
 
 NL -> SQL для PostgreSQL с гибридным аудитом и итеративным исправлением.
 
-- Команда: <ФИО участников, роли>
-- Репозиторий: `<ссылка>`
+- Команда:
+  - Оля Ожерельева - фея, координатор, голос разума
+  - Кирилл Никулин - укротитель датасета, исследователь схемы БД
+  - Максим Смирнов - делал "тык" по кнопкам, чуть-чуть ругался на сроки
+- Репозиторий: [ссылка на гитхаб](https://github.com/smirnoffmg/case3)
 - Стек: Python 3.12, uv, sqlglot, BM25 (rank_bm25 + pymorphy3), Ollama / OpenAI / Claude, PostgreSQL в Docker
 
 ---
 
-## Слайд 2. Архитектура одним взглядом
+## Архитектура одним взглядом
 
 Пайплайн `src/case3/pipeline.py`:
 
@@ -25,11 +43,15 @@ NL -> SQL для PostgreSQL с гибридным аудитом и итерат
 5. **Repair loop** — `FeedbackMemory` копит уроки + флаг регрессии, лимит 5 итераций / 60 c, early-exit `is_stuck()`
 6. **Audit log** — markdown-отчёт со всеми итерациями и явным обоснованием порога
 
-![pipeline](doc/img/C3_Component_Core.png)
+---
+
+## Схема компонентов
+
+![pipeline](doc/img/C3_Component_Core.png){width=85%}
 
 ---
 
-## Слайд 3. Что мы знаем о тестовой БД (новый слайд)
+## Что мы знаем о тестовой БД
 
 `data/schema/data_model.sql` — слепок реальной кредитной системы банка **ПСБ** (~20 700 строк DDL, 60 таблиц).
 
@@ -46,6 +68,10 @@ NL -> SQL для PostgreSQL с гибридным аудитом и итерат
 | `application_obj`              | родовая «заявка»                                                           |
 | `ms_*` (13 таблиц)             | служебные MultiSelect-контейнеры (UUID-имена) — **не несут бизнес-смысла** |
 
+---
+
+## Ловушки схемы
+
 **Известные ловушки:**
 
 - Все таблицы имеют **14 одинаковых базовых полей** (`id, name, name__ru, name__en, status, ...`) — ORM-наследование на уровне приложения (`OWNER = moon_tuning`).
@@ -59,11 +85,15 @@ NL -> SQL для PostgreSQL с гибридным аудитом и итерат
 - Ретривер исключает `ms_*` контейнеры -> 60 -> **47 бизнес-таблиц** в BM25-индексе.
 - В промпт добавлены: подсказка «`application_obj` для общих «заявок», `scp_application` / `ic_application` / … только при упоминании подсистемы»; JOIN-пример для фильтра по имени инициатора.
 
-![ddl](doc/img/ddl.png)
+---
+
+## DDL-слепок
+
+![ddl](doc/img/ddl.png){width=80%}
 
 ---
 
-## Слайд 4. Критерий «Точность генерации SQL» (15 баллов)
+## Точность генерации SQL
 
 **Цель:** Execution Accuracy ≥ 70%.
 
@@ -80,11 +110,15 @@ NL -> SQL для PostgreSQL с гибридным аудитом и итерат
 `ast_normalized` — строгое структурное сравнение нормализованных запросов, не требует Docker.
 `result_set` — сравнение по набору строк (PK-матч), требует PostgreSQL в Docker.
 
+---
+
+## Динамика result_set EA
+
 **Динамика result_set EA по итеративным фиксам (исторически):**
 
 ```
 15.8% -> 17.1% -> 28.9% -> 42.1% -> 46.1% -> 59.2% -> 65.8%  [result_set]
-23.7% -> 34.2%                                              [ast_normalized]
+23.7% -> 34.2%                                               [ast_normalized]
 ```
 
 | Шаг                                                                                  | EA (result_set) |
@@ -97,6 +131,10 @@ NL -> SQL для PostgreSQL с гибридным аудитом и итерат
 | + cleaned gold + JOIN few-shot                                                       | 59.2%           |
 | + расширенный _DOMAIN_CONTEXT, правила MIN/MAX, «по признаку», TASK_SQL_MISMATCH fix | **65.8%**       |
 
+---
+
+## Динамика ast_normalized EA
+
 **Динамика ast_normalized EA:**
 
 | Шаг                                           | EA (ast_normalized) |
@@ -108,11 +146,11 @@ NL -> SQL для PostgreSQL с гибридным аудитом и итерат
 
 ---
 
-## Слайд 5. Как считается EA: два режима сравнения
+## EA: режим ast_normalized
 
 **Execution Accuracy** = доля задач, в которых сгенерированный SQL возвращает тот же результат, что и эталонный.
 
-### Режим `ast_normalized` (основной; без Docker)
+**Режим `ast_normalized` (основной; без Docker)**
 
 Сравнение через sqlglot AST с прагматическими послаблениями (`eval/metrics.py -> _normalize_ast`):
 
@@ -126,7 +164,11 @@ NL -> SQL для PostgreSQL с гибридным аудитом и итерат
 
 Запуск: `uv run case3 eval` (без переменных окружения). **Результат: 34.2%.**
 
-### Режим `result_set` (справочный; требует Docker)
+---
+
+## EA: режим result_set
+
+**Режим `result_set` (справочный; требует Docker)**
 
 Выполняет оба SQL на живом PostgreSQL и сравнивает наборы строк (`eval/db.py -> result_sets_equal`):
 
@@ -143,6 +185,10 @@ uv run case3 eval                                         # EA в режиме r
 
 **Результат: 65.8%.** PK-матч принимает лишние колонки и `WHERE X IS NOT NULL` при ненулевых данных — это объясняет разрыв с ast_normalized.
 
+---
+
+## Сравнение режимов EA
+
 **Ключевое различие:**
 
 |                                      | ast_normalized | result_set                     |
@@ -155,7 +201,7 @@ uv run case3 eval                                         # EA в режиме r
 
 ---
 
-## Слайд 6. Критерий «Покрытие классов уязвимостей» (25 баллов)
+## Покрытие классов уязвимостей
 
 **Реализовано 9 классов, по каждому риск 0–10:**
 
@@ -178,11 +224,15 @@ uv run case3 eval                                         # EA в режиме r
 precision = 1.000   recall = 1.000   (по всем 9 классам)
 ```
 
-![vulns](doc/img/vulns.png)
+---
+
+## vulns.jsonl
+
+![vulns](doc/img/vulns.png){width=85%}
 
 ---
 
-## Слайд 7. Критерий «Работа итеративного цикла» (25 баллов)
+## Работа итеративного цикла
 
 **Механизм:**
 
@@ -198,17 +248,19 @@ precision = 1.000   recall = 1.000   (по всем 9 классам)
 
 На eval-наборе `mean_iterations = 1.00` — почти все задачи проходят с первой попытки благодаря качественному промпту и retrieval.
 
-[СКРИНШОТ: audit log с итерациями, видно как риск падает 5.0 -> 0.0]
-
 ---
 
-## Слайд 8. Критерий «Аналитика и отчётность» (15 баллов)
+## Аналитика и отчётность
 
 **Что выводит `case3 eval` в `reports/eval_<ts>.json`:**
 
 - Pipeline: `execution_accuracy`, `execution_accuracy_mode`, `approval_rate`, `mean_iterations`, `mean_risk_delta`, `gold_validity_rate`
 - Judge: aggregate + **per-class precision/recall** (9 классов)
 - Samples: финальный SQL + matched-флаг по каждой из 76 задач
+
+---
+
+## Разбор ошибок ast_normalized
 
 **Анализ ошибок ast_normalized (50 непрошедших из 76, при EA 34.2%):**
 
@@ -225,7 +277,7 @@ precision = 1.000   recall = 1.000   (по всем 9 классам)
 
 ---
 
-## Слайд 9. Критерий «Прозрачность для пользователя» (10 баллов)
+## Прозрачность для пользователя
 
 **Audit log (markdown) теперь содержит:**
 
@@ -239,11 +291,9 @@ precision = 1.000   recall = 1.000   (по всем 9 классам)
 
 Скачивается из CLI (`--log-file out.md`) и из Streamlit-UI.
 
-[СКРИНШОТ: реальный markdown-отчёт целиком — заголовок + одна-две итерации + явная строка решения]
-
 ---
 
-## Слайд 10. Критерий «Воспроизводимость и качество кода» (10 баллов)
+## Воспроизводимость и качество кода
 
 ```bash
 uv sync --dev
@@ -258,62 +308,45 @@ uv run case3 run "Список сотрудников, лимит 10"
 - `docker-compose.yml` + `make db-seed` для оффлайн-БД с метриками EA
 - README + README-dev.md + ADR 0001–0005 + audit-log внутри отчётов
 
-![check](doc/img/make_check.png)
+---
+
+## make check
+
+![check](doc/img/make_check.png){width=88%}
 
 ---
 
-## Слайд 11. Критерий «Обоснованность архитектурных решений» (10 баллов)
+## Обоснованность архитектурных решений
 
 **ADR (`doc/adr/`):**
 
 - **ADR 0002** — система не исполняет SQL. *Альтернатива:* sandbox-исполнение — отвергнуто (read-only роль не защищает от утечек ПДн через корректный SELECT).
 - **ADR 0003** — гибридный судья (статика + LLM всегда включены). *Альтернатива:* только LLM — отвергнуто (нестабильно на инъекциях с явным паттерном); только статика — не ловит семантику задачи.
+
+---
+
+## ADR 0004–0005
+
 - **ADR 0004** — max-risk + hard-block. *Альтернатива:* сумма рисков — отвергнуто (не блокирует одиночные критические находки).
 - **ADR 0005** — Prompt + RAG (BM25), без fine-tuning. *Альтернатива:* fine-tuning — нет размеченного корпуса; ломается при изменении схемы.
 
 **Выбор LLM:** Ollama (`qwen2.5:7b`) для локальной разработки; Claude Sonnet 4 для качества; OpenAI-совместимый прокси GreenData для прода — переключается через `LLM_PROVIDER=` без правок кода.
 
-![adr](doc/img/adr.png)
+---
+
+## ADR
+
+![adr](doc/img/adr.png){width=88%}
 
 ---
 
-## Слайд 12. Live demo
+## Live demo
 
-**Сценарий 1. Безопасная задача:**
-`uv run case3 run "Список сотрудников с id и именем, лимит 10"`
--> одобрено за 1 итерацию.
-
-**Сценарий 2. Уязвимость -> исправление:**
-`uv run case3 run "Покажи всё из сотрудников" -vv`
--> итерация 1: `SELECT_STAR` + `NO_PAGINATION` (risk 5.0) -> rejected
--> итерация 2: явные колонки + LIMIT (risk 0.0) -> approved.
-
-**Сценарий 3. Деструктив:**
-`uv run case3 run "Удали всех клиентов старше 2020"`
--> Intent Gate блокирует с риском 9.0 (`TASK_DESTRUCTIVE`).
-
-**Сценарий 4. Воспроизводимая метрика (без Docker):**
-```bash
-uv run case3 eval
-jq .pipeline reports/eval_<latest>.json
-```
--> EA = 0.342 (ast_normalized), approval = 1.000, judge P/R = 1.0/1.0.
-
-**Сценарий 5. С Docker (эталонный результат):**
-```bash
-make db-seed
-EVAL_DATABASE_URL=postgresql://case3:case3@localhost:55432/demo_db uv run case3 eval
-jq .pipeline reports/eval_<latest>.json
-```
--> EA = 0.658 (result_set), approval = 1.000, judge P/R = 1.0/1.0.
-
-**Сценарий 6. Streamlit UI** — те же запросы в браузере, скачивание audit log.
-
-[СКРИНШОТ: терминал с прогоном сценария 2, видно две итерации]
+![live_demo](doc/img/all_emp.png){width=92%}
 
 ---
 
-## Слайд 13. Дополнительный критерий «Поддержка PL/pgSQL» (+10 баллов)
+## Поддержка PL/pgSQL
 
 Класс **`PLPGSQL_UNSAFE`** ловит:
 - `EXECUTE format(...)` без `USING`
@@ -324,18 +357,17 @@ jq .pipeline reports/eval_<latest>.json
 
 Оговорка: в реальном DDL (`data/schema/data_model.sql`) нет `CREATE FUNCTION/TRIGGER/VIEW/INDEX` — PL/pgSQL не используется в продовой схеме. Покрытие класса синтетическое, на собственном датасете.
 
-[СКРИНШОТ: пример уязвимого `EXECUTE format(...)` + находка судьи с риском 9.0]
+![plpgsql](doc/img/plpgsql.png){width=88%}
 
 ---
 
-## Слайд 14. Дополнительный критерий «Авторский размеченный датасет» (+10 баллов)
+## Авторский размеченный датасет
 
 - `data/dataset/tasks.jsonl`: **87 пар** NL -> ожидаемый SQL (русские задачи, разные подсистемы)
 - `data/dataset/vulns.jsonl`: **54 строки**, ≥ 5 примеров на каждый из 9 классов уязвимостей
 - Используется для:
   - Execution Accuracy генератора (на seeded DB через Docker)
   - precision / recall судьи по каждому классу (агрегатно и per-class)
-- Покрытие требования «не менее 50 пар» по бонусному критерию ✓
 
 DIRECT_SENSITIVE: 8
 DML_NO_WHERE: 7
@@ -349,15 +381,17 @@ SQL_INJ_UNION: 6
 
 ---
 
-## Слайд 15. Итоги и распределение в команде
+## Итоги и распределение в команде
 
 **Что реализовано:**
+
 - Все 7 основных критериев закрыты, артефакты в репозитории
 - 2 из 2 дополнительных критериев (PL/pgSQL поддержка + датасет ≥ 50 пар)
 - Архитектура поддерживает три LLM-провайдера через единый фабричный интерфейс
 
 **Что унесём дальше:**
-- Расширение датасета адверсариальными примерами для LLM-судьи (где статика заведомо промахнётся)
+
+- Расширение датасета примерами для LLM-судьи (где статика заведомо промахнётся)
 - Подключение полной схемы ПСБ (сейчас 60 таблиц-срез из ~225)
 - Доисполнение SQL в read-only sandbox как опциональный слой
 

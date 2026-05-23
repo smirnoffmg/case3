@@ -1,0 +1,21 @@
+\usepackage{etoolbox}
+\usepackage{graphicx}
+
+\setbeamersize{text margin left=8mm, text margin right=8mm}
+\setbeamerfont{frametitle}{size=\large}
+\setbeamerfont{normal text}{size=\small}
+\setbeamerfont{itemize/enumerate body}{size=\small}
+\setbeamerfont{itemize/enumerate subbody}{size=\footnotesize}
+\setbeamerfont{block body}{size=\small}
+\setbeamerfont{caption}{size=\footnotesize}
+
+\setkeys{Gin}{width=0.88\textwidth, keepaspectratio}
+
+\AtBeginEnvironment{tabular}{\scriptsize}
+\AtBeginEnvironment{longtable}{\scriptsize}
+\AtBeginEnvironment{verbatim}{\footnotesize}
+\AtBeginEnvironment{Highlighting}{\footnotesize}
+
+\makeatletter
+\def\beamer@framenotesbegin{}
+\makeatother

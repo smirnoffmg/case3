@@ -1,4 +1,4 @@
-.PHONY: check build-schema eval db-up db-down db-seed db-reset
+.PHONY: check build-schema eval db-up db-down db-seed db-reset presentation-pdf
 
 build-schema:
 	uv run python scripts/build_schema_index.py
@@ -25,4 +25,10 @@ check: build-schema
 	uv run ruff check . --fix
 	uv run mypy .
 	uv run pytest
+
+presentation-pdf:
+	pandoc presentation.md --slide-level=2 -t beamer -o presentation.pdf \
+		--pdf-engine=xelatex \
+		-V mainfont="Helvetica Neue" \
+		-V monofont="Menlo"
 
